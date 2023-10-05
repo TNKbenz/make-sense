@@ -10,6 +10,8 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Login from './views/Login/Login';
+import Home from './views/Home/Home';
+import Train from './views/Train/Train';
 
 export const store = configureStore();
 AppInitializer.inti();
@@ -22,6 +24,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login/>
+  },
+  {
+    path: "/Home",
+    element: <Home/>
+  },
+  {
+    path: "/Train",
+    element: <Train/>    
   },
 ]);
 

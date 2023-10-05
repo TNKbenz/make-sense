@@ -1,7 +1,6 @@
 import './Login.scss';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MainView from '../MainView/MainView';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -58,8 +57,8 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Welcome to Login page</h2>
+    <div className="login">
+      <h2>Welcome to Login page kub</h2>
       <div>
         <div>Username:</div>
         <input type="text" value={username} onChange={e => setUsername(e.target.value)} />

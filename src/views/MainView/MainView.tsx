@@ -19,15 +19,15 @@ const MainView: React.FC = () => {
     };
 
     const endProject = () => {
-        setProjectInProgress(false);
-        setProjectCanceled(true);
+        setProjectInProgress(false); 
+        setProjectCanceled(true); 
     };
 
     const getClassName = () => {
         return classNames(
             'MainView', {
-            'InProgress': projectInProgress,
-            'Canceled': !projectInProgress && projectCanceled
+            'InProgress': !projectInProgress, // projectInProgress
+            'Canceled': projectInProgress && !projectCanceled //  !projectInProgress && projectCanceled
         }
         );
     };
@@ -127,11 +127,11 @@ const MainView: React.FC = () => {
                 <div className='SocialMediaWrapper'>
                     {getSocialMediaButtons({ width: 30, height: 30 })}
                 </div>
-                {!projectInProgress && <TextButton
+                {/* {!projectInProgress && <TextButton
                     label={'Get Started'}
                     onClick={startProject}
                     externalClassName={'get-started-button'}
-                />}
+                />} */}
             </div>
         </div>
     );

@@ -10,6 +10,7 @@ import {ImageButton} from '../../Common/ImageButton/ImageButton';
 import {Settings} from '../../../settings/Settings';
 import {ProjectData} from '../../../store/general/types';
 import DropDownMenu from './DropDownMenu/DropDownMenu';
+import { useNavigate } from 'react-router-dom';
 
 interface IProps {
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -34,6 +35,11 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
     };
 
     const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT)
+
+    const navigate = useNavigate();
+    const TrainPage = () =>{
+        navigate('/Train')
+    }
 
     return (
         <div className='TopNavigationBar'>
@@ -63,6 +69,9 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
                         onChange={onChange}
                         onFocus={onFocus}
                     />
+                </div>
+                <div className='NavigationBarGroupWrapper'> 
+                    <div className='Name'onClick={TrainPage}>Train</div>
                 </div>
                 <div className='NavigationBarGroupWrapper'>
                     <ImageButton

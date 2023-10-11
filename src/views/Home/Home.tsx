@@ -5,7 +5,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const handleCreateProjectClick = () => {
     navigate('/home');
-    window.location.reload(); 
+    //window.location.reload(); 
     // ใส่โค้ดที่คุณต้องการเมื่อคลิกปุ่ม "Create Project" ที่นี่
   };
 

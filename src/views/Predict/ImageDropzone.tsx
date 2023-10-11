@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import './Predict.css';
-import { PieChart, Pie, Cell, Label } from 'recharts';
+import { PieChart, Pie } from 'recharts';
 
 interface ImageDropzoneProps {
   onUploadSuccess: (predictions: Predictions) => void;
@@ -40,7 +40,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: 'image/*',
+    // accept: 'image/*',
   });
 
   const handleUpload = () => {

@@ -9,7 +9,7 @@ const Predict: React.FC = () => {
 
   const handleSelectModelClick = () => {
     navigate('/home');
-    window.location.reload();
+    // window.location.reload();
   };
 
   const handleUpload = (imageUrl: string) => {

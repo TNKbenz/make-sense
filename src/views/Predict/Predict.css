@@ -1,47 +1,45 @@
-/* predict.css */
 .Predict {
-    
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     margin: 0 auto;
-    max-width: 600px; /* ปรับขนาดตามที่คุณต้องการ */
+    max-width: 800px; /* ปรับขนาดตามที่คุณต้องการ */
+    background-color: #ffffff;
   }
-  
-  .Home {
+
+  .Predict h2 {
+    font-size: 24px;
+    color: #000000;
+  }
+
+  .Predict-Home {
     margin-bottom: 20px;
     text-align: left; /* ตั้งให้ข้อความด้านซ้าย */
   }
-  
-  .Content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .ModelName {
-    text-align: left; /* ตั้งให้ข้อความด้านซ้าย */
-  }
-  
-  .Button {
-    display: flex;
-    flex-direction: row; /* วางปุ่ม Predict และปุ่ม Current Model Name ในบรรทัดเดียวกัน */
-  }
-  
-  .button {
-    margin-left: 10px; /* เพื่อให้ปุ่ม Predict อยู่ด้านขวาของปุ่ม Current Model Name */
-  }
-  
+
   .ImageDropzoneContainer {
-    border: 2px dashed #ccc;
+    border: 2px dashed white;
     padding: 20px;
     text-align: center;
     margin-top: 20px;
     border-radius: 5px;
   }
 
-  .h2{
-    margin-bottom: 20px;
-    text-align: center; /* ตั้งให้ข้อความด้านซ้าย */  
+  .ImageDropzoneContainer image-dropzone{
+    border: 2px dashed white; /* เส้นขอบ */
+    padding: 20px; /* ระยะห่างขอบ */
+    text-align: center; /* ตำแหน่งข้อความภายใน */
+    border-radius: 5px; /* มุมโค้งขอบ */
+    background-color: white; /* สีพื้นหลังขอบคุม */
+    max-width: 700px; /* กำหนดความกว้างสูงสุด */
+    margin: 0 auto; /* จัดตำแหน่งให้อยู่ตรงกลาง */
+  }
+  
+  .image-dropzone p {
+    margin: 0; /* กำหนดระยะห่างขอบคุมข้อความ */
+  }
+  
+  .image-dropzone button {
+    margin-top: 10px; /* ระยะห่างระหว่างปุ่ม Predict */
   }

@@ -1,3 +1,4 @@
+
 .Home {
     font-family: sans-serif;
     text-align: left;
@@ -10,7 +11,7 @@
     padding: 10px 20px;
     margin: 10px;
     font-size: 16px;
-    background-color: #ffffff;
+    background-color: #d68383;
     color: #000000;
     border: none;
     border-radius: 5px;
@@ -26,8 +27,9 @@
 
   .Train h1 {
     font-size: 24px;
-    color: #dee2e6;
+    color: #000000;
   }
+
   h3 {
     margin-top: 0;
   }

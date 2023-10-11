@@ -1,7 +1,8 @@
 import React from 'react';
 import ImageDropzone from './ImageDropzone';
 import { useNavigate } from 'react-router-dom';
-import './predict.css';
+import './Predict.css';
+
 
 const Predict: React.FC = () => {
   const navigate = useNavigate();
@@ -17,20 +18,16 @@ const Predict: React.FC = () => {
 
   return (
     <div className="Predict">
-      <div className="Home">
-        <button onClick={() => navigate('/')}>Home</button>
-      </div>
-      <h2>Welcome to Predict Page</h2>
-      <div className="Content">
-        <button onClick={handleSelectModelClick}>Select Existing Model</button>
-        <div className="ModelName">
-          <h2>Current Model Name</h2>
+        <div className="Home">
+            <button onClick={() => navigate('/')}>Home</button>
         </div>
-        <div className="ImageDropzoneContainer">
-          <ImageDropzone onUploadSuccess={handleUpload} />
+            <div className='Predict'><h2>Welcome to Predict Page </h2></div>
+            <button onClick={handleSelectModelClick}>Select Existing Model</button>
+            <h2>Current Model Name</h2>
+            <div className="ImageDropzoneContainer">
+            <ImageDropzone onUploadSuccess={handleUpload} />
+            </div>
         </div>
-      </div>
-    </div>
   );
 };
 

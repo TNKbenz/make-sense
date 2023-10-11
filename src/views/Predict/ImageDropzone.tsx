@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
-import './predict.css';
+import './Predict.css';
 import { PieChart, Pie, Cell, Label } from 'recharts';
 
 interface ImageDropzoneProps {

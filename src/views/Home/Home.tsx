@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate} from 'react-router-dom';
+ 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const handleCreateProjectClick = () => {
-    navigate('/');
+    navigate('/home');
+    window.location.reload(); 
     // ใส่โค้ดที่คุณต้องการเมื่อคลิกปุ่ม "Create Project" ที่นี่
   };
 
   const handleOpenProjectClick = () => {
-    navigate('/');
+    navigate('/home');
     // ใส่โค้ดที่คุณต้องการเมื่อคลิกปุ่ม "Open Project" ที่นี่
   };
 
@@ -24,4 +25,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

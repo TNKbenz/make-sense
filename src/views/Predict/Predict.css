@@ -1,0 +1,47 @@
+/* predict.css */
+.Predict {
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 600px; /* ปรับขนาดตามที่คุณต้องการ */
+  }
+  
+  .Home {
+    margin-bottom: 20px;
+    text-align: left; /* ตั้งให้ข้อความด้านซ้าย */
+  }
+  
+  .Content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .ModelName {
+    text-align: left; /* ตั้งให้ข้อความด้านซ้าย */
+  }
+  
+  .Button {
+    display: flex;
+    flex-direction: row; /* วางปุ่ม Predict และปุ่ม Current Model Name ในบรรทัดเดียวกัน */
+  }
+  
+  .button {
+    margin-left: 10px; /* เพื่อให้ปุ่ม Predict อยู่ด้านขวาของปุ่ม Current Model Name */
+  }
+  
+  .ImageDropzoneContainer {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    border-radius: 5px;
+  }
+
+  .h2{
+    margin-bottom: 20px;
+    text-align: center; /* ตั้งให้ข้อความด้านซ้าย */  
+  }

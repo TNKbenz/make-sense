@@ -38,7 +38,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
 
     const navigate = useNavigate();
     const TrainPage = () =>{
-        navigate('/Train')
+        navigate('/train')
     }
 
     return (

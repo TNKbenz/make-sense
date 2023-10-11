@@ -14,7 +14,7 @@ import {PlatformModel} from './staticModels/PlatformModel';
 import classNames from 'classnames';
 import NotificationsView from './views/NotificationsView/NotificationsView';
 import { RoboflowAPIDetails } from './store/ai/types';
-import Login from './views/Login/Login';
+
 
 interface IProps {
     projectType: ProjectType;

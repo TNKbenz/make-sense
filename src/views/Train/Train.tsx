@@ -22,7 +22,7 @@ const tabs: TabsType = [
     Component: Tab_Beginners
   },
   {
-    label: "Tab Developers",
+    label: "Visualize",
     index: 2,
     Component: Tab_Developers
   }
@@ -35,7 +35,7 @@ export default function Train() {
   return (
     
     <div className="Train">
-      <div className="Home"><button onClick={() => navigate('/Home')}>Home</button></div>
+      <div className="Home"><button onClick={() => navigate('/')}>Home</button></div>
       <h1>Project Name</h1>
       <br />
       <Tabs selectedTab={selectedTab} onClick={setSelectedTab} tabs={tabs} />

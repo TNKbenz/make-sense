@@ -12,6 +12,7 @@ import {
 import Login from './views/Login/Login';
 import Home from './views/Home/Home';
 import Train from './views/Train/Train';
+import Predict from './views/Predict/Predict';
 
 export const store = configureStore();
 AppInitializer.inti();
@@ -19,19 +20,23 @@ AppInitializer.inti();
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>
+    element: <Home/>
   },
   {
     path: "/login",
     element: <Login/>
   },
   {
-    path: "/Home",
-    element: <Home/>
+    path: "/home",
+    element: <App/>
   },
   {
-    path: "/Train",
+    path: "/train",
     element: <Train/>    
+  },
+  {
+    path: "/predict",
+    element: <Predict/>    // element: <App/> 
   },
 ]);
 

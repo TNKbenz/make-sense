@@ -5,7 +5,7 @@ RUN apt-get update && apt-get -y install git && rm -rf /var/lib/apt/lists/*
 COPY ./ /make-sense
 
 RUN cd /make-sense && \
-  npm install
+  npm install --legacy-peer-deps
 
 WORKDIR /make-sense
 

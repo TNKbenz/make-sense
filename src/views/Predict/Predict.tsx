@@ -18,8 +18,9 @@ const Predict: React.FC = () => {
 
   return (
     <div className="Predict">
-        <div className="Home">
-            <button onClick={() => navigate('/')}>Home</button>
+        <div className="ButtonContainer">
+            <button className="TrainButton" onClick={() => navigate('/')}>Home</button>
+            <button className="TrainButton" onClick={() => navigate('/train')} >Train</button>
         </div>
             <div className='Predict'><h2>Welcome to Predict Page </h2></div>
             <button onClick={handleSelectModelClick}>Select Existing Model</button>

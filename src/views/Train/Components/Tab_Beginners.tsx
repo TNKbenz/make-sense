@@ -39,11 +39,9 @@ const Tab_Beginners: FC<{}> = () => {
 
   return (
     <Fragment>
-      <div className="Train">
-        <button onClick={() => navigate("/predict")}>Create Model</button>
-        <button onClick={() => navigate("/predict")}>
-          Select Existing Model
-        </button>
+      <div className="tabs-component" style={{textAlign: 'center', display: 'flex', justifyContent: 'center'}}>
+        <button className='button-14' role='button' onClick={() => navigate('/predict')}>Create Model</button>
+        <button className='button-14' role='button' onClick={() => navigate('/predict')}>Select Existing Model</button>
       </div>
       <div className="Parameter">
         <h3>Model tuning</h3>

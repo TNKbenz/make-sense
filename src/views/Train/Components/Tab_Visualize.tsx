@@ -61,7 +61,7 @@ const ModelPerformanceChart = ({ data }) => {
   );
 };
 
-const Tab_Developers = () => {
+const Tab_Visualize = () => {
   // Example data for accuracy and cost over epochs
   const mockData = [
     { epoch: 1, accuracy: 0.58, cost: 1.5 },
@@ -98,4 +98,4 @@ const Tab_Developers = () => {
   );
 };
 
-export default Tab_Developers;
+export default Tab_Visualize;

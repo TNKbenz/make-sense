@@ -1,12 +1,32 @@
 .Predict {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin: 0 auto;
-    max-width: 800px; /* ปรับขนาดตามที่คุณต้องการ */
-    background-color: #ffffff;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+.ButtonContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 70%;
+  padding: 10px; 
+  background-color: #ffffff; 
+}
+
+.TrainButton {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  background-color: #d68383;
+  color: #000000;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
 
   .Predict h2 {
     font-size: 24px;
@@ -15,7 +35,12 @@
 
   .Predict-Home {
     margin-bottom: 20px;
-    text-align: left; /* ตั้งให้ข้อความด้านซ้าย */
+    text-align: left; 
+  }
+
+  .Predict-Train {
+    margin-bottom: 20px;
+    text-align: right; 
   }
 
   .ImageDropzoneContainer {
@@ -27,19 +52,19 @@
   }
 
   .ImageDropzoneContainer image-dropzone{
-    border: 2px dashed white; /* เส้นขอบ */
-    padding: 20px; /* ระยะห่างขอบ */
-    text-align: center; /* ตำแหน่งข้อความภายใน */
-    border-radius: 5px; /* มุมโค้งขอบ */
-    background-color: white; /* สีพื้นหลังขอบคุม */
-    max-width: 700px; /* กำหนดความกว้างสูงสุด */
-    margin: 0 auto; /* จัดตำแหน่งให้อยู่ตรงกลาง */
+    border: 2px dashed white; 
+    padding: 20px; 
+    text-align: center; 
+    border-radius: 5px; 
+    background-color: white;
+    max-width: 700px; 
+    margin: 0 auto; 
   }
   
   .image-dropzone p {
-    margin: 0; /* กำหนดระยะห่างขอบคุมข้อความ */
+    margin: 0; 
   }
   
   .image-dropzone button {
-    margin-top: 10px; /* ระยะห่างระหว่างปุ่ม Predict */
+    margin-top: 10px; 
   }

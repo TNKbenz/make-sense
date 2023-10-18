@@ -1,134 +1,197 @@
 
 .Home {
-    font-family: sans-serif;
-    text-align: left;
-    width: 70vw;
-    margin: 0 auto;
-    
-  }
-
-  .Home button {
-    padding: 10px 20px;
-    margin: 10px;
-    font-size: 16px;
-    background-color: #d68383;
-    color: #000000;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+  font-family: sans-serif;
+  text-align: left;
+  width: 70vw;
+  margin: 0 auto;
   
+}
+
+.Home button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  background-color: #d68383;
+  color: #000000;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.Train h1 {
+  font-size: 24px;
+  color: #000000;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.tabs-component [role="tablist"] {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #dee2e6;
+  position: relative;
+}
+
+.tabs-component [role="tablist"] button {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  display: block;
+  padding: 0.5rem 3rem;
+  cursor: pointer;
+  margin: 0 4px;
+  outline: none;
+  background-color: #fff;
+  transition: border 0.2s ease-in-out 0s;
+}
+
+.tabs-component [role="tablist"] button.active,
+.tabs-component [role="tablist"] button:focus,
+.tabs-component [role="tablist"] button:hover {
+  border-width: 1px;
+  border-color: #e9ecef #e9ecef #b41c1c;
+}
+
+.tabs-component [role="tablist"] button.active {
+  color: #495057;
+  background-color: #f8f8f8;
+}
+
+.tabs-component [role="tabpanel"] {
+  text-align: left;
+  padding: 3rem;
+  background-color: #f8f8f8;
+  box-shadow: 1px 1px 2px rgb(204 204 204 / 75%);
+}
+
 .Train {
-    font-family: sans-serif;
-    text-align: center;
-    width: 70vw;
-    margin: 0 auto;
-  }
+  font-family: sans-serif;
+  text-align: left;
+  width: 70vw;
+  margin: auto;
 
-  .Train h1 {
-    font-size: 24px;
-    color: #000000;
-  }
+}
 
-  h3 {
-    margin-top: 0;
-  }
-  
-  .tabs-component [role="tablist"] {
-    display: flex;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #dee2e6;
-    position: relative;
-  }
-  
-  .tabs-component [role="tablist"] button {
-    border-width: 4px;
-    border-style: solid;
-    border-color: transparent;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem;
-    display: block;
-    padding: 0.5rem 3rem;
-    cursor: pointer;
-    margin: 0 4px;
-    outline: none;
-    background-color: #fff;
-    transition: border 0.2s ease-in-out 0s;
-  }
-  
-  .tabs-component [role="tablist"] button.active,
-  .tabs-component [role="tablist"] button:focus,
-  .tabs-component [role="tablist"] button:hover {
-    border-width: 1px;
-    border-color: #e9ecef #e9ecef #b41c1c;
-  }
-  
-  .tabs-component [role="tablist"] button.active {
-    color: #495057;
-    background-color: #f8f8f8;
-  }
-  
-  .tabs-component [role="tabpanel"] {
-    text-align: left;
-    padding: 3rem;
-    background-color: #f8f8f8;
-    box-shadow: 1px 1px 2px rgb(204 204 204 / 75%);
-  }
-  
-  .tabs-component.vertical {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-  
-  .tabs-component.vertical [role="tablist"] {
-    flex-direction: column;
-  }
-  
-  .tabs-component.vertical [role="tabpanel"] {
-    flex: 1;
-  }
-  
-  .tabs-component [role="tablist"] button {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    margin: 0;
-  }
-  
-  .tabs-component.vertical [role="tablist"] button.active,
-  .tabs-component.vertical [role="tablist"] button:focus,
-  .tabs-component.vertical [role="tablist"] button:hover {
-    border-color: #e9ecef transparent #e9ecef #b41c1c;
-  }
+.tabs-component.vertical {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
 
-  .Parameter {
-    border: 1px solid #ccc; /* สร้างเส้นกรอบ 1px สีเทา */
-    padding: 40px; /* เพิ่มระยะห่างรอบขอบของช่อง input */
-  }
-  
-  .Parameter div {
-    margin-bottom: 5px; /* เพิ่มระยะห่างระหว่างแต่ละช่อง input */
-  }
-  
-  .Parameter label {
-    display: block; /* แสดง label เป็นบรรทัดใหม่ */
-    font-weight: bold; /* ทำให้ข้อความ label หนาขึ้น */
-  }
-  
-  .Parameter input {
-    width: 100%; /* ขยาย input ให้เต็มความกว้างของพื้นที่ของ Parameter */
-    padding: 5px; /* เพิ่มระยะห่างรอบขอบของ input */
-    border: 1px solid #000000; /* สร้างเส้นกรอบสำหรับ input */
-    border-radius: 4px; /* ทำให้มีมุมโค้งบนขอบของ input */
-  }
-  input {
-    display: block;
-    width: 100%;
-    padding-top: 20px;
-    border: none;
-    border-radius: 0;
-    color: black;
-    background: transparent;
-    font-size: 15px;
-    transition: 0.3s ease;
-  }
+.tabs-component.vertical [role="tablist"] {
+  flex-direction: column;
+}
+
+.tabs-component.vertical [role="tabpanel"] {
+  flex: 1;
+}
+
+.tabs-component [role="tablist"] button {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin: 0;
+}
+
+.tabs-component.vertical [role="tablist"] button.active,
+.tabs-component.vertical [role="tablist"] button:focus,
+.tabs-component.vertical [role="tablist"] button:hover {
+  border-color: #e9ecef transparent #e9ecef #b41c1c;
+}
+
+.Parameter {
+  border: 1px solid #ccc; /* สร้างเส้นกรอบ 1px สีเทา */
+  padding: 40px; /* เพิ่มระยะห่างรอบขอบของช่อง input */
+}
+.ParameterBox {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  background-color: #f9f9f9;
+  margin-right: 10px;
+}
+
+.ParameterBox:last-child {
+  margin-right: 0;
+}
+
+.Parameter div {
+  margin-bottom: 5px; /* เพิ่มระยะห่างระหว่างแต่ละช่อง input */
+}
+
+.Parameter label {
+  display: block; /* แสดง label เป็นบรรทัดใหม่ */
+  font-weight: bold; /* ทำให้ข้อความ label หนาขึ้น */
+}
+
+.Parameter input {
+  width: 100%; /* ขยาย input ให้เต็มความกว้างของพื้นที่ของ Parameter */
+  padding: 5px; /* เพิ่มระยะห่างรอบขอบของ input */
+  border: 1px solid #000000; /* สร้างเส้นกรอบสำหรับ input */
+  border-radius: 4px; /* ทำให้มีมุมโค้งบนขอบของ input */
+}
+input {
+  display: block;
+  width: 100%;
+  padding-top: 10px;
+  border: none;
+  border-radius: 0;
+  color: black;
+  background: transparent;
+  font-size: 15px;
+  transition: 0.3s ease;
+}
+
+
+
+
+
+
+.button-14 {
+  background-image: linear-gradient(#f7f8fa ,#e7e9ec);
+  border-color: #adb1b8 #a2a6ac #8d9096;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 3px;
+  box-shadow: rgba(255,255,255,.6) 0 1px 0 inset;
+  box-sizing: border-box;
+  color: #0f1111;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Amazon Ember",Arial,sans-serif;
+  font-size: 14px;
+  height: 29px;
+  font-size: 13px;
+  outline: 0;
+  overflow: hidden;
+  padding: 0 11px;
+  text-align: center;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.button-14:active {
+  border-bottom-color: #a2a6ac;
+}
+
+.button-14:active:hover {
+  border-bottom-color: #a2a6ac;
+}
+
+.button-14:hover {
+  border-color: #a2a6ac #979aa1 #82858a;
+}
+
+.button-14:focus {
+  border-color: #e77600;
+  box-shadow: rgba(228, 121, 17, .5) 0 0 3px 2px;
+  outline: 0;
+}

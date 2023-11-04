@@ -1,65 +1,60 @@
-import axios from "axios";
 import React, { FC, Fragment, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
-import { findLast } from "lodash";
+import { connect } from "react-redux";
+import axios from "axios";
+import { AppState } from "../../../store";
+import { ImageData } from "../../../store/labels/types";
 
-const Tab_Beginners: FC<{}> = () => {
+interface IProps {
+  imageData: ImageData[];
+}
+
+const Tab_Beginners: FC<IProps> = ({ imageData }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
 
-  // const imageDatas = LabelsSelector.getImagesData();
-  // console.log(imageDatas);
-  // for (const imageData of imageDatas) {
-  //   const labelNames = LabelsSelector.getLabelNames();
-  //   let a = imageData.labelNameIds.map((labelNameId: string) => {
-  //     return findLast(labelNames, { id: labelNameId }).name;
-  //   });
-  //   console.log(a);
-  //   console.log(labelNames);
-  // }
-
-  //send training data to backend
   const handleSubmit = async () => {
-    console.log("data submitted");
-    // try {
-    //   const data = {
-    //     epoch,
-    //     lr: learningRate,
-    //   };
-    //   const response = await axios.post("http://localhost:8000/train/", data);
-    //   console.log(response.data);
-    //   // Handle any other logic after a successful request, if needed.
-    // } catch (error) {
-    //   // Handle errors, e.g., display an error message or log the error.
-    //   console.error("Error:", error);
-    // }
+    console.log("Data submitted");
+    try {
+      const data = {
+        epoch,
+        lr: learningRate,
+        imageData,
+      };
+      const response = await axios.post("http://localhost:8000/train/", data);
+      console.log(response.data);
+      // Handle any other logic after a successful request, if needed.
+    } catch (error) {
+      // Handle errors, e.g., display an error message or log the error.
+      console.error("Error:", error);
+    }
   };
 
   return (
     <Fragment>
-      <div className="tabs-component" style={{textAlign: 'center', display: 'flex', justifyContent: 'center'}}>
-        <button className='button-14' role='button' onClick={() => navigate('/predict')}>Create Model</button>
-        <button className='button-14' role='button' onClick={() => navigate('/predict')}>Select Existing Model</button>
+      <div className="tabs-component" style={{ textAlign: "center", display: "flex", justifyContent: "center" }}>
+        <button className="button-14" role="button" onClick={() => navigate("/predict")}>
+          Create Model
+        </button>
+        <button className="button-14" role="button" onClick={() => navigate("/predict")}>
+          Select Existing Model
+        </button>
       </div>
       <div className="Parameter">
         <h3>Model tuning</h3>
         <div>Epoch</div>
-        <input
-          type="text"
-          value={epoch}
-          onChange={(e) => setEpoch(e.target.value)}
-        />
+        <input type="text" value={epoch} onChange={(e) => setEpoch(e.target.value)} />
         <div>Learning Rate</div>
-        <input
-          type="text"
-          value={learningRate}
-          onChange={(e) => setLearningRate(e.target.value)}
-        />
+        <input type="text" value={learningRate} onChange={(e) => setLearningRate(e.target.value)} />
         <button onClick={handleSubmit}>Train</button>
       </div>
     </Fragment>
   );
 };
-export default Tab_Beginners;
+
+const mapStateToProps = (state: AppState) => ({
+  imageData: state.labels.imagesData,
+});
+
+export default connect(mapStateToProps)(Tab_Beginners);

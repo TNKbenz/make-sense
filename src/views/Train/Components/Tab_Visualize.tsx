@@ -1,4 +1,5 @@
 import React from "react";
+import axios from 'axios';
 import {
   LineChart,
   Line,
@@ -63,6 +64,20 @@ const ModelPerformanceChart = ({ data }) => {
 
 const Tab_Visualize = () => {
   // Example data for accuracy and cost over epochs
+  const dataUrl = 'https://example.com/api/data'; 
+
+  axios.get(dataUrl)
+  .then(response => {
+    // ดึงข้อมูลจากตัวแปร response และจัดรูปข้อมูลให้อยู่ในรูปแบบที่ต้องการ
+    const Data = response.data; // สมมติว่า response.data มีข้อมูลที่ต้องการ
+    // คำสั่งแสดงผลข้อมูลเพื่อตรวจสอบ
+    console.log(Data);
+  })
+  .catch(error => {
+    // กรณีเกิดข้อผิดพลาดในการดึงข้อมูล
+    console.error('Error fetching data:', error);
+  });
+  
   const mockData = [
     { epoch: 1, accuracy: 0.58, cost: 1.5 },
     { epoch: 2, accuracy: 0.62, cost: 1.4 },

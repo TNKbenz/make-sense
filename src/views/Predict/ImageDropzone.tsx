@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie } from "recharts";
+import { PieChart, Pie ,Tooltip} from "recharts";
 
 interface ImageDropzoneProps {
   onUploadSuccess: (predictions: Predictions) => void;
@@ -11,14 +11,6 @@ interface ImageDropzoneProps {
 type Predictions = {
   [key: string]: number;
 };
-
-// const data = {
-//   "golden retriever": 0.8504292964935303,
-//   "Labrador retriever": 0.08213566243648529,
-//   "cocker spaniel": 0.01636691391468048,
-//   kuvasz: 0.0071950675919651985,
-//   "Tibetan terrier": 0.005311739630997181,
-// };
 
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
 
@@ -32,7 +24,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
 
-      // Resize the image to 300x300 pixels
       const resizedImage = await resizeImage(file, 400, 400);
       setSelectedFile(resizedImage);
       setSelectedFileUrl(URL.createObjectURL(resizedImage));
@@ -157,8 +148,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
                 innerRadius={75}
                 outerRadius={150}
                 dataKey="value"
-                label
+                label = {true}
               ></Pie>
+              <Tooltip formatter={(value, name) => [value, name]}/>
             </PieChart>
           </div>
         </div>

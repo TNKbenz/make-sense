@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid ,LabelList,Cell} from 'recharts';
 
 interface ImageData {
   src: string;
@@ -28,7 +28,29 @@ const data_SizeImage: SizeImage[] = [
   { name: 'E', value: '1600x810' },
 ];
 
+const dataUrl = 'https://example.com/api/data'; 
+
+const sizeImageUrl = 'https://example.com/api/sizeImage'; 
+
+const fetchData = async () => {
+  try {
+    const response = await axios.get(dataUrl);
+    const data: ImageData[] = response.data;
+
+    const responseSizeImage = await axios.get(sizeImageUrl);
+    const dataSizeImage: SizeImage[] = responseSizeImage.data; 
+
+    console.log('ImageData:', data);
+    console.log('SizeImage:', dataSizeImage);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
+
+fetchData();
+
 const classifySize = (data: SizeImage[]) => {
+  const smallSize: SizeImage[] = [];
   const mediumSize: SizeImage[] = [];
   const largeSize: SizeImage[] = [];
   const jumboSize: SizeImage[] = [];
@@ -38,16 +60,19 @@ const classifySize = (data: SizeImage[]) => {
     const width = parseInt(dimensions[0], 10);
     const height = parseInt(dimensions[1], 10);
 
-    if (width >= 1000 || height >= 1000) {
+    if (width * height >= 1048576) { // 1024*1024
       jumboSize.push(item);
-    } else if (width >= 400 || height >= 400) {
+    } else if (width * height >= 262144) { // 512 * 512
       largeSize.push(item);
+    } else if (width * height <= 20736) { // 144 * 144
+      smallSize.push(item);
     } else {
       mediumSize.push(item);
     }
   });
 
   return {
+    small: smallSize,
     medium: mediumSize,
     large: largeSize,
     jumbo: jumboSize,
@@ -100,9 +125,10 @@ const DataHealth: React.FC = () => {
 
 
   const data_classifiedSizes= [
-    { name: 'Medium', count: classifiedSizes.medium.length },
-    { name: 'Large', count: classifiedSizes.large.length },
-    { name: 'Jumbo', count: classifiedSizes.jumbo.length },
+    { name: 'Small', count: classifiedSizes.small.length ,label: " < 144 x 144"},
+    { name: 'Medium', count: classifiedSizes.medium.length ,label: "< 512 x 512"},
+    { name: 'Large', count: classifiedSizes.large.length ,label: " > 512 x 512"},
+    { name: 'Jumbo', count: classifiedSizes.jumbo.length ,label: " > 1024 x 1024"},
   ];
   return (
     <div>
@@ -112,18 +138,18 @@ const DataHealth: React.FC = () => {
           <div  style={{ display: 'flex', justifyContent: 'space-between',padding: '0px' , marginBottom: '10px'}}>
             <div className="ParameterBox">
               <h4>images</h4>
-              <h3>{imageCount}</h3>
+              <h3 style={{ color: 'rgb(136, 132, 216)' }}>{imageCount}</h3>
               <h4>0 missing annotations</h4>
             </div>
             <div className="ParameterBox">
               <h4>Annotations</h4>
-              <h3>{annotationCount}</h3>
-              <h4>{annotationsPerImage} per image (average)</h4>
-              <h4>across {classCount} classes</h4>
+              <h3 style={{ color: 'rgb(136, 132, 216)' }}>{annotationCount}</h3>
+              <h4><span style={{ color: 'rgb(136, 132, 216)' }}>{annotationsPerImage}</span> per image (average)</h4>
+              <h4>across <span style={{ color: 'rgb(136, 132, 216)' }}>{classCount}</span> classes</h4>
             </div>
             <div className="ParameterBox">
               <h4>Median Image Ratio</h4>
-              <h3>{mostFrequentOrAverageRatio}</h3>
+              <h3 style={{ color: '#008000' }} >{mostFrequentOrAverageRatio}</h3>
               <h4>square</h4>
             </div>
           </div>
@@ -132,9 +158,8 @@ const DataHealth: React.FC = () => {
             <BarChart width={800} height={150} data={data} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
+              <YAxis dataKey="name" type="category" interval={0}/>
               <Tooltip />
-              <Legend />
               <Bar dataKey="value" fill="#8884d8" />
             </BarChart>
           </div>
@@ -144,11 +169,17 @@ const DataHealth: React.FC = () => {
             <BarChart width={800} height={150} data={data_classifiedSizes} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
+              <YAxis dataKey="name" type="category" interval={0}/>
               <Tooltip />
               <Legend />
-              <Bar dataKey="count" fill="#82ca9d" />
-            </BarChart>
+              <Bar dataKey="count" fill="#8884d8">
+                <LabelList dataKey="label" position="right" fill="#000" />
+                <Cell fill="#FFFF00" />
+                <Cell fill="#008000" />
+                <Cell fill="#0000FF" />
+                <Cell fill="#FF0000" />
+              </Bar>
+          </BarChart>
           </div>
         </div>
       </div>

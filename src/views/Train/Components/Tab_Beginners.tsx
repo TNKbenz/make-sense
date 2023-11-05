@@ -15,12 +15,20 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
   const [learningRate, setLearningRate] = useState<string>("");
 
   const handleSubmit = async () => {
+    if(imageData.length > 0){
+    const formData = new FormData();
+    
+    imageData.forEach((fileInfo, index) => {
+      const file = fileInfo.fileData;
+      formData.append(`file${index}`, file);
+    });
+    console.log(formData);
     console.log("Data submitted");
     try {
       const data = {
         epoch,
         lr: learningRate,
-        imageData,
+        formData,
       };
       const response = await axios.post("http://localhost:8000/train/", data);
       console.log(response.data);
@@ -28,7 +36,7 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
     } catch (error) {
       // Handle errors, e.g., display an error message or log the error.
       console.error("Error:", error);
-    }
+    }}
   };
 
   return (

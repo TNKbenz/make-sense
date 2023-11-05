@@ -47,8 +47,6 @@ const DataHealth: React.FC<IProps> = ({ imageData }) => {
   const annotationsPerImage = (annotationCount / imageCount).toFixed(2);;
   const classCount = data.length;
 
-  console.log(data);
-
   const data_SizeImage = [];
   for (let i = 0; i < imageData.length; i++) {
     const size = imageData[i].fileData.size;
@@ -81,10 +79,8 @@ const DataHealth: React.FC<IProps> = ({ imageData }) => {
       jumbo: jumboSize,
     };
   };
-
+  
   const classifiedSizes = classifySize(data_SizeImage);
-  console.log(imageData)
-
   const data_classifiedSizes= [
     { name: 'Small', count: classifiedSizes.small.length },
     { name: 'Medium', count: classifiedSizes.medium.length },

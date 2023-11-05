@@ -40,6 +40,9 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
         <button className="button-14" role="button" onClick={() => navigate("/predict")}>
           Select Existing Model
         </button>
+        <button className="button-14" role="button" onClick={() => navigate("/Home")}>
+          Add & Label Image
+        </button>
       </div>
       <div className="Parameter">
         <h3>Model tuning</h3>

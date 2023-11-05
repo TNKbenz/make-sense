@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { AppState } from "../../../store";
 import { ImageData } from "../../../store/labels/types";
+import path from "path";
 
 interface IProps {
   imageData: ImageData[];
@@ -21,6 +22,7 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
     imageData.forEach((fileInfo, index) => {
       const file = fileInfo.fileData;
       formData.append(`file${index}`, file);
+      console.log(file);
     });
     console.log(formData);
     console.log("Data submitted");
@@ -30,6 +32,7 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
         lr: learningRate,
         formData,
       };
+      console.log(data)
       const response = await axios.post("http://localhost:8000/train/", data);
       console.log(response.data);
       // Handle any other logic after a successful request, if needed.

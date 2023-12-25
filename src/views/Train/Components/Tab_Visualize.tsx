@@ -1,5 +1,5 @@
-import React from "react";
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   LineChart,
   Line,
@@ -62,53 +62,35 @@ const ModelPerformanceChart = ({ data }) => {
   );
 };
 
+// Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  // Example data for accuracy and cost over epochs
-  const dataUrl = 'https://example.com/api/data'; 
+  const dataUrl = "http://localhost:8000/result/";
+  const [data, setData] = useState([]);
 
-  axios.get(dataUrl)
-  .then(response => {
-    // ดึงข้อมูลจากตัวแปร response และจัดรูปข้อมูลให้อยู่ในรูปแบบที่ต้องการ
-    const Data = response.data; // สมมติว่า response.data มีข้อมูลที่ต้องการ
-    // คำสั่งแสดงผลข้อมูลเพื่อตรวจสอบ
-    console.log(Data);
-  })
-  .catch(error => {
-    // กรณีเกิดข้อผิดพลาดในการดึงข้อมูล
-    console.error('Error fetching data:', error);
-  });
-  
-  const mockData = [
-    { epoch: 1, accuracy: 0.58, cost: 1.5 },
-    { epoch: 2, accuracy: 0.62, cost: 1.4 },
-    { epoch: 3, accuracy: 0.67, cost: 1.3 },
-    { epoch: 4, accuracy: 0.71, cost: 1.2 },
-    { epoch: 5, accuracy: 0.75, cost: 1.1 },
-    { epoch: 6, accuracy: 0.79, cost: 1.0 },
-    { epoch: 7, accuracy: 0.83, cost: 0.9 },
-    { epoch: 8, accuracy: 0.87, cost: 0.8 },
-    { epoch: 9, accuracy: 0.91, cost: 0.7 },
-    { epoch: 10, accuracy: 0.94, cost: 0.6 },
-    { epoch: 11, accuracy: 0.95, cost: 0.5 },
-    { epoch: 12, accuracy: 0.96, cost: 0.4 },
-    { epoch: 13, accuracy: 0.97, cost: 0.3 },
-    { epoch: 14, accuracy: 0.98, cost: 0.2 },
-    { epoch: 15, accuracy: 0.98, cost: 0.1 },
-    { epoch: 16, accuracy: 0.98, cost: 0.09 },
-    { epoch: 17, accuracy: 0.99, cost: 0.08 },
-    { epoch: 18, accuracy: 0.99, cost: 0.07 },
-    { epoch: 19, accuracy: 0.99, cost: 0.06 },
-    { epoch: 20, accuracy: 0.99, cost: 0.05 },
-    { epoch: 21, accuracy: 0.99, cost: 0.04 },
-    { epoch: 22, accuracy: 0.99, cost: 0.03 },
-    { epoch: 23, accuracy: 0.99, cost: 0.02 },
-    { epoch: 24, accuracy: 0.99, cost: 0.01 },
-    // Continue adding more epochs and data as needed
-  ];
+  useEffect(() => {
+    // Make the API request inside the useEffect hook
+    axios
+      .get(dataUrl)
+      .then((response) => {
+        // Update the component's state with the received data
+        const transformedData = response.data.loss.map((loss, index) => ({
+          epoch: index + 1,
+          accuracy: response.data.accuracy[index], // converting accuracy to a decimal between 0 and 1
+          cost: loss,
+        }));
+
+        console.log(transformedData);
+        setData(transformedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []); // The empty dependency array [] ensures this effect runs once when the component mounts
 
   return (
     <div className="App">
-      <ModelPerformanceChart data={mockData} />
+      {/* Pass the data to the ModelPerformanceChart component */}
+      <ModelPerformanceChart data={data} />
     </div>
   );
 };

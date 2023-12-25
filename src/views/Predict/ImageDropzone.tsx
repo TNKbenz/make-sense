@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie ,Tooltip} from "recharts";
+import { PieChart, Pie, Tooltip } from "recharts";
 
 interface ImageDropzoneProps {
   onUploadSuccess: (predictions: Predictions) => void;
@@ -148,9 +148,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
                 innerRadius={75}
                 outerRadius={150}
                 dataKey="value"
-                label = {true}
+                label={true}
               ></Pie>
-              <Tooltip formatter={(value, name) => [value, name]}/>
+              <Tooltip formatter={(value, name) => [value, name]} />
             </PieChart>
           </div>
         </div>

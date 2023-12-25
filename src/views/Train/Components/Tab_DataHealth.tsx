@@ -1,135 +1,118 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid ,LabelList,Cell} from 'recharts';
+import {LabelStatus} from "../../../data/enums/LabelStatus";
+import {LabelType} from "../../../data/enums/LabelType";
+import {ImageData, LabelPoint, LabelRect} from "../../../store/labels/types";
+import { AppState } from "../../../store";
+import { connect } from "react-redux";
+import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 
-interface ImageData {
-  src: string;
-  type: string;
+interface IProps {
+  imageData: ImageData[];
+  activeLabelType: LabelType;
 }
 
 interface SizeImage {
   name: string;
-  value: string;
+  value: number;
 }
 
-const data = [
-  { name: 'A', value: 2 },
-  { name: 'B', value: 2 },
-  { name: 'C', value: 2 },
-  { name: 'D', value: 2 },
-  { name: 'E', value: 4 },
-];
-
-const data_SizeImage: SizeImage[] = [
-  { name: 'A', value: '400x300' },
-  { name: 'B', value: '800x820' },
-  { name: 'C', value: '800x820' },
-  { name: 'D', value: '800x800' },
-  { name: 'E', value: '1600x810' },
-];
-
-const dataUrl = 'https://example.com/api/data'; 
-
-const sizeImageUrl = 'https://example.com/api/sizeImage'; 
-
-const fetchData = async () => {
-  try {
-    const response = await axios.get(dataUrl);
-    const data: ImageData[] = response.data;
-
-    const responseSizeImage = await axios.get(sizeImageUrl);
-    const dataSizeImage: SizeImage[] = responseSizeImage.data; 
-
-    console.log('ImageData:', data);
-    console.log('SizeImage:', dataSizeImage);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-};
-
-fetchData();
-
-const classifySize = (data: SizeImage[]) => {
-  const smallSize: SizeImage[] = [];
-  const mediumSize: SizeImage[] = [];
-  const largeSize: SizeImage[] = [];
-  const jumboSize: SizeImage[] = [];
-
-  data.forEach((item) => {
-    const dimensions = item.value.split('x');
-    const width = parseInt(dimensions[0], 10);
-    const height = parseInt(dimensions[1], 10);
-
-    if (width * height >= 1048576) { // 1024*1024
-      jumboSize.push(item);
-    } else if (width * height >= 262144) { // 512 * 512
-      largeSize.push(item);
-    } else if (width * height <= 20736) { // 144 * 144
-      smallSize.push(item);
-    } else {
-      mediumSize.push(item);
-    }
+const DataHealth: React.FC<IProps> = ({ imageData }) => {
+  const labels = [];
+  imageData.forEach(item => {
+    item.labelNameIds.forEach(id => {
+      const name = LabelsSelector.getLabelNameById(id)?.name;
+      if (name) {
+        labels.push(name);
+      }
+    });
   });
 
-  return {
-    small: smallSize,
-    medium: mediumSize,
-    large: largeSize,
-    jumbo: jumboSize,
-  };
-};
-
-
-const findMostFrequentOrAverageRatio = (data: SizeImage[]) => {
-  const ratioCount = {};
-  data.forEach((item) => {
-    if (item.value in ratioCount) {
-      ratioCount[item.value]++;
+  const data = [];
+  const counts = new Map();
+  labels.forEach(item => {
+    if (counts.has(item)) {
+      counts.set(item, counts.get(item) + 1);
     } else {
-      ratioCount[item.value] = 1;
+      counts.set(item, 1);
     }
   });
+  counts.forEach((value, name) => {
+    data.push({name,value});
+  });
 
-  let mostFrequentRatio = '';
-  let maxCount = 0;
-
-  for (const ratio in ratioCount) {
-    if (ratioCount[ratio] > maxCount) {
-      mostFrequentRatio = ratio;
-      maxCount = ratioCount[ratio];
-    }
-  }
-
-  if (mostFrequentRatio) {
-    return mostFrequentRatio;
-  } else {
-    
-    const totalWidth = data.reduce((total, item) => total + parseInt(item.value.split('x')[0], 10), 0);
-    const totalHeight = data.reduce((total, item) => total + parseInt(item.value.split('x')[1], 10), 0);
-    const averageWidth = totalWidth / data.length;
-    const averageHeight = totalHeight / data.length;
-    
-
-    return `${averageWidth}x${averageHeight}`;
-  }
-};
-
-const DataHealth: React.FC = () => {
-
-  const classifiedSizes = classifySize(data_SizeImage);
-  const mostFrequentOrAverageRatio = findMostFrequentOrAverageRatio(data_SizeImage);
-  const imageCount = data_SizeImage.length;
+  const imageCount = imageData.length;
   const annotationCount = data.reduce((total, item) => total + item.value, 0);
-  const annotationsPerImage = annotationCount / imageCount;
+  const annotationsPerImage = (annotationCount / imageCount).toFixed(2);;
   const classCount = data.length;
 
+  const data_SizeImage = [];
+  for (let i = 0; i < imageData.length; i++) {
+    const size = imageData[i].fileData.size;
+    data_SizeImage.push(size);
+  }
 
+  const classifySize = (data_SizeImage) => {
+    const smallSize: SizeImage[] = [];
+    const mediumSize: SizeImage[] = [];
+    const largeSize: SizeImage[] = [];
+    const jumboSize: SizeImage[] = [];
+  
+    data_SizeImage.forEach((item) => {
+ 
+      if (item >= 1048576) { // 1024*1024
+        jumboSize.push(item);
+      } else if (item >= 262144) { // 512 * 512
+        largeSize.push(item);
+      } else if (item <= 20736) { // 144 * 144
+        smallSize.push(item);
+      } else {
+        mediumSize.push(item);
+      }
+    });
+  
+    return {
+      small: smallSize,
+      medium: mediumSize,
+      large: largeSize,
+      jumbo: jumboSize,
+    };
+  };
+  
+  const classifiedSizes = classifySize(data_SizeImage);
   const data_classifiedSizes= [
-    { name: 'Small', count: classifiedSizes.small.length ,label: " < 144 x 144"},
-    { name: 'Medium', count: classifiedSizes.medium.length ,label: "< 512 x 512"},
-    { name: 'Large', count: classifiedSizes.large.length ,label: " > 512 x 512"},
-    { name: 'Jumbo', count: classifiedSizes.jumbo.length ,label: " > 1024 x 1024"},
+    { name: 'Small', count: classifiedSizes.small.length },
+    { name: 'Medium', count: classifiedSizes.medium.length },
+    { name: 'Large', count: classifiedSizes.large.length },
+    { name: 'Jumbo', count: classifiedSizes.jumbo.length },
   ];
+
+  const findMostFrequentOrAverageRatio = (data_SizeImage) => {
+    data_SizeImage.sort((a, b) => a - b);
+
+    let medianSize;
+    const middleIndex = Math.floor(data_SizeImage.length / 2);
+
+    if (data_SizeImage.length % 2 === 0) {
+      medianSize = (data_SizeImage[middleIndex - 1] + data_SizeImage[middleIndex]) / 2;
+    } else {
+      medianSize = data_SizeImage[middleIndex];
+    }
+    return medianSize
+  };
+   const mostFrequentOrAverageRatio = findMostFrequentOrAverageRatio(data_SizeImage);
+
+  const colorStyle = {
+    color:
+      mostFrequentOrAverageRatio >= 1048576
+        ? 'red'
+        : mostFrequentOrAverageRatio >= 262144
+        ? 'blue'
+        : mostFrequentOrAverageRatio <= 20736
+        ? 'yellow'
+        : 'green',
+  };
   return (
     <div>
       <div>
@@ -139,7 +122,7 @@ const DataHealth: React.FC = () => {
             <div className="ParameterBox">
               <h4>images</h4>
               <h3 style={{ color: 'rgb(136, 132, 216)' }}>{imageCount}</h3>
-              <h4>0 missing annotations</h4>
+              {/* <h4>0 missing annotations</h4> */}
             </div>
             <div className="ParameterBox">
               <h4>Annotations</h4>
@@ -148,8 +131,8 @@ const DataHealth: React.FC = () => {
               <h4>across <span style={{ color: 'rgb(136, 132, 216)' }}>{classCount}</span> classes</h4>
             </div>
             <div className="ParameterBox">
-              <h4>Median Image Ratio</h4>
-              <h3 style={{ color: '#008000' }} >{mostFrequentOrAverageRatio}</h3>
+              <h4>Median Image Size</h4>
+              <h3 style={colorStyle} >{mostFrequentOrAverageRatio}</h3>
               <h4>square</h4>
             </div>
           </div>
@@ -180,6 +163,12 @@ const DataHealth: React.FC = () => {
                 <Cell fill="#FF0000" />
               </Bar>
           </BarChart>
+          <h5>
+             ! Small: Less than 144 x 144,
+            <span style={{ color: "#008000" }}> Medium: Less than 512 x 512,</span>
+            <span style={{ color: "#0000FF" }}> Large: Greater than 512 x 512,</span>
+            <span style={{ color: "#FF0000" }}> Jumbo: Greater than 1024 x 1024.</span>
+          </h5>
           </div>
         </div>
       </div>
@@ -187,4 +176,9 @@ const DataHealth: React.FC = () => {
   );
 };
 
-export default DataHealth;
+const mapStateToProps = (state: AppState) => ({
+  imageData: state.labels.imagesData,
+  activeLabelType: state.labels.activeLabelType
+});
+
+export default connect(mapStateToProps)(DataHealth);

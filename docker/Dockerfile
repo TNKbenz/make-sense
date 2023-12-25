@@ -1,12 +1,24 @@
-FROM node:16.16.0
+# Stage 1: Build frontend
+FROM node:16.16.0 AS frontend-builder
 
-RUN apt-get update && apt-get -y install git && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-COPY ./ /make-sense
+COPY . /app
 
-RUN cd /make-sense && \
-  npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
+RUN npm run build
 
-WORKDIR /make-sense
+# Stage 3: Create production image with NGINX
+FROM nginx:latest
 
-ENTRYPOINT ["npm", "run", "dev"]
+# Copy built frontend from the frontend-builder stage
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html
+
+# Copy NGINX configuration
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Expose the port the app runs on
+EXPOSE 80
+
+# Start NGINX and the Node.js app
+CMD ["nginx", "-g", "daemon off;"]

@@ -100,7 +100,7 @@ const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurve
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  const dataUrl = "http://localhost/api/result/";
+  const dataUrl = "/api/result/";
   const [data, setData] = useState([]);
   const [validationCurveData, setValidationCurveData] = useState([]);
   const [precisionRecallCurveData, setPrecisionRecallCurveData] = useState([]);

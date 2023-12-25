@@ -1,76 +1,70 @@
 import './Login.scss';
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  
 
-  const handleLogin = () => { // window.location.replace('../MainView/MainView');
-    navigate('/');
-    // อ่านข้อมูลผู้ใช้จากไฟล์ JSON (ในสรา้งแอพของคุณ คุณต้องใช้วิธีการแบบนี้เพื่ออ่านข้อมูลจากไฟล์ JSON)
-    // window.location.replace('../MainView/MainView');
-    // fetch('/users.json')
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     const { users } = data;
-    //     const user = users.find((user: any) => user.username === username && user.password === password);
-    //     if (user) {
-    //       // ถ้าเจอข้อมูลผู้ใช้ ให้เข้าสู่ระบบและเปลี่ยนเส้นทางไปยังหน้าหลัก
-    //       // history.push('../MainView/MainView');
-    //       window.location.replace('../MainView/MainView');
-    //     } else {
-    //       alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-    //     }
-    //   });
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/login', { username, password });
+      console.log(response.data);
+      navigate('/home');
+    } catch (error) {
+      console.error('Login failed:', error);
+      setShowErrorPopup(true);
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 5000);
+    }
   };
 
-  const handleRegister = () => {
-    // อ่านข้อมูลผู้ใช้จากไฟล์ JSON (ในสรา้งแอพของคุณ คุณต้องใช้วิธีการแบบนี้เพื่ออ่านข้อมูลจากไฟล์ JSON)
-    fetch('/users.json')
-      .then(response => response.json())
-      .then(data => {
-        const { users } = data;
-        const userExists = users.some((user: any) => user.username === username);
-
-        if (userExists) {
-          alert('ชื่อผู้ใช้นี้มีอยู่แล้ว');
-        } else {
-          // เพิ่มข้อมูลผู้ใช้ใหม่ลงใน JSON
-          const newUser = { username, password };
-          users.push(newUser);
-
-          // บันทึกข้อมูลลงในไฟล์ JSON (ในสรา้งแอพของคุณ คุณต้องใช้วิธีการแบบนี้เพื่อบันทึกข้อมูล)
-          fetch('/users.json', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          });
-
-          alert('ลงทะเบียนสำเร็จ');
-          // history.push('/login');
-        }
-      });
+  const handleRegister = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/register', { username, password });
+      console.log(response.data);
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+      }, 5000);
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
   };
 
   return (
     <div className="login">
-      <h2>Welcome to Login page kub</h2>
+      <h2>Welcome to Login page</h2>
       <div>
         <div>Username:</div>
-        <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
+        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
       </div>
       <div>
         <div>Password:</div>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <div>
         <button onClick={handleLogin}>Login</button>
         <button onClick={handleRegister}>Register</button>
       </div>
+
+      {showSuccessPopup && (
+        <div className="popup">
+          <p>Registration successful!</p>
+        </div>
+      )}
+
+      {showErrorPopup && (
+        <div className="popup">
+          <p color='red'>Login failed. Please check your username and password and try again.</p>
+        </div>
+      )}
     </div>
   );
 };

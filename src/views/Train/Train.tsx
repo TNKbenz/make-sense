@@ -35,19 +35,20 @@ const tabs: TabsType = [
 ];
 
 export default function Train() {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
 
   return (
-    
+
     <div className="Train">
-      <div className="Home" style={{textAlign: 'center', display: 'flex', justifyContent: 'space-between'}}>
+      <div className="Home" style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <button onClick={() => navigate('/')}>Home</button>
         <button onClick={() => navigate('/predict')}>Predict</button>
-        </div>
-      <div style={{textAlign: 'center', display: 'flex', justifyContent: 'center'}}><h1>TRAIN MODEL</h1></div>
+      </div>
+      <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center' }}><h1>TRAIN MODEL</h1></div>
       <br />
       <Tabs selectedTab={selectedTab} onClick={setSelectedTab} tabs={tabs} />
+      <NotificationsView />
     </div>
   );
 }

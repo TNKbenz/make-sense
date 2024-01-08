@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showErrorRegPopup, setShowErrorRegPopup] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
   const [mode, setMode] = useState('login');
 
 
@@ -49,7 +50,12 @@ const Login: React.FC = () => {
       }, 5000);
     } catch (error) {
       console.error('Registration failed:', error);
-      handleToggleMode();
+      if (error.response.status == 401) {
+        setErrMsg('duplicate username')
+      } else {
+        setErrMsg('failed to signup')
+        handleToggleMode();
+      }
       setShowErrorRegPopup(true)
       setTimeout(() => {
         setShowErrorRegPopup(false);
@@ -88,14 +94,6 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          {showErrorRegPopup && (
-            <div className="popup">
-              <p style={{ color: 'red' }}>
-                Register failed.
-              </p>
-            </div>
-          )}
-
           {showErrorPopup && (
             <div className="popup">
               <p style={{ color: 'red' }}>
@@ -125,6 +123,14 @@ const Login: React.FC = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
+          {showErrorRegPopup && (
+            <div className="popup">
+              <p style={{ color: 'red' }}>
+                {errMsg}
+              </p>
+            </div>
+          )}
+
           <div>
             <button onClick={handleRegister}>Register</button>
           </div>

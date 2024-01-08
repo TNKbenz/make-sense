@@ -40,7 +40,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
   const handleUpload = () => {
     if (selectedFile) {
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append("bytefiles", selectedFile);
       formData.append("username", "test1");
       formData.append("project_name", "project-test1");
       formData.append("modelname", "mt1");
@@ -51,9 +51,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
           const receivedPredictions: Predictions = response.data;
           setPredictions(receivedPredictions);
           onUploadSuccess(receivedPredictions);
-          console.log(receivedPredictions);
+          console.log("recieve prediction:", receivedPredictions);
 
-          const Predict_Key: string = Object.keys(receivedPredictions).reduce(
+          const Predict_Key: string = Object.keys(receivedPredictions.predictions).reduce(
             (mostLikely, key) =>
               receivedPredictions[key] > receivedPredictions[mostLikely]
                 ? key

@@ -69,8 +69,13 @@ const Tab_Visualize = () => {
 
   useEffect(() => {
     // Make the API request inside the useEffect hook
+    const dataToSend = {
+      username: 'test1',
+      project_name: 'project-test1',
+      modelname: 'mt1'
+    };
     axios
-      .get(dataUrl)
+      .post(dataUrl, dataToSend)
       .then((response) => {
         // Update the component's state with the received data
         const transformedData = response.data.loss.map((loss, index) => ({

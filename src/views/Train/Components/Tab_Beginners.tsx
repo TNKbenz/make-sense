@@ -8,7 +8,6 @@ import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
 import { NotificationUtil } from "../../../utils/NotificationUtil";
 import { submitNewNotification } from "../../../store/notifications/actionCreators";
 import { INotification, NotificationsActionType } from "../../../store/notifications/types";
-import NotificationsView from "../../../views/NotificationsView/NotificationsView";
 
 interface IProps {
   imageData: ImageData[];
@@ -111,7 +110,6 @@ const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) =
         />
         <button onClick={handleSubmit}>Train</button>
       </div>
-      <NotificationsView />
     </Fragment>
   );
 };

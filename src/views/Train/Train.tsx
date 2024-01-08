@@ -6,6 +6,7 @@ import Tabs from "./Components/Tabs";
 import Tab_Beginners from "./Components/Tab_Beginners";
 import Tab_Visualize from "./Components/Tab_Visualize";
 import Tab_DataHealth from "./Components/Tab_DataHealth";
+import NotificationsView from "../../views/NotificationsView/NotificationsView";
 
 type TabsType = {
   label: string;

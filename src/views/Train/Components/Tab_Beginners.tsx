@@ -11,10 +11,13 @@ import { INotification, NotificationsActionType } from "../../../store/notificat
 
 interface IProps {
   imageData: ImageData[];
+  modelname: string;
+  username: string;
+  project_name: string;
   submitNewNotificationAction: (notification: INotification) => NotificationsActionType;
 }
 
-const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) => {
+const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction, modelname, username, project_name }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
@@ -36,9 +39,9 @@ const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) =
       });
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
-      formData.append("username", "test1")
-      formData.append("project_name", "project-test1")
-      formData.append("modelname", "mt1")
+      formData.append("username", username)
+      formData.append("project_name", project_name || "p1")
+      formData.append("modelname", modelname || "mt1")
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -116,6 +119,9 @@ const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) =
 
 const mapStateToProps = (state: AppState) => ({
   imageData: state.labels.imagesData,
+  username: state.user.username,
+  modelname: state.user.modelname,
+  project_name: state.user.project_name,
 });
 
 const mapDispatchToProps = {

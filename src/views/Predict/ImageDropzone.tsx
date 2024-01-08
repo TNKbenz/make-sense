@@ -41,6 +41,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("file", selectedFile);
+      formData.append("username", "test1");
+      formData.append("project_name", "project-test1");
+      formData.append("modelname", "mt1");
 
       axios
         .post("http://localhost:8000/uploadfile/", formData)

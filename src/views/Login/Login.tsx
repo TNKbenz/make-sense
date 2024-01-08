@@ -1,9 +1,17 @@
 import './Login.scss';
 import React, { useState } from 'react';
 import axios from 'axios';
+import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { updateUsername } from '../../store/users/actionCreators';
+import { UserState } from '../../store/users/types';
 
-const Login: React.FC = () => {
+
+interface IProps {
+  updateUserLoginAction: (username: string) => void
+}
+
+const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +29,7 @@ const Login: React.FC = () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/login`, { username, password });
       console.log(response.data);
+      updateUserLoginAction(response.data.username)
       navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
@@ -47,7 +56,7 @@ const Login: React.FC = () => {
       setTimeout(() => {
         setShowSuccessPopup(false);
         handleToggleMode();
-      }, 5000);
+      }, 100);
     } catch (error) {
       console.error('Registration failed:', error);
       if (error.response.status == 401) {
@@ -140,4 +149,14 @@ const Login: React.FC = () => {
     </div>
   );
 }
-export default Login;
+
+const mapDispatchToProps = {
+  updateUserLoginAction: updateUsername
+};
+
+const mapStateToProps = (state: UserState) => ({
+
+});
+
+// export default Login;
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

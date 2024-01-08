@@ -48,7 +48,7 @@ const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) =
       console.log(formData);
 
       const response = await axios.post(
-        "http://localhost:8000/train/",
+        `${import.meta.env.VITE_BACKEND_URL}/train/`,
         formData
       );
       console.log(response.data);

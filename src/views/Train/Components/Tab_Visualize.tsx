@@ -64,7 +64,7 @@ const ModelPerformanceChart = ({ data }) => {
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  const dataUrl = "http://localhost:8000/result/";
+  const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
 
   useEffect(() => {

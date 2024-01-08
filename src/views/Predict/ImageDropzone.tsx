@@ -12,12 +12,19 @@ type Predictions = {
   [key: string]: number;
 };
 
+type PredictionsResult = {
+  predicted: List[number]
+  predicted_labels: List[string]
+  probabilities: List[List[number]]
+};
+
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
 
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<Predictions | null>(null);
+  const [prob, setProb] = useState<number | null>(null);
   const [predict_key, setPredict_key] = useState<string | null>(null);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -46,22 +53,23 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
       formData.append("modelname", "mt1");
 
       axios
-        .post("http://localhost:8000/uploadfile/", formData)
+        .post(`${import.meta.env.VITE_BACKEND_URL}/uploadfile/`, formData)
         .then((response) => {
-          const receivedPredictions: Predictions = response.data;
+          const receivedPredictions: PredictionsResult = response.data;
           setPredictions(receivedPredictions);
           onUploadSuccess(receivedPredictions);
           console.log("recieve prediction:", receivedPredictions);
 
-          const Predict_Key: string = Object.keys(receivedPredictions.predictions).reduce(
+          const Predict_Key: string = Object.keys(receivedPredictions.probabilities).reduce(
             (mostLikely, key) =>
               receivedPredictions[key] > receivedPredictions[mostLikely]
                 ? key
                 : mostLikely,
             Object.keys(receivedPredictions)[0]
           );
-          setPredict_key(Predict_Key);
-          onUploadSuccess(receivedPredictions);
+          setPredict_key(receivedPredictions.predicted_labels[0]);
+          setProb(Math.max(...receivedPredictions.probabilities[0]))
+          onUploadSuccess(Predict_Key);
         })
         .catch((error) => {
           console.error("เกิดข้อผิดพลาดในการอัพโหลดไฟล์", error);
@@ -136,7 +144,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
       {predictions && (
         <div>
           <h2>
-            คาดว่าเป็น: {predict_key} {predictions[predict_key] * 100}%
+            คาดว่าเป็น: {predict_key} {prob * 100}%
           </h2>
           <div className="Chart">
             <PieChart width={700} height={700}>

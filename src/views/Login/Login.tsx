@@ -9,11 +9,11 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
-  
+
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/login', { username, password });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/login`, { username, password });
       console.log(response.data);
       navigate('/home');
     } catch (error) {
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/register', { username, password });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, { username, password });
       console.log(response.data);
       setShowSuccessPopup(true);
       setTimeout(() => {

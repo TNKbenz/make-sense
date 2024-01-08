@@ -64,13 +64,18 @@ const ModelPerformanceChart = ({ data }) => {
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  const dataUrl = "http://localhost:8000/result/";
+  const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
 
   useEffect(() => {
     // Make the API request inside the useEffect hook
+    const dataToSend = {
+      username: 'test1',
+      project_name: 'project-test1',
+      modelname: 'mt1'
+    };
     axios
-      .get(dataUrl)
+      .post(dataUrl, dataToSend)
       .then((response) => {
         // Update the component's state with the received data
         const transformedData = response.data.loss.map((loss, index) => ({

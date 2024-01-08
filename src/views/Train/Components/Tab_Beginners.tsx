@@ -5,12 +5,16 @@ import axios from "axios";
 import { AppState } from "../../../store";
 import { ImageData } from "../../../store/labels/types";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
+import { NotificationUtil } from "../../../utils/NotificationUtil";
+import { submitNewNotification } from "../../../store/notifications/actionCreators";
+import { INotification, NotificationsActionType } from "../../../store/notifications/types";
 
 interface IProps {
   imageData: ImageData[];
+  submitNewNotificationAction: (notification: INotification) => NotificationsActionType;
 }
 
-const Tab_Beginners: FC<IProps> = ({ imageData }) => {
+const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
@@ -32,6 +36,9 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
       });
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
+      formData.append("username", "test1")
+      formData.append("project_name", "project-test1")
+      formData.append("modelname", "mt1")
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -41,13 +48,17 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
       console.log(formData);
 
       const response = await axios.post(
-        "http://localhost:8000/train/",
+        `${import.meta.env.VITE_BACKEND_URL}/train/`,
         formData
       );
       console.log(response.data);
     } catch (error) {
       console.error("Error:", error);
     }
+    submitNewNotificationAction(NotificationUtil.createMessageNotification({
+      "header": "train success",
+      "description": "in model ... train successful"
+    }))
     console.log("Data submitted");
   };
 
@@ -107,4 +118,8 @@ const mapStateToProps = (state: AppState) => ({
   imageData: state.labels.imagesData,
 });
 
-export default connect(mapStateToProps)(Tab_Beginners);
+const mapDispatchToProps = {
+  submitNewNotificationAction: submitNewNotification
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Tab_Beginners);

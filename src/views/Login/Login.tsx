@@ -14,11 +14,11 @@ const Login: React.FC = () => {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showErrorRegPopup, setShowErrorRegPopup] = useState(false);
   const [mode, setMode] = useState('login');
-  
+
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/login', { username, password });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/login`, { username, password });
       console.log(response.data);
       navigate('/');
     } catch (error) {
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
         }, 5000);
         return;
       }
-      const response = await axios.post('http://localhost:3001/register', { username, password });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, { username, password });
       console.log(response.data);
       setShowSuccessPopup(true);
       setTimeout(() => {
@@ -62,7 +62,7 @@ const Login: React.FC = () => {
     setShowRegPopup((prevRegMode) => (prevRegMode === false ? true : false))
     setMode((prevMode) => (prevMode === 'login' ? 'register' : 'login'));
   };
-  
+
 
   return (
     <div className="login">
@@ -81,7 +81,7 @@ const Login: React.FC = () => {
             <button onClick={handleLogin}>Login</button>
             <button onClick={handleToggleMode}>Sign up</button>
           </div>
-  
+
           {showSuccessPopup && (
             <div className="popup">
               <p>Registration successful!</p>
@@ -95,7 +95,7 @@ const Login: React.FC = () => {
               </p>
             </div>
           )}
-  
+
           {showErrorPopup && (
             <div className="popup">
               <p style={{ color: 'red' }}>

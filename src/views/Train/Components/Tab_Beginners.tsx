@@ -5,12 +5,17 @@ import axios from "axios";
 import { AppState } from "../../../store";
 import { ImageData } from "../../../store/labels/types";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
+import { NotificationUtil } from "../../../utils/NotificationUtil";
+import { submitNewNotification } from "../../../store/notifications/actionCreators";
+import { INotification, NotificationsActionType } from "../../../store/notifications/types";
+import NotificationsView from "../../../views/NotificationsView/NotificationsView";
 
 interface IProps {
   imageData: ImageData[];
+  submitNewNotificationAction: (notification: INotification) => NotificationsActionType;
 }
 
-const Tab_Beginners: FC<IProps> = ({ imageData }) => {
+const Tab_Beginners: FC<IProps> = ({ imageData, submitNewNotificationAction }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
@@ -32,6 +37,9 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
       });
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
+      formData.append("username", "test1")
+      formData.append("project_name", "project-test1")
+      formData.append("modelname", "mt1")
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -48,6 +56,10 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
     } catch (error) {
       console.error("Error:", error);
     }
+    submitNewNotificationAction(NotificationUtil.createMessageNotification({
+      "header": "train success",
+      "description": "in model ... train successful"
+    }))
     console.log("Data submitted");
   };
 
@@ -99,6 +111,7 @@ const Tab_Beginners: FC<IProps> = ({ imageData }) => {
         />
         <button onClick={handleSubmit}>Train</button>
       </div>
+      <NotificationsView />
     </Fragment>
   );
 };
@@ -107,4 +120,8 @@ const mapStateToProps = (state: AppState) => ({
   imageData: state.labels.imagesData,
 });
 
-export default connect(mapStateToProps)(Tab_Beginners);
+const mapDispatchToProps = {
+  submitNewNotificationAction: submitNewNotification
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Tab_Beginners);

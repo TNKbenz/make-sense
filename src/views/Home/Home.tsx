@@ -36,7 +36,8 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username}) => {
 
   const fetchListProject = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/projects');
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}`);
+
       setListProject(response.data.ListProject);
     } catch (error) {
       console.error('Error fetching ListProject:', error);
@@ -46,7 +47,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username}) => {
   const handleAddProject = async () => {
     try {
       console.log(" username",username,"newProject",newProject," selectedOption",selectedOption)
-      await axios.post('http://localhost:3001/project/add', { text: newProject , selectedOption , username});
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/???`, { text: newProject , selectedOption , username});
       fetchListProject();
       navigate('/home');
       setNewProject('');
@@ -57,7 +58,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username}) => {
 
   const handleDeleteListProject = async (projectId) => {
     try {
-      await axios.delete(`http://localhost:3001/delete`);
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/???/?projectId=${projectId}`);
       fetchListProject();
     } catch (error) {
       console.error('Error deleting ListProject:', error);

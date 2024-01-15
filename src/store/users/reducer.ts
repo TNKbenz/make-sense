@@ -21,13 +21,13 @@ export function userReducer(
     case Action.UPDATE_PROJECT_NAME: {
       return {
         ...state,
-        username: action.payload.project_name
+        project_name: action.payload.project_name
       }
     }
     case Action.UPDATE_MODELNAME: {
       return {
         ...state,
-        username: action.payload.modelname
+        modelname: action.payload.modelname
       }
     }
     default:

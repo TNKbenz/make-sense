@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 
+
 const app = express();
 const PORT = 3001;
 
@@ -15,16 +16,35 @@ mongoose.connect('mongodb+srv://s6301012630061:1234@cluster0.cfjkr9t.mongodb.net
   .then(() => console.log('Connection successfully'))
   .catch((err) => console.error(err));
 
-const User = mongoose.model('User', new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-}));
+  const projectSchema = new mongoose.Schema({
+    project_name: {
+      type: String,
+      required: true,
+    },
+    project_type: {
+      type: String,
+      required: true,
+    },
+  });
+  
+  const userSchema = new mongoose.Schema({
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    projects: {
+      type: [projectSchema],
+      default: [], 
+    },
+  });
+  
+const User = mongoose.model('User', userSchema);
+
 
 // Middleware
 app.use(cors());
@@ -86,7 +106,68 @@ app.get('/users', async (req, res) => {
   }
 });
 
+app.post('/project/add', async (req, res) => {
+  const { project_name, project_type , username } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const newProject = { project_name, project_type  };
+    user.projects.push(newProject);
+    await user.save();
+
+    res.json({ message: 'Project added to user successfully' });
+  } catch (error) {
+    console.error('Error adding project to user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.get('/projects', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const projects = user.projects;
+    res.json({ projects });
+  } catch (error) {
+    console.error('Error fetching projects of user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.delete('/delete', async (req, res) => {
+  const { username, project_name, project_type } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.projects = user.projects.filter((project) => project.project_name !== project_name || project.project_type !== project_type);
+    await user.save();
+
+    res.json({ message: 'Project deleted from user successfully' });
+  } catch (error) {
+    console.error('Error deleting project from user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export default User;

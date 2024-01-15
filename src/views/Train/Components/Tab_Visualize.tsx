@@ -11,7 +11,24 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const ModelPerformanceChart = ({ data }) => {
+// mock data
+
+//Confusion-Matrix 
+// const matrix = {
+//   truePositives: 42,
+//   trueNegatives: 89,
+//   falsePositives: 5,
+//   falseNegatives: 14,
+// };
+
+const validationCurve_Params = [1, 2, 3, 4, 5];
+const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89];
+const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89];
+const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95];
+const precisionRecallCurve_Recall = [0.68, 0.75, 0.82, 0.88, 0.92];
+
+
+const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurveData }) => {
   return (
     <div className="model-performance-chart">
       <h2>Model Performance</h2>
@@ -20,22 +37,12 @@ const ModelPerformanceChart = ({ data }) => {
         <h3>Accuracy</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
-            <XAxis
-              dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
-            />
-            <YAxis
-              label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
-            />
+            <XAxis dataKey="epoch" label={{ value: 'Epoch', position: 'insideBottom', offset: 0 }} />
+            <YAxis label={{ value: 'Accuracy', angle: -90, position: 'insideLeft' }} />
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="accuracy"
-              name="Accuracy"
-              stroke="#8884d8"
-            />
+            <Line type="monotone" dataKey="accuracy" name="Accuracy" stroke="#8884d8" />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -44,13 +51,8 @@ const ModelPerformanceChart = ({ data }) => {
         <h3>Cost (Loss)</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
-            <XAxis
-              dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
-            />
-            <YAxis
-              label={{ value: "Cost", angle: -90, position: "insideLeft" }}
-            />
+            <XAxis dataKey="epoch" label={{ value: 'Epoch', position: 'insideBottom', offset: 0 }} />
+            <YAxis label={{ value: 'Cost', angle: -90, position: 'insideLeft' }} />
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip />
             <Legend />
@@ -58,24 +60,55 @@ const ModelPerformanceChart = ({ data }) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      <div className="Validation-Curve-graph">
+        <h3>Validation Curve</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={validationCurveData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="parameter" type="number" label={{ value: 'Parameter Value', position: 'insideBottom' , offset: 0}} />
+            <YAxis label={{ value: 'Accuracy', angle: -90, position: 'insideLeft' }} />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="crossValidationScore" name="Cross Validation Score" stroke="blue" />
+            <Line type="monotone" dataKey="trainingScore" name="Training Score" stroke="red" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="Precision-Recall-Curve-graph">
+        <h3>Precision Recall Curve</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={precisionRecallCurveData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="recall" type="number" label={{ value: 'Recall', position: 'insideBottom' , offset: 0 }} />
+            <YAxis label={{ value: 'Precision', angle: -90, position: 'insideLeft' }} />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="precision" name="Precision" stroke="green" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      
+      {/* <div className="Confusion-Matrix">
+        <h3>Confusion Matrix</h3>
+      </div> */}
     </div>
   );
 };
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
+  const dataUrl = "http://localhost:8000/result/";
   const [data, setData] = useState([]);
+  const [validationCurveData, setValidationCurveData] = useState([]);
+  const [precisionRecallCurveData, setPrecisionRecallCurveData] = useState([]);
 
   useEffect(() => {
     // Make the API request inside the useEffect hook
-    const dataToSend = {
-      username: 'test1',
-      project_name: 'project-test1',
-      modelname: 'mt1'
-    };
     axios
-      .post(dataUrl, dataToSend)
+      .get(dataUrl)
       .then((response) => {
         // Update the component's state with the received data
         const transformedData = response.data.loss.map((loss, index) => ({
@@ -84,18 +117,51 @@ const Tab_Visualize = () => {
           cost: loss,
         }));
 
-        console.log(transformedData);
+        // Additional transformations for validationCurveData and precisionRecallCurveData
+        const transformedValidationCurveData = validationCurve_Params.map((param, index) => ({
+          parameter: param,
+          crossValidationScore: validationCurve_Cross_Validation_Score[index],
+          trainingScore: validationCurve_Training_Score[index],
+        }));
+
+        const transformedPrecisionRecallCurveData = precisionRecallCurve_Precision.map((precision, index) => ({
+          precision,
+          recall: precisionRecallCurve_Recall[index],
+        }));
+
         setData(transformedData);
+        setValidationCurveData(transformedValidationCurveData);
+        setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
+        // mock data
+        const validationCurve_Params = [1, 2, 3, 4, 5];
+        const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89];
+        const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89];
+        const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95];
+        const precisionRecallCurve_Recall = [0.68, 0.75, 0.82, 0.88, 0.92];
+        const transformedValidationCurveData = validationCurve_Params.map((param, index) => ({
+          parameter: param,
+          crossValidationScore: validationCurve_Cross_Validation_Score[index],
+          trainingScore: validationCurve_Training_Score[index],
+        }));
+
+        const transformedPrecisionRecallCurveData = precisionRecallCurve_Precision.map((precision, index) => ({
+          precision,
+          recall: precisionRecallCurve_Recall[index],
+        }));
+        
+
+        setValidationCurveData(transformedValidationCurveData);
+        setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
+        //
       });
   }, []); // The empty dependency array [] ensures this effect runs once when the component mounts
 
   return (
     <div className="App">
-      {/* Pass the data to the ModelPerformanceChart component */}
-      <ModelPerformanceChart data={data} />
+      <ModelPerformanceChart data={data} validationCurveData={validationCurveData} precisionRecallCurveData={precisionRecallCurveData} />
     </div>
   );
 };

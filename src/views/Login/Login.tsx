@@ -4,7 +4,7 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUsername } from '../../store/users/actionCreators';
-import { UserState } from '../../store/users/types';
+import { AppState } from 'src/store';
 
 
 interface IProps {
@@ -28,7 +28,9 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/login`, { username, password });
+      // const response = await axios.post('http://localhost:3001/login', { username, password });
       console.log(response.data);
+      // updateUserLoginAction(username)
       updateUserLoginAction(response.data.username)
       navigate('/');
     } catch (error) {
@@ -50,6 +52,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
         }, 5000);
         return;
       }
+      // const response = await axios.post('http://localhost:3001/register', { username, password });
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, { username, password });
       console.log(response.data);
       setShowSuccessPopup(true);
@@ -154,7 +157,7 @@ const mapDispatchToProps = {
   updateUserLoginAction: updateUsername
 };
 
-const mapStateToProps = (state: UserState) => ({
+const mapStateToProps = (state: AppState) => ({
 
 });
 

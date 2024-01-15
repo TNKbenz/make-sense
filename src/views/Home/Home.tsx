@@ -2,8 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Home.scss';
+import { updateProjectName } from '../../store/users/actionCreators';
+import { AppState } from "../../store";
+import { connect } from 'react-redux';
 
-const Home: React.FC = () => {
+interface IProps {
+  username: string;
+  updateProjectNameAction : (project_name: string) => void
+}
+
+const Home: React.FC<IProps> = ({ updateProjectNameAction, username}) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
@@ -15,20 +23,20 @@ const Home: React.FC = () => {
 
   useEffect(() => {
 
-    const mockData = [
-      { _id: 1, text: 'Project A', type: 'Classify' },
-      { _id: 2, text: 'Project B', type: 'Object Detection' },
-      { _id: 3, text: 'Project C', type: 'Object Detection' },
-    ];
+  //   const mockData = [
+  //     { _id: 1, project_name: 'Project A', project_type: 'Classify' },
+  //     { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
+  //     { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
+  //   ];
 
-    setListProject(mockData);
-  }, []);
-  //   fetchListProject();
+  //   setListProject(mockData);
   // }, []);
+    fetchListProject();
+  }, []);
 
   const fetchListProject = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/ListProject');
+      const response = await axios.get('http://localhost:3001/projects');
       setListProject(response.data.ListProject);
     } catch (error) {
       console.error('Error fetching ListProject:', error);
@@ -37,7 +45,8 @@ const Home: React.FC = () => {
 
   const handleAddProject = async () => {
     try {
-      await axios.post('http://localhost:3001/ListProject', { text: newProject , selectedOption});
+      console.log(" username",username,"newProject",newProject," selectedOption",selectedOption)
+      await axios.post('http://localhost:3001/project/add', { text: newProject , selectedOption , username});
       fetchListProject();
       navigate('/home');
       setNewProject('');
@@ -48,7 +57,7 @@ const Home: React.FC = () => {
 
   const handleDeleteListProject = async (projectId) => {
     try {
-      await axios.delete(`http://localhost:3001/Project/${projectId}`);
+      await axios.delete(`http://localhost:3001/delete`);
       fetchListProject();
     } catch (error) {
       console.error('Error deleting ListProject:', error);
@@ -85,7 +94,8 @@ const Home: React.FC = () => {
 
   const handleOpenClick = () => {
     if (selectedProject) {
-      console.log('Selected Project:', selectedProject.text);
+      console.log('Selected Project:', selectedProject.project_name);
+      updateProjectNameAction(selectedProject.project_name)
       navigate('/home');
     }
     
@@ -141,8 +151,8 @@ const Home: React.FC = () => {
             <tbody>
               {ListProject.map((Project, index) => (
                 <tr key={Project._id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9' }}>
-                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{Project.text}</td>
-                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{Project.type}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{Project.project_name}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '8px' }}>{Project.project_type}</td>
                   <td style={{ border: '1px solid #ddd', padding: '8px' }}>
                     <button className="button-16" role="button" onClick={() => handleSelectListProject(Project._id)}>Select</button>
                     <button className="button-16" role="button" onClick={() => handleDeleteListProject(Project._id)}>Delete</button>
@@ -152,7 +162,7 @@ const Home: React.FC = () => {
             </tbody>
           </table>
           <div>
-            <button className='button-1' onClick={handleOpenClick}>Open {selectedProject.text} Project</button>
+            <button className='button-1' onClick={handleOpenClick}>Open {selectedProject.project_name} Project</button>
             <button className='button-1' onClick={handleBackClick}>Back</button>
           </div>
         </div>
@@ -161,5 +171,17 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+// export default Home;
 
+const mapDispatchToProps = {
+  updateProjectNameAction: updateProjectName
+
+};
+
+const mapStateToProps = (state: AppState) => ({
+  username: state.user.username,
+  
+
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

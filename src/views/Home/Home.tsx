@@ -5,13 +5,18 @@ import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect } from "react-redux";
+import { updateProjectData } from '../../store/general/actionCreators';
+import { ProjectData } from 'src/store/general/types';
+import { updateImageData } from '../../store/labels/actionCreators';
 
 interface IProps {
   username: string;
   updateProjectNameAction: (project_name: string) => void;
+  updateProjectDataAction : (projectData: ProjectData ) => void
+  updateImageDataAction : (imageData: ImageData[]) => void
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
+const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username}) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
@@ -19,19 +24,20 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
   const [ListProject, setListProject] = useState([]);
   const [newProject, setNewProject] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
-  const [selectedOption, setSelectedOption] = useState("classification");
+  const [selectedOption, setSelectedOption] = useState('CLASSIFICATION');
+  const [imageData, setImageData] = useState([]);
 
   useEffect(() => {
-    //   const mockData = [
-    //     { _id: 1, project_name: 'Project A', project_type: 'Classify' },
-    //     { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
-    //     { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
-    //   ];
+      const mockData = [
+        { _id: 1, project_name: 'Project A', project_type: 'Classify' },
+        { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
+        { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
+      ];
 
-    //   setListProject(mockData);
-    // }, []);
-    fetchListProject();
-  }, []);
+      setListProject(mockData);
+    }, []);
+  //   fetchListProject();
+  // }, []);
 
   const fetchListProject = async () => {
     try {
@@ -84,6 +90,15 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
     }
   };
 
+  // const handleGetImages = async (projectId) => {
+  //   try{
+  //     const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
+  //     setImageData(response.data.imageData)
+  //   } catch(error) {
+  //     console.error('Error getting Images:', error);
+  //   }
+  // }
+
   const handleCreateProjectClick = () => {
     setShowMainPopup(false);
     setShowCreatePopup(true);
@@ -114,9 +129,15 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
 
   const handleOpenClick = () => {
     if (selectedProject) {
-      console.log("Selected Project:", selectedProject.project_name);
-      updateProjectNameAction(selectedProject.project_name);
-      navigate("/home");
+      console.log('Selected Project:', selectedProject.project_name ,' Type Project:',selectedProject.project_type);
+      updateProjectNameAction(selectedProject.project_name)
+      updateProjectDataAction({
+        // type: selectedProject.project_type,
+        type: null,
+        name: selectedProject.project_name
+      })
+      updateImageDataAction(imageData)
+      navigate('/home');
     }
   };
 
@@ -165,8 +186,8 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
               value={selectedOption}
               onChange={handleOptionChange}
             >
-              <option value="classification">Classification</option>
-              <option value="ObjectDetection">Object Detection</option>
+              <option value="CLASSIFICATION">CLASSIFICATION</option>
+              <option value="OBJECT_DETECTION">OBJECT DETECTION</option>
             </select>
             <div>
               <button className="button-1" onClick={handleAddProject}>
@@ -277,10 +298,14 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, username }) => {
 
 const mapDispatchToProps = {
   updateProjectNameAction: updateProjectName,
+  updateProjectDataAction: updateProjectData,
+  updateImageDataAction: updateImageData
 };
 
 const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
+  projectData: state.general.projectData,
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

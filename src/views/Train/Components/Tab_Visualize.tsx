@@ -21,11 +21,11 @@ import {
 //   falseNegatives: 14,
 // };
 
-const validationCurve_Params = [1, 2, 3, 4, 5];
-const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89];
-const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89];
-const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95];
-const precisionRecallCurve_Recall = [0.68, 0.75, 0.82, 0.88, 0.92];
+const validationCurve_Params = [1, 2, 3, 4, 5, 6 , 7 ,8];
+const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89 , 0.94, 0.96, 0.98];
+const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89];
+const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95 , 0.75, 0.82, 0.89, 0.91, 0.95];
+const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65 ,0.68, 0.75, 0.82, 0.88, 0.92];
 
 
 const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurveData }) => {
@@ -136,11 +136,11 @@ const Tab_Visualize = () => {
       .catch((error) => {
         console.error('Error fetching data:', error);
         // mock data
-        const validationCurve_Params = [1, 2, 3, 4, 5];
-        const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89];
-        const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89];
-        const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95];
-        const precisionRecallCurve_Recall = [0.68, 0.75, 0.82, 0.88, 0.92];
+        const validationCurve_Params = [1, 2, 3, 4, 5, 6 , 7 ,8];
+        const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89 , 0.94, 0.96, 0.98];
+        const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89];
+        const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95 , 0.75, 0.82, 0.89, 0.91, 0.95];
+        const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65 ,0.68, 0.75, 0.82, 0.88, 0.92];
         const transformedValidationCurveData = validationCurve_Params.map((param, index) => ({
           parameter: param,
           crossValidationScore: validationCurve_Cross_Validation_Score[index],

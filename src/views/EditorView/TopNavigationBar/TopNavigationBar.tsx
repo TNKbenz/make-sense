@@ -16,9 +16,13 @@ interface IProps {
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     projectData: ProjectData;
+    imageData: ImageData[];
+    modelname: string;
+    username: string;
+    project_name: string;
 }
 
-const TopNavigationBar: React.FC<IProps> = (props) => {
+const TopNavigationBar: React.FC<IProps> = (props, modelname, username, project_name) => {
     const onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         event.target.setSelectionRange(0, event.target.value.length);
     };
@@ -92,7 +96,11 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectData: state.general.projectData
+    projectData: state.general.projectData,
+    username: state.user.username,
+    imageData: state.labels.imagesData,
+    modelname: state.user.modelname,
+    project_name: state.user.project_name,
 });
 
 export default connect(

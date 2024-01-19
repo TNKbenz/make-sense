@@ -22,10 +22,11 @@ interface IProps {
     project_name: string;
 }
 
-const TopNavigationBar: React.FC<IProps> = (props, modelname, username, project_name) => {
+const TopNavigationBar: React.FC<IProps> = (props) => {
     const onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         event.target.setSelectionRange(0, event.target.value.length);
     };
+    console.log("user :",...props.username ,"project :",...props.project_name)
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value
@@ -37,7 +38,7 @@ const TopNavigationBar: React.FC<IProps> = (props, modelname, username, project_
             name: value
         })
     };
-
+    
     const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT)
 
     const navigate = useNavigate();

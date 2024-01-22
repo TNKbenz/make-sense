@@ -12,8 +12,8 @@ import { updateImageData } from '../../store/labels/actionCreators';
 interface IProps {
   username: string;
   updateProjectNameAction: (project_name: string) => void;
-  updateProjectDataAction : (projectData: ProjectData ) => void
-  updateImageDataAction : (imageData: ImageData[]) => void
+  updateProjectDataAction : (projectData: ProjectData ) => void;
+  updateImageDataAction : (imageData: ImageData[]) => void;
 }
 
 const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username}) => {

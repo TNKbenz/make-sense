@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import "./styles.css";
 import Tabs from "./Components/Tabs";
 // Tabs Components
-import Tab_Beginners from "./Components/Tab_Beginners";
 import Tab_Visualize from "./Components/Tab_Visualize";
 import Tab_DataHealth from "./Components/Tab_DataHealth";
 import NotificationsView from "../../views/NotificationsView/NotificationsView";
+import Tab_Train from "./Components/Tab_Train";
 
 type TabsType = {
   label: string;
@@ -19,9 +19,9 @@ type TabsType = {
 // Tabs Array
 const tabs: TabsType = [
   {
-    label: "Tab Beginners",
+    label: "Tab Train",
     index: 1,
-    Component: Tab_Beginners
+    Component: Tab_Train
   },
   {
     label: "Visualize",

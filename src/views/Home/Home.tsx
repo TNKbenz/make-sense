@@ -3,17 +3,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
+import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect } from "react-redux";
-import { updateActivePopupType,updateProjectData } from '../../store/general/actionCreators';
+import { updateProjectData } from '../../store/general/actionCreators';
 import { ProjectData } from 'src/store/general/types';
-import { updateImageData } from '../../store/labels/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import {addImageData, updateActiveImageIndex} from '../../store/labels/actionCreators';
-import {PopupWindowType} from '../../data/enums/PopupWindowType';
+import {addImageData, updateActiveImageIndex,updateLabelNames,updateImageData} from '../../store/labels/actionCreators';
 import {useDropzone,DropzoneOptions} from 'react-dropzone';
-import {TextButton} from '../Common/TextButton/TextButton';
-import {ImageData} from '../../store/labels/types';
+import {ImageData,LabelName} from '../../store/labels/types';
 import {ProjectType} from '../../data/enums/ProjectType';
 import { sortBy } from 'lodash';
 
@@ -24,11 +22,12 @@ interface IProps {
   updateProjectDataAction : (projectData: ProjectData ) => void;
   updateImageDataAction : (imageData: ImageData[]) => void;
   updateActiveImageIndexAction: (activeImageIndex: number) => any;
-  updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
+  updateModelNameAction: (modelname: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
+  updateLabelNamesAction: (labels: LabelName[]) => void;
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateActivePopupTypeAction , updateActiveImageIndexAction }) => {
+const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateModelNameAction , updateActiveImageIndexAction ,updateLabelNamesAction }) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
@@ -39,7 +38,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
-  
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
   useEffect(() => {
     fetchListProject();
@@ -67,6 +66,13 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         " selectedOption",
         selectedOption
       );
+      if (newProject.trim() === "" || newProject.includes(" ")) {
+        setShowErrorPopup(true)
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 5000);
+        return;
+      }
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/project/create`, {
         project_name: newProject,
         project_type: selectedOption,
@@ -74,6 +80,14 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         project_path: "",
       });
       fetchListProject();
+      updateProjectNameAction(newProject)
+      updateModelNameAction(selectedOption)
+      updateProjectDataAction({
+        type: null,
+        name: newProject,
+      });
+      updateImageDataAction([])
+      updateLabelNamesAction([])
       navigate("/home");
       setNewProject("");
     } catch (error) {
@@ -96,14 +110,14 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     }
   };
 
-  // const handleGetImages = async (projectId) => {
-  //   try{
-  //     const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
-  //     setImageData(response.data.imageData)
-  //   } catch(error) {
-  //     console.error('Error getting Images:', error);
-  //   }
-  // }
+  const handleGetImages = async (projectId) => {
+    try{
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
+      setImageData(response.data.imageData)
+    } catch(error) {
+      console.error('Error getting Images:', error);
+    }
+  }
 
   const handleCreateProjectClick = () => {
     setShowMainPopup(false);
@@ -166,7 +180,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
           const files = sortBy(acceptedFiles, (item: File) => item.name)
           updateProjectDataAction({
               name: selectedProject.project_name,
-              type: projectType
+              type: selectedProject.project_type
           });
           updateActiveImageIndexAction(0); 
           addImageDataAction(files.map((file:File) => ImageDataUtil
@@ -265,6 +279,13 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                 Back
               </button>
             </div>
+            {showErrorPopup && (
+              <div >
+                <p style={{ color: 'red' }}>
+                  Create Project failed.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -332,6 +353,9 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                     <button
                       className="button-16"
                       role="button"
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                      }}
                       onClick={() => handleSelectListProject(Project._id)}
                     >
                       Select
@@ -339,6 +363,9 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                     <button
                       className="button-16"
                       role="button"
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                      }}
                       onClick={() => handleDeleteListProject(Project._id)}
                     >
                       Delete
@@ -349,7 +376,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
             </tbody>
           </table>
           <div>
-            <button className="button-1" onClick={handleOpenClick}>
+            <button className="button-1"  onClick={handleOpenClick}>
               Open {selectedProject.project_name} Project
             </button>
             <button className="button-1" onClick={handleBackClick}>
@@ -389,7 +416,8 @@ const mapDispatchToProps = {
   updateImageDataAction: updateImageData,
   updateActiveImageIndexAction: updateActiveImageIndex,
   addImageDataAction: addImageData,
-  updateActivePopupTypeAction: updateActivePopupType
+  updateModelNameAction: updateModelName,
+  updateLabelNamesAction: updateLabelNames,
 };
 
 const mapStateToProps = (state: AppState) => ({

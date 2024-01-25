@@ -7,8 +7,11 @@ import { ImageData } from "../../../store/labels/types";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
 import { NotificationUtil } from "../../../utils/NotificationUtil";
 import { submitNewNotification } from "../../../store/notifications/actionCreators";
-import { INotification, NotificationsActionType } from "../../../store/notifications/types";
-import { ProjectData } from 'src/store/general/types';
+import {
+  INotification,
+  NotificationsActionType,
+} from "../../../store/notifications/types";
+import { ProjectData } from "src/store/general/types";
 import { updateModelName } from "../../../store/users/actionCreators";
 
 interface IProps {
@@ -16,13 +19,23 @@ interface IProps {
   modelname: string;
   username: string;
   project_name: string;
-  submitNewNotificationAction: (notification: INotification) => NotificationsActionType;
+  submitNewNotificationAction: (
+    notification: INotification
+  ) => NotificationsActionType;
   updateModelNameAction: (modelname: string) => void;
   projectData: ProjectData;
-
 }
 
-const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction, projectData }) => {
+const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
+  onClose,
+  imageData,
+  submitNewNotificationAction,
+  modelname,
+  username,
+  project_name,
+  updateModelNameAction,
+  projectData,
+}) => {
   const [newModel, setNewModel] = useState("");
 
   const handleAddProject = async () => {
@@ -35,8 +48,12 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
         "model_name",
         newModel
       );
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`);
-      updateModelNameAction(newModel)
+      await axios.post(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`
+      );
+      updateModelNameAction(newModel);
       setNewModel("");
     } catch (error) {
       console.error("Error adding ListProject:", error);
@@ -76,7 +93,15 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   );
 };
 
-const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction }) => {
+const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
+  onClose,
+  imageData,
+  submitNewNotificationAction,
+  modelname,
+  username,
+  project_name,
+  updateModelNameAction,
+}) => {
   const [ListModel, setListModel] = useState([]);
   const [selectedModel, setSelectedModel] = useState("");
 
@@ -86,11 +111,12 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   //   fetchListProject();
   // }, []);
 
-
   const fetchListModel = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}`
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/model/?username=${username}&project_name=${project_name}`
       );
       setListModel(response.data);
     } catch (error) {
@@ -111,7 +137,11 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   const handleDeleteListModel = async () => {
     try {
       await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}&model_name=${selectedModel.model_name}`
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/model/?username=${username}&project_name=${project_name}&model_name=${
+          selectedModel.model_name
+        }`
       );
       fetchListModel();
     } catch (error) {
@@ -121,8 +151,8 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
 
   const handleOpenClick = () => {
     if (selectedModel) {
-      console.log('Selected Model:', selectedModel.model_name);
-      updateModelNameAction(selectedModel.model_name)
+      console.log("Selected Model:", selectedModel.model_name);
+      updateModelNameAction(selectedModel.model_name);
     }
   };
 
@@ -206,7 +236,14 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   );
 };
 
-const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction }) => {
+const Tab_Train: FC<IProps> = ({
+  imageData,
+  submitNewNotificationAction,
+  modelname,
+  username,
+  project_name,
+  updateModelNameAction,
+}) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
@@ -231,6 +268,15 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
+      if (epoch === "" || learningRate === "") {
+        submitNewNotificationAction(
+          NotificationUtil.createErrorNotification({
+            header: "Training prevented",
+            description: "Some paremeter is missing a value",
+          })
+        );
+        return;
+      }
 
       imageData.forEach((fileInfo, index) => {
         const file = fileInfo.fileData;
@@ -238,27 +284,41 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
       });
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
-      formData.append("username", username)
-      formData.append("project_name", project_name || "p1")
-      formData.append("modelname", modelname || "mt1")
+      formData.append("username", username);
+      formData.append("project_name", project_name || "p1");
+      formData.append("modelname", modelname || "mt1");
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
       });
+
+      submitNewNotificationAction(
+        NotificationUtil.createMessageNotification({
+          header: "Train started",
+          description: "Model training started",
+        })
+      );
 
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/train/`,
         formData
       );
       console.log(response.data);
+      submitNewNotificationAction(
+        NotificationUtil.createSuccessNotification({
+          header: "Training success",
+          description: "Model trained successfully",
+        })
+      );
     } catch (error) {
       console.error("Error:", error);
+      submitNewNotificationAction(
+        NotificationUtil.createErrorNotification({
+          header: "Training failed",
+          description: "Some paremeter is missing a value",
+        })
+      );
     }
-    submitNewNotificationAction(NotificationUtil.createMessageNotification({
-      "header": "train success",
-      "description": "in model ... train successful"
-    }))
-    console.log("Data submitted");
   };
 
   return (
@@ -278,14 +338,16 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
         >
           Create Model
         </button>
-        {isPopupCreate_Visible && <PopupCreate
-          onClose={() => togglePopupCreate()}
-          imageData={imageData}
-          modelname={modelname}
-          project_name={project_name}
-          username={username}
-          updateModelNameAction={updateModelNameAction}
-        />}
+        {isPopupCreate_Visible && (
+          <PopupCreate
+            onClose={() => togglePopupCreate()}
+            imageData={imageData}
+            modelname={modelname}
+            project_name={project_name}
+            username={username}
+            updateModelNameAction={updateModelNameAction}
+          />
+        )}
         <button
           className="button-14"
           role="button"
@@ -293,14 +355,16 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
         >
           Select Existing Model
         </button>
-        {isPopupSelect_Visible && <PopupSelect
-          onClose={() => togglePopupSelect()}
-          imageData={imageData}
-          modelname={modelname}
-          project_name={project_name}
-          username={username}
-          updateModelNameAction={updateModelNameAction}
-        />}
+        {isPopupSelect_Visible && (
+          <PopupSelect
+            onClose={() => togglePopupSelect()}
+            imageData={imageData}
+            modelname={modelname}
+            project_name={project_name}
+            username={username}
+            updateModelNameAction={updateModelNameAction}
+          />
+        )}
         <button
           className="button-14"
           role="button"
@@ -340,11 +404,19 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = {
   submitNewNotificationAction: submitNewNotification,
   updateModelNameAction: updateModelName,
+};
 
-}
+const connectPopupCreate = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PopupCreate);
+const connectPopupSelect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(PopupSelect);
+const connectTab_Train = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Tab_Train);
 
-const connectPopupCreate = connect(mapStateToProps, mapDispatchToProps)(PopupCreate);
-const connectPopupSelect = connect(mapStateToProps, mapDispatchToProps)(PopupSelect);
-const connectTab_Train = connect(mapStateToProps, mapDispatchToProps)(Tab_Train);
-
-export { connectPopupCreate, connectPopupSelect, connectTab_Train }
+export { connectPopupCreate, connectPopupSelect, connectTab_Train };

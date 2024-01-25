@@ -36,7 +36,7 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
   updateModelNameAction,
   projectData,
 }) => {
-  const [newModel, setNewModel] = useState("");
+  const [newModel, setNewModel] = useState("default");
 
   const handleAddProject = async () => {
     try {
@@ -54,7 +54,7 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
         }/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`
       );
       updateModelNameAction(newModel);
-      setNewModel("");
+      setNewModel("default")
     } catch (error) {
       console.error("Error adding ListProject:", error);
     }
@@ -108,8 +108,6 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
   useEffect(() => {
     fetchListModel();
   }, []);
-  //   fetchListProject();
-  // }, []);
 
   const fetchListModel = async () => {
     try {
@@ -124,25 +122,27 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
     }
   };
 
-  const handleSelectListModel = (modelId) => {
+  const handleSelectListModel = (model_name) => {
     try {
-      const selected = ListModel.find((project) => project._id === modelId);
+      const selected = ListModel.find((Model) => Model.model_name === model_name);
       setSelectedModel(selected);
-      console.log("Selected Project:", modelId);
+      console.log("Selected Project:", model_name);
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
   };
 
-  const handleDeleteListModel = async () => {
+  const handleDeleteListModel = async (model_name) => {
     try {
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
         }/model/?username=${username}&project_name=${project_name}&model_name=${
-          selectedModel.model_name
+          model_name
         }`
       );
+      const updatedList = ListModel.filter(Model => Model.model_name !== model_name);
+      setListModel(updatedList);
       fetchListModel();
     } catch (error) {
       console.error("Error deleting ListModel:", error);
@@ -207,14 +207,20 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                   <button
                     className="button-16"
                     role="button"
-                    onClick={() => handleSelectListModel(Model._id)}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                    }}
+                    onClick={() => handleSelectListModel(Model.model_name)}
                   >
                     Select
                   </button>
                   <button
                     className="button-16"
                     role="button"
-                    onClick={() => handleDeleteListModel()}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                    }}
+                    onClick={() => handleDeleteListModel(Model.model_name)}
                   >
                     Delete
                   </button>

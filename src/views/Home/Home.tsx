@@ -32,7 +32,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showListProjectPopup, setShowListProjectPopup] = useState(false);
-  const [ListProject, setListProject] = useState([]);
+  const [ListProject, setListProject] = useState([]);  
   const [newProject, setNewProject] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
@@ -95,29 +95,31 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     }
   };
 
-  const handleDeleteListProject = async () => {
+  const handleDeleteListProject = async (project_name) => {
     try {
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
         }/project/delete/?username=${username}&project_name=${
-          selectedProject.project_name
+          project_name
         }`
       );
+      const updatedList = ListProject.filter(Project => Project.project_name !== project_name);
+      setListProject(updatedList);
       fetchListProject();
     } catch (error) {
       console.error("Error deleting ListProject:", error);
     }
   };
 
-  const handleGetImages = async (projectId) => {
-    try{
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
-      setImageData(response.data.imageData)
-    } catch(error) {
-      console.error('Error getting Images:', error);
-    }
-  }
+  // const handleGetImages = async (projectId) => {
+  //   try{
+  //     const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
+  //     setImageData(response.data.imageData)
+  //   } catch(error) {
+  //     console.error('Error getting Images:', error);
+  //   }
+  // }
 
   const handleCreateProjectClick = () => {
     setShowMainPopup(false);
@@ -140,30 +142,40 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     setShowDropZonePopup(false);
   };
 
-  const handleSelectListProject = (projectId) => {
+  const handleSelectListProject = (project_name) => {
     try {
-      const selected = ListProject.find((project) => project._id === projectId);
+      console.log("ListProject:", ListProject);
+      console.log("project_name:", project_name);
+      const selected = ListProject.find(Project => Project.project_name === project_name);
       setSelectedProject(selected);
-      console.log("Selected Project:", projectId);
+      console.log("Selected Project:", selected);
     } catch (error) {
-      console.error("Error deleting todo:", error);
+      console.error("Error:", error);
     }
   };
+  
 
   const handleOpenClick = async () => {
     if (selectedProject) {
-      console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
-      updateProjectNameAction(selectedProject.project_name);
-      updateProjectDataAction({
-        type: selectedProject.project_type,
-        name: selectedProject.project_name,
-      });
-      navigate('/home');
-      getDropZoneContent();
-      startEditorWithImageRecognition();
-      // updateImageDataAction(imageData)
+      const isInListProject = ListProject.find(project => project.project_name === selectedProject.project_name);
+  
+      if (isInListProject) {
+        console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
+        updateProjectNameAction(selectedProject.project_name);
+        updateProjectDataAction({
+          type: selectedProject.project_type,
+          name: selectedProject.project_name
+        });
+        navigate('/home');
+        getDropZoneContent();
+        startEditorWithImageRecognition();
+        // updateImageDataAction(imageData)
+      } else {
+        console.error('Error: Selected project not found in ListProject');
+      }
     }
   };
+  
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
@@ -336,43 +348,49 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
               </tr>
             </thead>
             <tbody>
-              {ListProject.map((Project, index) => (
-                <tr
-                  key={Project._id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                  }}
-                >
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    {Project.project_name}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    {Project.project_type}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    <button
-                      className="button-16"
-                      role="button"
-                      style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                      }}
-                      onClick={() => handleSelectListProject(Project._id)}
-                    >
-                      Select
-                    </button>
-                    <button
-                      className="button-16"
-                      role="button"
-                      style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                      }}
-                      onClick={() => handleDeleteListProject(Project._id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
+              {ListProject.length > 0 ? (
+                ListProject.map((Project, index) => (
+                  <tr
+                    key={Project._id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                    }}
+                  >
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      {Project.project_name}
+                    </td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      {Project.project_type}
+                    </td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      <button
+                        className="button-16"
+                        role="button"
+                        style={{
+                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        }}
+                        onClick={() => handleSelectListProject(Project.project_name)}
+                      >
+                        Select
+                      </button>
+                      <button
+                        className="button-16"
+                        role="button"
+                        style={{
+                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        }}
+                        onClick={() => handleDeleteListProject(Project.project_name)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">No projects available</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           <div>

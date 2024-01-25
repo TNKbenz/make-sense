@@ -24,7 +24,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const [ListProject, setListProject] = useState([]);
   const [newProject, setNewProject] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
-  const [selectedOption, setSelectedOption] = useState('CLASSIFICATION');
+  const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
   const [imageData, setImageData] = useState([]);
 
   useEffect(() => {
@@ -184,7 +184,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
               value={selectedOption}
               onChange={handleOptionChange}
             >
-              <option value="CLASSIFICATION">CLASSIFICATION</option>
+              <option value="IMAGE_RECOGNITION">IMAGE_RECOGNITION</option>
               <option value="OBJECT_DETECTION">OBJECT DETECTION</option>
             </select>
             <div>

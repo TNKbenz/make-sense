@@ -1,22 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,PropsWithChildren} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect } from "react-redux";
-import { updateProjectData } from '../../store/general/actionCreators';
+import { updateActivePopupType,updateProjectData } from '../../store/general/actionCreators';
 import { ProjectData } from 'src/store/general/types';
 import { updateImageData } from '../../store/labels/actionCreators';
+import { ImageDataUtil } from '../../utils/ImageDataUtil';
+import {addImageData, updateActiveImageIndex} from '../../store/labels/actionCreators';
+import {PopupWindowType} from '../../data/enums/PopupWindowType';
+import {useDropzone,DropzoneOptions} from 'react-dropzone';
+import {TextButton} from '../Common/TextButton/TextButton';
+import {ImageData} from '../../store/labels/types';
+import {ProjectType} from '../../data/enums/ProjectType';
+import { sortBy } from 'lodash';
+
 
 interface IProps {
   username: string;
   updateProjectNameAction: (project_name: string) => void;
-  updateProjectDataAction: (projectData: ProjectData) => void;
-  updateImageDataAction: (imageData: ImageData[]) => void;
+  updateProjectDataAction : (projectData: ProjectData ) => void;
+  updateImageDataAction : (imageData: ImageData[]) => void;
+  updateActiveImageIndexAction: (activeImageIndex: number) => any;
+  updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
+  addImageDataAction: (imageData: ImageData[]) => any;
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction, updateImageDataAction, username }) => {
+const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateActivePopupTypeAction , updateActiveImageIndexAction }) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
@@ -26,16 +38,10 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
   const [imageData, setImageData] = useState([]);
+  const [showDropZonePopup, setShowDropZonePopup] = useState(false);
+  
 
   useEffect(() => {
-    //   const mockData = [
-    //     { _id: 1, project_name: 'Project A', project_type: 'Classify' },
-    //     { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
-    //     { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
-    //   ];
-    //
-    //   setListProject(mockData);
-    // }, []);
     fetchListProject();
   }, []);
 
@@ -78,8 +84,10 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const handleDeleteListProject = async () => {
     try {
       await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${selectedProject.project_name
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/project/delete/?username=${username}&project_name=${
+          selectedProject.project_name
         }`
       );
       fetchListProject();
@@ -101,18 +109,21 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     setShowMainPopup(false);
     setShowCreatePopup(true);
     setShowListProjectPopup(false);
+    setShowDropZonePopup(false);
   };
 
   const handleOpenProjectClick = () => {
     setShowMainPopup(false);
     setShowCreatePopup(false);
     setShowListProjectPopup(true);
+    setShowDropZonePopup(true);
   };
 
   const handleBackClick = () => {
     setShowMainPopup(true);
     setShowCreatePopup(false);
     setShowListProjectPopup(false);
+    setShowDropZonePopup(false);
   };
 
   const handleSelectListProject = (projectId) => {
@@ -125,23 +136,82 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     }
   };
 
-  const handleOpenClick = () => {
+  const handleOpenClick = async () => {
     if (selectedProject) {
       console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
-      updateProjectNameAction(selectedProject.project_name)
+      updateProjectNameAction(selectedProject.project_name);
       updateProjectDataAction({
-        // type: selectedProject.project_type,
-        type: null,
-        name: selectedProject.project_name
-      })
-      updateImageDataAction(imageData)
+        type: selectedProject.project_type,
+        name: selectedProject.project_name,
+      });
       navigate('/home');
+      getDropZoneContent();
+      startEditorWithImageRecognition();
+      // updateImageDataAction(imageData)
     }
   };
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
   };
+
+  const {acceptedFiles, getRootProps, getInputProps} = useDropzone({
+      accept: {
+          'image/*': ['.jpeg', '.png']
+      }
+  } as DropzoneOptions);
+
+  const startEditor = (projectType: ProjectType) => {
+      if (acceptedFiles.length > 0) {
+          const files = sortBy(acceptedFiles, (item: File) => item.name)
+          updateProjectDataAction({
+              name: selectedProject.project_name,
+              type: projectType
+          });
+          updateActiveImageIndexAction(0); 
+          addImageDataAction(files.map((file:File) => ImageDataUtil
+              .createImageDataFromFileData(file)));
+          // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+      }
+  };
+
+  const getDropZoneContent = () => {
+      if (acceptedFiles.length === 0)
+          return <>
+              <input {...getInputProps()} />
+              <img
+                  draggable={false}
+                  alt={'upload'}
+                  src={'ico/box-opened.png'}
+              />
+              <p className='extraBold'>Drop images</p>
+              <p>or</p>
+              <p className='extraBold'>Click here to select them</p>
+          </>;
+      else if (acceptedFiles.length === 1)
+          return <>
+              <img
+                  draggable={false}
+                  alt={'uploaded'}
+                  src={'ico/box-closed.png'}
+              />
+              <p className='extraBold'>1 image loaded</p>
+          </>;
+      else
+          return <>
+              <input {...getInputProps()} />
+              <img
+                  draggable={false}
+                  key={1}
+                  alt={'uploaded'}
+                  src={'ico/box-closed.png'}
+              />
+              <p key={2} className='extraBold'>{acceptedFiles.length} images loaded</p>
+          </>;
+  };
+
+  const startEditorWithObjectDetection = () => startEditor(ProjectType.OBJECT_DETECTION);
+  const startEditorWithImageRecognition = () => startEditor(ProjectType.IMAGE_RECOGNITION);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -288,6 +358,25 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
           </div>
         </div>
       )}
+
+      {showDropZonePopup && (
+        <div className='ImagesDropZone' style={{
+          backgroundColor: "black",
+        }}>
+            <div {...getRootProps({className: 'DropZone'})}>
+                {getDropZoneContent()}
+            </div>
+            <div className='DropZoneButtons'>
+                <button
+                    onClick={startEditorWithObjectDetection}
+                />
+                <button
+                    onClick={startEditorWithImageRecognition}
+                />
+            </div>
+        </div>
+      )}
+      
     </div>
   );
 };
@@ -297,7 +386,10 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
 const mapDispatchToProps = {
   updateProjectNameAction: updateProjectName,
   updateProjectDataAction: updateProjectData,
-  updateImageDataAction: updateImageData
+  updateImageDataAction: updateImageData,
+  updateActiveImageIndexAction: updateActiveImageIndex,
+  addImageDataAction: addImageData,
+  updateActivePopupTypeAction: updateActivePopupType
 };
 
 const mapStateToProps = (state: AppState) => ({

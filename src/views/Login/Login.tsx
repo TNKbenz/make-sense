@@ -86,7 +86,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
     <div className="login">
       <h2>Welcome to {mode} page</h2>
       {showLoginPopup && (
-        <div className="popup">
+        <div >
           <div>
             <div>Username:</div>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -101,13 +101,13 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
           </div>
 
           {showSuccessPopup && (
-            <div className="popup">
+            <div >
               <p>Registration successful!</p>
             </div>
           )}
 
           {showErrorPopup && (
-            <div className="popup">
+            <div >
               <p style={{ color: 'red' }}>
                 Login failed.
               </p>
@@ -118,7 +118,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
       )}
 
       {showRegPopup && (
-        <div className="popup">
+        <div >
           <div>
             <div>Username:</div>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -136,7 +136,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
             />
           </div>
           {showErrorRegPopup && (
-            <div className="popup">
+            <div >
               <p style={{ color: 'red' }}>
                 {errMsg}
               </p>

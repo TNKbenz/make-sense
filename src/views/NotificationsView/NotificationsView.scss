@@ -1,8 +1,8 @@
-@import 'src/settings/Settings';
+@import "src/settings/Settings";
 
 $messageWidth: 400px;
 $messageHeight: 200px;
-$displayTime: 5.0s;
+$displayTime: 3s;
 $wrapperMargin: 10px;
 $baseZIndex: 2000;
 //$errorColor: #ff0033;
@@ -143,37 +143,37 @@ $warningColor: #eed202;
 }
 
 @keyframes animation-in {
-  0%   {
+  0% {
     width: 0;
   }
-  100%  {
+  100% {
     width: calc(#{$messageWidth} + 2 * #{$wrapperMargin});
   }
 }
 
 @keyframes animation-display {
-  0%   {
+  0% {
     width: calc(#{$messageWidth} + 2 * #{$wrapperMargin});
   }
-  100%  {
+  100% {
     width: calc(#{$messageWidth} + 2 * #{$wrapperMargin});
   }
 }
 
 @keyframes animation-out {
-  0%   {
+  0% {
     width: calc(#{$messageWidth} + 2 * #{$wrapperMargin});
   }
-  100%  {
+  100% {
     width: 0;
   }
 }
 
 @keyframes loader-animation {
-  0%   {
+  0% {
     width: 0;
   }
-  100%  {
+  100% {
     width: 100%;
   }
 }

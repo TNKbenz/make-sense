@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useState ,useEffect} from "react";
+import React, { FC, Fragment, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import axios from "axios";
@@ -22,7 +22,7 @@ interface IProps {
 
 }
 
-const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username, project_name ,updateModelNameAction , projectData}) => {
+const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction, projectData }) => {
   const [newModel, setNewModel] = useState("");
 
   const handleAddProject = async () => {
@@ -31,18 +31,11 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
         " username",
         username,
         "project_name",
-        projectData.name,
-        "project_type",
-        projectData.type,
+        project_name,
         "model_name",
         newModel
       );
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/project/create`, {
-        project_name: projectData.name,
-        project_type: projectData.type,
-        username: username,
-        project_path: "",
-      });
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`);
       updateModelNameAction(newModel)
       setNewModel("");
     } catch (error) {
@@ -53,59 +46,52 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   return (
     <div className="popup">
       <div>
-          <h2>Create Model</h2>
+        <h2>Create Model</h2>
+        <div>
+          <div>Model name:</div>
+          <input
+            style={{
+              width: "100%",
+              padding: "8px",
+              margin: "10px auto",
+              border: "2px solid #000000",
+              borderRadius: "5px",
+              textAlign: "center",
+            }}
+            type="text"
+            value={newModel}
+            onChange={(e) => setNewModel(e.target.value)}
+          />
           <div>
-            <div>Model name:</div>
-            <input
-              style={{
-                width: "100%",
-                padding: "8px",
-                margin: "10px auto",
-                border: "2px solid #000000",
-                borderRadius: "5px",
-                textAlign: "center",
-              }}
-              type="text"
-              value={newModel}
-              onChange={(e) => setNewModel(e.target.value)}
-              />
-              <div>
-              <button className="button-1" onClick={handleAddProject}>
-                Add Model
-              </button>
-              <button className="button-1" onClick={onClose}>
-                Close
-              </button>
-            </div>
+            <button className="button-1" onClick={handleAddProject}>
+              Add Model
+            </button>
+            <button className="button-1" onClick={onClose}>
+              Close
+            </button>
           </div>
         </div>
+      </div>
     </div>
   );
 };
 
-const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username,project_name ,updateModelNameAction}) => {
+const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction }) => {
   const [ListModel, setListModel] = useState([]);
   const [selectedModel, setSelectedModel] = useState("");
 
   useEffect(() => {
-    const mockData = [
-      { _id: 1, model_name: 'model A'},
-      { _id: 2, model_name: 'model B' },
-      { _id: 3, model_name: 'model C' },
-    ];
-
-    setListModel(mockData);
+    fetchListModel();
   }, []);
-//   fetchListProject();
-// }, []);
+  //   fetchListProject();
+  // }, []);
 
 
   const fetchListModel = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/project/all/?username=${username}`
+        `${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}`
       );
-
       setListModel(response.data);
     } catch (error) {
       console.error("Error fetching ListModel:", error);
@@ -125,11 +111,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
   const handleDeleteListModel = async () => {
     try {
       await axios.delete(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${
-          selectedModel.model_name
-        }`
+        `${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}&model_name=${selectedModel.model_name}`
       );
       fetchListModel();
     } catch (error) {
@@ -143,88 +125,88 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({ onClose, imag
       updateModelNameAction(selectedModel.model_name)
     }
   };
-  
+
   return (
     <div className="popup">
       <div>
-          <h2>Select Model</h2>
-          <table
-            style={{
-              width: "100%",
-              margin: "auto",
-              borderCollapse: "collapse",
-              marginTop: "20px",
-            }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    width: "60%",
-                    border: "2px solid #ddd",
-                    padding: "8px",
-                    backgroundColor: "#f2f2f2",
-                  }}
-                >
-                  Name
-                </th>
-                <th
-                  style={{
-                    width: "40%",
-                    border: "2px solid #ddd",
-                    padding: "8px",
-                    backgroundColor: "#f2f2f2",
-                  }}
-                >
-                  Action
-                </th>
+        <h2>Select Model</h2>
+        <table
+          style={{
+            width: "100%",
+            margin: "auto",
+            borderCollapse: "collapse",
+            marginTop: "20px",
+          }}
+        >
+          <thead>
+            <tr>
+              <th
+                style={{
+                  width: "60%",
+                  border: "2px solid #ddd",
+                  padding: "8px",
+                  backgroundColor: "#f2f2f2",
+                }}
+              >
+                Name
+              </th>
+              <th
+                style={{
+                  width: "40%",
+                  border: "2px solid #ddd",
+                  padding: "8px",
+                  backgroundColor: "#f2f2f2",
+                }}
+              >
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {ListModel.map((Model, index) => (
+              <tr
+                key={Model._id}
+                style={{
+                  backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                }}
+              >
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  {Model.model_name}
+                </td>
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  <button
+                    className="button-16"
+                    role="button"
+                    onClick={() => handleSelectListModel(Model._id)}
+                  >
+                    Select
+                  </button>
+                  <button
+                    className="button-16"
+                    role="button"
+                    onClick={() => handleDeleteListModel()}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {ListModel.map((Model, index) => (
-                <tr
-                  key={Model._id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                  }}
-                >
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    {Model.model_name}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    <button
-                      className="button-16"
-                      role="button"
-                      onClick={() => handleSelectListModel(Model._id)}
-                    >
-                      Select
-                    </button>
-                    <button
-                      className="button-16"
-                      role="button"
-                      onClick={() => handleDeleteListModel()}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div>
-            <button className="button-1" onClick={handleOpenClick}>
-              Open {selectedModel.model_name} Model
-            </button>
-            <button className="button-1" onClick={onClose}>
-              Close
-            </button>
-          </div>
+            ))}
+          </tbody>
+        </table>
+        <div>
+          <button className="button-1" onClick={handleOpenClick}>
+            Open {selectedModel.model_name} Model
+          </button>
+          <button className="button-1" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
+    </div>
   );
 };
 
-const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelname, username, project_name }) => {
+const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelname, username, project_name, updateModelNameAction }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
   const [learningRate, setLearningRate] = useState<string>("");
@@ -238,7 +220,7 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
 
   const togglePopupSelect = () => {
     setPopupSelect_Visible(!isPopupSelect_Visible);
-  };  
+  };
 
   for (let i = 0; i < imageData.length; i++) {
     let id = imageData[i]["labelNameIds"][0];
@@ -296,7 +278,14 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
         >
           Create Model
         </button>
-        {isPopupCreate_Visible && <PopupCreate onClose={() => togglePopupCreate()} />}
+        {isPopupCreate_Visible && <PopupCreate
+          onClose={() => togglePopupCreate()}
+          imageData={imageData}
+          modelname={modelname}
+          project_name={project_name}
+          username={username}
+          updateModelNameAction={updateModelNameAction}
+        />}
         <button
           className="button-14"
           role="button"
@@ -304,7 +293,14 @@ const Tab_Train: FC<IProps> = ({ imageData, submitNewNotificationAction, modelna
         >
           Select Existing Model
         </button>
-        {isPopupSelect_Visible && <PopupSelect onClose={() => togglePopupSelect()} />}
+        {isPopupSelect_Visible && <PopupSelect
+          onClose={() => togglePopupSelect()}
+          imageData={imageData}
+          modelname={modelname}
+          project_name={project_name}
+          username={username}
+          updateModelNameAction={updateModelNameAction}
+        />}
         <button
           className="button-14"
           role="button"
@@ -344,7 +340,11 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = {
   submitNewNotificationAction: submitNewNotification,
   updateModelNameAction: updateModelName,
-  
+
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Tab_Train);
+const connectPopupCreate = connect(mapStateToProps, mapDispatchToProps)(PopupCreate);
+const connectPopupSelect = connect(mapStateToProps, mapDispatchToProps)(PopupSelect);
+const connectTab_Train = connect(mapStateToProps, mapDispatchToProps)(Tab_Train);
+
+export { connectPopupCreate, connectPopupSelect, connectTab_Train }

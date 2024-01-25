@@ -6,7 +6,7 @@ import Tabs from "./Components/Tabs";
 import Tab_Visualize from "./Components/Tab_Visualize";
 import Tab_DataHealth from "./Components/Tab_DataHealth";
 import NotificationsView from "../../views/NotificationsView/NotificationsView";
-import Tab_Train from "./Components/Tab_Train";
+import { connectTab_Train as Tab_Train } from "./Components/Tab_Train";
 
 type TabsType = {
   label: string;

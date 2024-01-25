@@ -21,11 +21,11 @@ import {
 //   falseNegatives: 14,
 // };
 
-const validationCurve_Params = [1, 2, 3, 4, 5, 6 , 7 ,8];
-const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89 , 0.94, 0.96, 0.98];
+const validationCurve_Params = [1, 2, 3, 4, 5, 6, 7, 8];
+const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89, 0.94, 0.96, 0.98];
 const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89];
-const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95 , 0.75, 0.82, 0.89, 0.91, 0.95];
-const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65 ,0.68, 0.75, 0.82, 0.88, 0.92];
+const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95, 0.75, 0.82, 0.89, 0.91, 0.95];
+const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65, 0.68, 0.75, 0.82, 0.88, 0.92];
 
 
 const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurveData }) => {
@@ -66,7 +66,7 @@ const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurve
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={validationCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="parameter" type="number" label={{ value: 'Parameter Value', position: 'insideBottom' , offset: 0}} />
+            <XAxis dataKey="parameter" type="number" label={{ value: 'Parameter Value', position: 'insideBottom', offset: 0 }} />
             <YAxis label={{ value: 'Accuracy', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
@@ -81,7 +81,7 @@ const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurve
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={precisionRecallCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="recall" type="number" label={{ value: 'Recall', position: 'insideBottom' , offset: 0 }} />
+            <XAxis dataKey="recall" type="number" label={{ value: 'Recall', position: 'insideBottom', offset: 0 }} />
             <YAxis label={{ value: 'Precision', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
@@ -90,7 +90,7 @@ const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurve
         </ResponsiveContainer>
       </div>
 
-      
+
       {/* <div className="Confusion-Matrix">
         <h3>Confusion Matrix</h3>
       </div> */}
@@ -100,7 +100,7 @@ const ModelPerformanceChart = ({ data, validationCurveData, precisionRecallCurve
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize = () => {
-  const dataUrl = "http://localhost:8000/result/";
+  const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
   const [validationCurveData, setValidationCurveData] = useState([]);
   const [precisionRecallCurveData, setPrecisionRecallCurveData] = useState([]);
@@ -136,11 +136,11 @@ const Tab_Visualize = () => {
       .catch((error) => {
         console.error('Error fetching data:', error);
         // mock data
-        const validationCurve_Params = [1, 2, 3, 4, 5, 6 , 7 ,8];
-        const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89 , 0.94, 0.96, 0.98];
+        const validationCurve_Params = [1, 2, 3, 4, 5, 6, 7, 8];
+        const validationCurve_Cross_Validation_Score = [0.85, 0.88, 0.92, 0.91, 0.89, 0.94, 0.96, 0.98];
         const validationCurve_Training_Score = [0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89];
-        const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95 , 0.75, 0.82, 0.89, 0.91, 0.95];
-        const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65 ,0.68, 0.75, 0.82, 0.88, 0.92];
+        const precisionRecallCurve_Precision = [0.75, 0.82, 0.89, 0.91, 0.95, 0.75, 0.82, 0.89, 0.91, 0.95];
+        const precisionRecallCurve_Recall = [0.1, 0.2, 0.4, 0.6, 0.65, 0.68, 0.75, 0.82, 0.88, 0.92];
         const transformedValidationCurveData = validationCurve_Params.map((param, index) => ({
           parameter: param,
           crossValidationScore: validationCurve_Cross_Validation_Score[index],
@@ -151,7 +151,7 @@ const Tab_Visualize = () => {
           precision,
           recall: precisionRecallCurve_Recall[index],
         }));
-        
+
 
         setValidationCurveData(transformedValidationCurveData);
         setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);

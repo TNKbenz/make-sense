@@ -3,9 +3,14 @@ import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
 import { PieChart, Pie, Tooltip } from "recharts";
+import { AppState } from "src/store";
+import { connect } from "react-redux";
 
 interface ImageDropzoneProps {
   onUploadSuccess: (predictions: Predictions) => void;
+  username: string
+  project_name: string
+  modelname: string
 }
 
 type Predictions = {
@@ -20,7 +25,7 @@ type PredictionsResult = {
 
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
 
-const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
+const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username, project_name, modelname }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<Predictions | null>(null);
@@ -48,9 +53,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("bytefiles", selectedFile);
-      formData.append("username", "test1");
-      formData.append("project_name", "project-test1");
-      formData.append("modelname", "mt1");
+      formData.append("username", username);
+      formData.append("project_name", project_name);
+      formData.append("modelname", modelname);
 
       axios
         .post(`${import.meta.env.VITE_BACKEND_URL}/uploadfile/`, formData)
@@ -170,4 +175,10 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess }) => {
   );
 };
 
-export default ImageDropzone;
+const mapStateToProps = (state: AppState) => ({
+  username: state.user.username,
+  project_name: state.user.project_name,
+  modelname: state.user.modelname,
+});
+
+export default connect(mapStateToProps)(ImageDropzone);

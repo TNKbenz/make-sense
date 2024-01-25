@@ -12,11 +12,11 @@ import { updateImageData } from '../../store/labels/actionCreators';
 interface IProps {
   username: string;
   updateProjectNameAction: (project_name: string) => void;
-  updateProjectDataAction : (projectData: ProjectData ) => void;
-  updateImageDataAction : (imageData: ImageData[]) => void;
+  updateProjectDataAction: (projectData: ProjectData) => void;
+  updateImageDataAction: (imageData: ImageData[]) => void;
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username}) => {
+const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction, updateImageDataAction, username }) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
@@ -28,16 +28,16 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const [imageData, setImageData] = useState([]);
 
   useEffect(() => {
-      const mockData = [
-        { _id: 1, project_name: 'Project A', project_type: 'Classify' },
-        { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
-        { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
-      ];
-
-      setListProject(mockData);
-    }, []);
-  //   fetchListProject();
-  // }, []);
+    //   const mockData = [
+    //     { _id: 1, project_name: 'Project A', project_type: 'Classify' },
+    //     { _id: 2, project_name: 'Project B', project_type: 'Object Detection' },
+    //     { _id: 3, project_name: 'Project C', project_type: 'Object Detection' },
+    //   ];
+    //
+    //   setListProject(mockData);
+    // }, []);
+    fetchListProject();
+  }, []);
 
   const fetchListProject = async () => {
     try {
@@ -78,10 +78,8 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
   const handleDeleteListProject = async () => {
     try {
       await axios.delete(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${
-          selectedProject.project_name
+        `${import.meta.env.VITE_BACKEND_URL
+        }/project/delete/?username=${username}&project_name=${selectedProject.project_name
         }`
       );
       fetchListProject();
@@ -129,7 +127,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
 
   const handleOpenClick = () => {
     if (selectedProject) {
-      console.log('Selected Project:', selectedProject.project_name ,' Type Project:',selectedProject.project_type);
+      console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
       updateProjectNameAction(selectedProject.project_name)
       updateProjectDataAction({
         // type: selectedProject.project_type,

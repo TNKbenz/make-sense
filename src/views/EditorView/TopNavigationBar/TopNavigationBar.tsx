@@ -33,14 +33,14 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
   };
   console.log("user :", ...props.username, "project :", ...props.project_name);
 
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.toLowerCase().replace(" ", "-");
+  // const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = event.target.value.toLowerCase().replace(" ", "-");
 
-    props.updateProjectDataAction({
-      ...props.projectData,
-      name: value,
-    });
-  };
+  //   props.updateProjectDataAction({
+  //     ...props.projectData,
+  //     name: value,
+  //   });
+  // };
 
   const closePopup = () =>
     props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
@@ -94,7 +94,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           <TextInput
             isPassword={false}
             value={props.projectData.name}
-            onChange={onChange}
+            // onChange={onChange}
             onFocus={onFocus}
           />
         </div>

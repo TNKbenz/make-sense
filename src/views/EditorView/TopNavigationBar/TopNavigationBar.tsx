@@ -16,6 +16,12 @@ import DropDownMenu from "./DropDownMenu/DropDownMenu";
 import { useNavigate } from "react-router-dom";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
 import axios from "axios";
+import { NotificationUtil } from "../../../utils/NotificationUtil";
+import { submitNewNotification } from "../../../store/notifications/actionCreators";
+import {
+  INotification,
+  NotificationsActionType,
+} from "../../../store/notifications/types";
 
 interface IProps {
   updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -25,6 +31,9 @@ interface IProps {
   modelname: string;
   username: string;
   project_name: string;
+  submitNewNotificationAction: (
+    notification: INotification
+  ) => NotificationsActionType;
 }
 
 const TopNavigationBar: React.FC<IProps> = (props) => {
@@ -46,21 +55,36 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
     props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
 
   const navigate = useNavigate();
+
   const TrainPage = () => {
     const formData = new FormData();
+    const labels = [];
+    for (let i = 0; i < props.imageData.length; i++) {
+      let id = props.imageData[i]["labelNameIds"][0];
+      if (
+        LabelsSelector.getLabelNameById(id) === undefined ||
+        LabelsSelector.getLabelNameById(id) === null ||
+        LabelsSelector.getLabelNameById(id) === ""
+      ) {
+        props.submitNewNotificationAction(
+          NotificationUtil.createErrorNotification({
+            header: "Missing Label",
+            description:
+              "All images must be labeled before proceed to training.",
+          })
+        );
+        return;
+      } else {
+        let name = LabelsSelector.getLabelNameById(id)["name"];
+        labels.push(name);
+      }
+    }
     props.imageData.forEach((fileInfo, index) => {
       const file = fileInfo.fileData;
       formData.append("bytefiles", file);
     });
     formData.append("username", props.username);
     formData.append("project_name", props.project_name);
-
-    const labels = [];
-    for (let i = 0; i < props.imageData.length; i++) {
-      let id = props.imageData[i]["labelNameIds"][0];
-      let name = LabelsSelector.getLabelNameById(id)["name"];
-      labels.push(name);
-    }
     labels.forEach((label, index) => {
       formData.append("labels", label);
     });
@@ -119,6 +143,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
 const mapDispatchToProps = {
   updateActivePopupTypeAction: updateActivePopupType,
   updateProjectDataAction: updateProjectData,
+  submitNewNotificationAction: submitNewNotification,
 };
 
 const mapStateToProps = (state: AppState) => ({

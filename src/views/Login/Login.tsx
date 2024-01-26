@@ -44,14 +44,13 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
 
   const handleRegister = async () => {
     try {
-      if (password !== confirmPassword) {
-        handleToggleMode();
+      if (password !== confirmPassword || username.trim() === "" || password.trim() === "" || username.includes(" ") || password.includes(" ")) {
         setShowErrorRegPopup(true);
         setTimeout(() => {
           setShowErrorRegPopup(false);
         }, 5000);
         return;
-      }
+      }     
       // const response = await axios.post('http://localhost:3001/register', { username, password });
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, { username, password });
       console.log(response.data);
@@ -138,7 +137,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
           {showErrorRegPopup && (
             <div >
               <p style={{ color: 'red' }}>
-                {errMsg}
+                Register failed. {errMsg}
               </p>
             </div>
           )}

@@ -3,17 +3,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
+import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect } from "react-redux";
-import { updateActivePopupType,updateProjectData } from '../../store/general/actionCreators';
+import { updateProjectData } from '../../store/general/actionCreators';
 import { ProjectData } from 'src/store/general/types';
-import { updateImageData } from '../../store/labels/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import {addImageData, updateActiveImageIndex} from '../../store/labels/actionCreators';
-import {PopupWindowType} from '../../data/enums/PopupWindowType';
+import {addImageData, updateActiveImageIndex,updateLabelNames,updateImageData} from '../../store/labels/actionCreators';
 import {useDropzone,DropzoneOptions} from 'react-dropzone';
-import {TextButton} from '../Common/TextButton/TextButton';
-import {ImageData} from '../../store/labels/types';
+import {ImageData,LabelName} from '../../store/labels/types';
 import {ProjectType} from '../../data/enums/ProjectType';
 import { sortBy } from 'lodash';
 
@@ -24,22 +22,23 @@ interface IProps {
   updateProjectDataAction : (projectData: ProjectData ) => void;
   updateImageDataAction : (imageData: ImageData[]) => void;
   updateActiveImageIndexAction: (activeImageIndex: number) => any;
-  updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
+  updateModelNameAction: (modelname: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
+  updateLabelNamesAction: (labels: LabelName[]) => void;
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateActivePopupTypeAction , updateActiveImageIndexAction }) => {
+const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateModelNameAction , updateActiveImageIndexAction ,updateLabelNamesAction }) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showListProjectPopup, setShowListProjectPopup] = useState(false);
-  const [ListProject, setListProject] = useState([]);
+  const [ListProject, setListProject] = useState([]);  
   const [newProject, setNewProject] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
-  
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
   useEffect(() => {
     fetchListProject();
@@ -67,6 +66,13 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         " selectedOption",
         selectedOption
       );
+      if (newProject.trim() === "" || newProject.includes(" ")) {
+        setShowErrorPopup(true)
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 5000);
+        return;
+      }
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/project/create`, {
         project_name: newProject,
         project_type: selectedOption,
@@ -74,6 +80,14 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         project_path: "",
       });
       fetchListProject();
+      updateProjectNameAction(newProject)
+      updateModelNameAction(selectedOption)
+      updateProjectDataAction({
+        type: null,
+        name: newProject,
+      });
+      updateImageDataAction([])
+      updateLabelNamesAction([])
       navigate("/home");
       setNewProject("");
     } catch (error) {
@@ -81,15 +95,17 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     }
   };
 
-  const handleDeleteListProject = async () => {
+  const handleDeleteListProject = async (project_name) => {
     try {
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
         }/project/delete/?username=${username}&project_name=${
-          selectedProject.project_name
+          project_name
         }`
       );
+      const updatedList = ListProject.filter(Project => Project.project_name !== project_name);
+      setListProject(updatedList);
       fetchListProject();
     } catch (error) {
       console.error("Error deleting ListProject:", error);
@@ -126,30 +142,40 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     setShowDropZonePopup(false);
   };
 
-  const handleSelectListProject = (projectId) => {
+  const handleSelectListProject = (project_name) => {
     try {
-      const selected = ListProject.find((project) => project._id === projectId);
+      console.log("ListProject:", ListProject);
+      console.log("project_name:", project_name);
+      const selected = ListProject.find(Project => Project.project_name === project_name);
       setSelectedProject(selected);
-      console.log("Selected Project:", projectId);
+      console.log("Selected Project:", selected);
     } catch (error) {
-      console.error("Error deleting todo:", error);
+      console.error("Error:", error);
     }
   };
+  
 
   const handleOpenClick = async () => {
     if (selectedProject) {
-      console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
-      updateProjectNameAction(selectedProject.project_name);
-      updateProjectDataAction({
-        type: selectedProject.project_type,
-        name: selectedProject.project_name,
-      });
-      navigate('/home');
-      getDropZoneContent();
-      startEditorWithImageRecognition();
-      // updateImageDataAction(imageData)
+      const isInListProject = ListProject.find(project => project.project_name === selectedProject.project_name);
+  
+      if (isInListProject) {
+        console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
+        updateProjectNameAction(selectedProject.project_name);
+        updateProjectDataAction({
+          type: selectedProject.project_type,
+          name: selectedProject.project_name
+        });
+        navigate('/home');
+        getDropZoneContent();
+        startEditorWithImageRecognition();
+        // updateImageDataAction(imageData)
+      } else {
+        console.error('Error: Selected project not found in ListProject');
+      }
     }
   };
+  
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
@@ -166,7 +192,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
           const files = sortBy(acceptedFiles, (item: File) => item.name)
           updateProjectDataAction({
               name: selectedProject.project_name,
-              type: projectType
+              type: selectedProject.project_type
           });
           updateActiveImageIndexAction(0); 
           addImageDataAction(files.map((file:File) => ImageDataUtil
@@ -265,6 +291,13 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                 Back
               </button>
             </div>
+            {showErrorPopup && (
+              <div >
+                <p style={{ color: 'red' }}>
+                  Create Project failed.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -315,41 +348,53 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
               </tr>
             </thead>
             <tbody>
-              {ListProject.map((Project, index) => (
-                <tr
-                  key={Project._id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                  }}
-                >
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    {Project.project_name}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    {Project.project_type}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    <button
-                      className="button-16"
-                      role="button"
-                      onClick={() => handleSelectListProject(Project._id)}
-                    >
-                      Select
-                    </button>
-                    <button
-                      className="button-16"
-                      role="button"
-                      onClick={() => handleDeleteListProject(Project._id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
+              {ListProject.length > 0 ? (
+                ListProject.map((Project, index) => (
+                  <tr
+                    key={Project._id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                    }}
+                  >
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      {Project.project_name}
+                    </td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      {Project.project_type}
+                    </td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      <button
+                        className="button-16"
+                        role="button"
+                        style={{
+                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        }}
+                        onClick={() => handleSelectListProject(Project.project_name)}
+                      >
+                        Select
+                      </button>
+                      <button
+                        className="button-16"
+                        role="button"
+                        style={{
+                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        }}
+                        onClick={() => handleDeleteListProject(Project.project_name)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">No projects available</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           <div>
-            <button className="button-1" onClick={handleOpenClick}>
+            <button className="button-1"  onClick={handleOpenClick}>
               Open {selectedProject.project_name} Project
             </button>
             <button className="button-1" onClick={handleBackClick}>
@@ -389,7 +434,8 @@ const mapDispatchToProps = {
   updateImageDataAction: updateImageData,
   updateActiveImageIndexAction: updateActiveImageIndex,
   addImageDataAction: addImageData,
-  updateActivePopupTypeAction: updateActivePopupType
+  updateModelNameAction: updateModelName,
+  updateLabelNamesAction: updateLabelNames,
 };
 
 const mapStateToProps = (state: AppState) => ({

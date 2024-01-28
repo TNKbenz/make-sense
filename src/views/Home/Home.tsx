@@ -1,4 +1,4 @@
-import React, { useState, useEffect ,PropsWithChildren} from "react";
+import React, { useState, useEffect, PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
@@ -6,36 +6,51 @@ import { updateProjectName } from "../../store/users/actionCreators";
 import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect } from "react-redux";
-import { updateProjectData } from '../../store/general/actionCreators';
-import { ProjectData } from 'src/store/general/types';
-import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import {addImageData, updateActiveImageIndex,updateLabelNames,updateImageData} from '../../store/labels/actionCreators';
-import {useDropzone,DropzoneOptions} from 'react-dropzone';
-import {ImageData,LabelName} from '../../store/labels/types';
-import {ProjectType} from '../../data/enums/ProjectType';
-import { sortBy } from 'lodash';
-
+import { updateProjectData } from "../../store/general/actionCreators";
+import { ProjectData } from "src/store/general/types";
+import { ImageDataUtil } from "../../utils/ImageDataUtil";
+import {
+  addImageData,
+  updateActiveImageIndex,
+  updateLabelNames,
+  updateImageData,
+} from "../../store/labels/actionCreators";
+import { useDropzone, DropzoneOptions } from "react-dropzone";
+import { ImageData, LabelName } from "../../store/labels/types";
+import { ProjectType } from "../../data/enums/ProjectType";
+import { sortBy } from "lodash";
 
 interface IProps {
   username: string;
+  projectName: string;
   updateProjectNameAction: (project_name: string) => void;
-  updateProjectDataAction : (projectData: ProjectData ) => void;
-  updateImageDataAction : (imageData: ImageData[]) => void;
+  updateProjectDataAction: (projectData: ProjectData) => void;
+  updateImageDataAction: (imageData: ImageData[]) => void;
   updateActiveImageIndexAction: (activeImageIndex: number) => any;
   updateModelNameAction: (modelname: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
 }
 
-const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataAction , updateImageDataAction, username ,addImageDataAction ,updateModelNameAction , updateActiveImageIndexAction ,updateLabelNamesAction }) => {
+const Home: React.FC<IProps> = ({
+  updateProjectNameAction,
+  updateProjectDataAction,
+  updateImageDataAction,
+  username,
+  projectName,
+  addImageDataAction,
+  updateModelNameAction,
+  updateActiveImageIndexAction,
+  updateLabelNamesAction,
+}) => {
   const navigate = useNavigate();
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showListProjectPopup, setShowListProjectPopup] = useState(false);
-  const [ListProject, setListProject] = useState([]);  
+  const [ListProject, setListProject] = useState([]);
   const [newProject, setNewProject] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
-  const [selectedOption, setSelectedOption] = useState('IMAGE_RECOGNITION');
+  const [selectedOption, setSelectedOption] = useState("IMAGE_RECOGNITION");
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
@@ -67,7 +82,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         selectedOption
       );
       if (newProject.trim() === "" || newProject.includes(" ")) {
-        setShowErrorPopup(true)
+        setShowErrorPopup(true);
         setTimeout(() => {
           setShowErrorPopup(false);
         }, 5000);
@@ -80,14 +95,14 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
         project_path: "",
       });
       fetchListProject();
-      updateProjectNameAction(newProject)
-      updateModelNameAction(selectedOption)
+      updateProjectNameAction(newProject);
+      updateModelNameAction(selectedOption);
       updateProjectDataAction({
         type: null,
         name: newProject,
       });
-      updateImageDataAction([])
-      updateLabelNamesAction([])
+      updateImageDataAction([]);
+      updateLabelNamesAction([]);
       navigate("/home");
       setNewProject("");
     } catch (error) {
@@ -100,11 +115,11 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${
-          project_name
-        }`
+        }/project/delete/?username=${username}&project_name=${project_name}`
       );
-      const updatedList = ListProject.filter(Project => Project.project_name !== project_name);
+      const updatedList = ListProject.filter(
+        (Project) => Project.project_name !== project_name
+      );
       setListProject(updatedList);
       fetchListProject();
     } catch (error) {
@@ -146,98 +161,156 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
     try {
       console.log("ListProject:", ListProject);
       console.log("project_name:", project_name);
-      const selected = ListProject.find(Project => Project.project_name === project_name);
+      const selected = ListProject.find(
+        (Project) => Project.project_name === project_name
+      );
       setSelectedProject(selected);
       console.log("Selected Project:", selected);
     } catch (error) {
       console.error("Error:", error);
     }
   };
-  
-
-  const handleOpenClick = async () => {
-    if (selectedProject) {
-      const isInListProject = ListProject.find(project => project.project_name === selectedProject.project_name);
-  
-      if (isInListProject) {
-        console.log('Selected Project:', selectedProject.project_name, ' Type Project:', selectedProject.project_type);
-        updateProjectNameAction(selectedProject.project_name);
-        updateProjectDataAction({
-          type: selectedProject.project_type,
-          name: selectedProject.project_name
-        });
-        navigate('/home');
-        getDropZoneContent();
-        startEditorWithImageRecognition();
-        // updateImageDataAction(imageData)
-      } else {
-        console.error('Error: Selected project not found in ListProject');
-      }
-    }
-  };
-  
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
   };
 
-  const {acceptedFiles, getRootProps, getInputProps} = useDropzone({
-      accept: {
-          'image/*': ['.jpeg', '.png']
-      }
+  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/*": [".jpeg", ".png"],
+    },
   } as DropzoneOptions);
 
+  const loadImagesFromBackend = async () => {
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("project_name", projectName);
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/getimage`,
+      formData
+    );
+
+    // const files: File[] = [];
+    // for (const r of response.data.image_urls) {
+    //   const imageName = r.split("=").pop();
+    //   const imgRespose = await axios.get(r);
+    //   const blob = new Blob([imgRespose.data]);
+    //   const file = new File([blob], imageName);
+    //
+    //   localStorage.setItem(file.name, JSON.stringify(file));
+    //   files.push(file);
+    // }
+    //
+    // console.log(files);
+    return response.data.image_urls;
+  };
+
+  const startEditor2 = async (projectType: ProjectType) => {
+    const acceptedFiles = await loadImagesFromBackend();
+    if (acceptedFiles.length > 0) {
+      const files = sortBy(acceptedFiles, (item: File) => item.name);
+      updateProjectDataAction({
+        name: selectedProject.project_name,
+        type: selectedProject.project_type,
+      });
+      updateActiveImageIndexAction(0);
+      addImageDataAction(
+        files.map((file: File) =>
+          ImageDataUtil.createImageDataFromFileData(file)
+        )
+      );
+      console.log("add image file success");
+      // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+    }
+  };
+
   const startEditor = (projectType: ProjectType) => {
-      if (acceptedFiles.length > 0) {
-          const files = sortBy(acceptedFiles, (item: File) => item.name)
-          updateProjectDataAction({
-              name: selectedProject.project_name,
-              type: selectedProject.project_type
-          });
-          updateActiveImageIndexAction(0); 
-          addImageDataAction(files.map((file:File) => ImageDataUtil
-              .createImageDataFromFileData(file)));
-          // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+    if (acceptedFiles.length > 0) {
+      const files = sortBy(acceptedFiles, (item: File) => item.name);
+      updateProjectDataAction({
+        name: selectedProject.project_name,
+        type: selectedProject.project_type,
+      });
+      updateActiveImageIndexAction(0);
+      addImageDataAction(
+        files.map((file: File) =>
+          ImageDataUtil.createImageDataFromFileData(file)
+        )
+      );
+      // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+    }
+  };
+
+  const handleOpenClick = async () => {
+    if (selectedProject) {
+      const isInListProject = ListProject.find(
+        (project) => project.project_name === selectedProject.project_name
+      );
+
+      if (isInListProject) {
+        console.log(
+          "Selected Project:",
+          selectedProject.project_name,
+          " Type Project:",
+          selectedProject.project_type
+        );
+        updateProjectNameAction(selectedProject.project_name);
+        updateProjectDataAction({
+          type: selectedProject.project_type,
+          name: selectedProject.project_name,
+        });
+        updateImageDataAction([]);
+        // getDropZoneContent();
+        await startEditorWithImageRecognition2();
+        // updateImageDataAction(imageData)
+        navigate("/home");
+      } else {
+        console.error("Error: Selected project not found in ListProject");
       }
+    }
   };
 
   const getDropZoneContent = () => {
-      if (acceptedFiles.length === 0)
-          return <>
-              <input {...getInputProps()} />
-              <img
-                  draggable={false}
-                  alt={'upload'}
-                  src={'ico/box-opened.png'}
-              />
-              <p className='extraBold'>Drop images</p>
-              <p>or</p>
-              <p className='extraBold'>Click here to select them</p>
-          </>;
-      else if (acceptedFiles.length === 1)
-          return <>
-              <img
-                  draggable={false}
-                  alt={'uploaded'}
-                  src={'ico/box-closed.png'}
-              />
-              <p className='extraBold'>1 image loaded</p>
-          </>;
-      else
-          return <>
-              <input {...getInputProps()} />
-              <img
-                  draggable={false}
-                  key={1}
-                  alt={'uploaded'}
-                  src={'ico/box-closed.png'}
-              />
-              <p key={2} className='extraBold'>{acceptedFiles.length} images loaded</p>
-          </>;
+    if (acceptedFiles.length === 0)
+      return (
+        <>
+          <input {...getInputProps()} />
+          <img draggable={false} alt={"upload"} src={"ico/box-opened.png"} />
+          <p className="extraBold">Drop images</p>
+          <p>or</p>
+          <p className="extraBold">Click here to select them</p>
+        </>
+      );
+    else if (acceptedFiles.length === 1)
+      return (
+        <>
+          <img draggable={false} alt={"uploaded"} src={"ico/box-closed.png"} />
+          <p className="extraBold">1 image loaded</p>
+        </>
+      );
+    else
+      return (
+        <>
+          <input {...getInputProps()} />
+          <img
+            draggable={false}
+            key={1}
+            alt={"uploaded"}
+            src={"ico/box-closed.png"}
+          />
+          <p key={2} className="extraBold">
+            {acceptedFiles.length} images loaded
+          </p>
+        </>
+      );
   };
 
-  const startEditorWithObjectDetection = () => startEditor(ProjectType.OBJECT_DETECTION);
-  const startEditorWithImageRecognition = () => startEditor(ProjectType.IMAGE_RECOGNITION);
+  const startEditorWithObjectDetection = () =>
+    startEditor(ProjectType.OBJECT_DETECTION);
+  const startEditorWithImageRecognition = () =>
+    startEditor(ProjectType.IMAGE_RECOGNITION);
+  const startEditorWithImageRecognition2 = () =>
+    startEditor2(ProjectType.IMAGE_RECOGNITION);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -292,10 +365,8 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
               </button>
             </div>
             {showErrorPopup && (
-              <div >
-                <p style={{ color: 'red' }}>
-                  Create Project failed.
-                </p>
+              <div>
+                <p style={{ color: "red" }}>Create Project failed.</p>
               </div>
             )}
           </div>
@@ -367,9 +438,12 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                         className="button-16"
                         role="button"
                         style={{
-                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                          backgroundColor:
+                            index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                         }}
-                        onClick={() => handleSelectListProject(Project.project_name)}
+                        onClick={() =>
+                          handleSelectListProject(Project.project_name)
+                        }
                       >
                         Select
                       </button>
@@ -377,9 +451,12 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
                         className="button-16"
                         role="button"
                         style={{
-                          backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                          backgroundColor:
+                            index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                         }}
-                        onClick={() => handleDeleteListProject(Project.project_name)}
+                        onClick={() =>
+                          handleDeleteListProject(Project.project_name)
+                        }
                       >
                         Delete
                       </button>
@@ -394,7 +471,7 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
             </tbody>
           </table>
           <div>
-            <button className="button-1"  onClick={handleOpenClick}>
+            <button className="button-1" onClick={handleOpenClick}>
               Open {selectedProject.project_name} Project
             </button>
             <button className="button-1" onClick={handleBackClick}>
@@ -405,23 +482,21 @@ const Home: React.FC<IProps> = ({ updateProjectNameAction, updateProjectDataActi
       )}
 
       {showDropZonePopup && (
-        <div className='ImagesDropZone' style={{
-          backgroundColor: "black",
-        }}>
-            <div {...getRootProps({className: 'DropZone'})}>
-                {getDropZoneContent()}
-            </div>
-            <div className='DropZoneButtons'>
-                <button
-                    onClick={startEditorWithObjectDetection}
-                />
-                <button
-                    onClick={startEditorWithImageRecognition}
-                />
-            </div>
+        <div
+          className="ImagesDropZone"
+          style={{
+            backgroundColor: "black",
+          }}
+        >
+          <div {...getRootProps({ className: "DropZone" })}>
+            {getDropZoneContent()}
+          </div>
+          <div className="DropZoneButtons">
+            <button onClick={startEditorWithObjectDetection} />
+            <button onClick={startEditorWithImageRecognition} />
+          </div>
         </div>
       )}
-      
     </div>
   );
 };
@@ -440,8 +515,8 @@ const mapDispatchToProps = {
 
 const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
+  projectName: state.user.project_name,
   projectData: state.general.projectData,
-
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

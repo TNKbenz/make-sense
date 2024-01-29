@@ -5,7 +5,7 @@ import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
 import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
-import { connect ,useSelector} from "react-redux";
+import { connect, useSelector } from "react-redux";
 import { updateProjectData } from "../../store/general/actionCreators";
 import { ProjectData } from "src/store/general/types";
 import { ImageDataUtil } from "../../utils/ImageDataUtil";
@@ -15,6 +15,7 @@ import {
   updateActiveImageIndex,
   updateLabelNames,
   updateImageData,
+  updateImageDataById,
 } from "../../store/labels/actionCreators";
 import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { ImageData, LabelName } from "../../store/labels/types";
@@ -31,6 +32,8 @@ interface IProps {
   updateModelNameAction: (modelname: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
+  updateImageDataById: (id: string, newImageData: ImageData) => any;
+  labelNames: LabelName[];
 }
 
 const Home: React.FC<IProps> = ({
@@ -43,6 +46,8 @@ const Home: React.FC<IProps> = ({
   updateModelNameAction,
   updateActiveImageIndexAction,
   updateLabelNamesAction,
+  updateImageDataById,
+  labelNames,
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: AppState) => state.user.username);
@@ -222,18 +227,48 @@ const Home: React.FC<IProps> = ({
         type: selectedProject.project_type,
       });
       updateActiveImageIndexAction(0);
-      addImageDataAction(
-        imageUrls.map((file: File) =>
-          ImageDataUtil.createImageDataFromFileData(file)
-        )
-      );
 
       // Add unique label names to label names list
       const unique_label = uniq(labels.map((label) => label.annotations[0]));
       console.log("unique_label:", unique_label);
-      updateLabelNamesAction(
-        unique_label.map((label) => LabelUtil.createLabelName(label))
+      const created_label = unique_label.map((label) =>
+        LabelUtil.createLabelName(label)
       );
+      console.log("Created Labels:", created_label);
+      updateLabelNamesAction(
+        // unique_label.map((label) => LabelUtil.createLabelName(label))
+        created_label
+      );
+
+      const labelMap = new Map(
+        created_label.map((label) => [label.name, label.id])
+      );
+      const labelarr = [];
+
+      for (let i = 0; i < labels.length; i++) {
+        const annotation = labels[i].annotations[0];
+        const labelId = labelMap.get(annotation);
+
+        if (labelId !== undefined) {
+          labelarr.push(labelId);
+        } else {
+          console.log("not match");
+        }
+      }
+      console.log("labelMap:", labelMap);
+      console.log("labelarr:", labelarr);
+
+      const ImageDataArr = [];
+      for (let i = 0; i < imageUrls.length; i++) {
+        const imgdata = ImageDataUtil.createImageDataFromFileDataWithLabel(
+          imageUrls[i],
+          labelarr[i]
+        );
+        ImageDataArr.push(imgdata);
+      }
+      console.log("ImageDataArr:", ImageDataArr);
+      addImageDataAction(ImageDataArr);
+
       console.log("add image file success");
       // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
     }
@@ -532,6 +567,7 @@ const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   projectName: state.user.project_name,
   projectData: state.general.projectData,
+  labelNames: state.labels.labels,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

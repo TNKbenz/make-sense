@@ -39,9 +39,18 @@ export type LabelName = {
   color?: string;
 };
 
+export type FileUrl = {
+  name: string;
+  url: string;
+};
+
+export const isFileUrl = (
+  fileData: File | string | FileUrl
+): fileData is FileUrl => (fileData as FileUrl).url !== undefined;
+
 export type ImageData = {
   id: string;
-  fileData: File | string;
+  fileData: File | string | FileUrl;
   loadStatus: boolean;
   labelRects: LabelRect[];
   labelPoints: LabelPoint[];

@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import { updateProjectData } from "../../store/general/actionCreators";
 import { ProjectData } from "src/store/general/types";
 import { ImageDataUtil } from "../../utils/ImageDataUtil";
+import { LabelUtil } from "../../utils/LabelUtil";
 import {
   addImageData,
   updateActiveImageIndex,
@@ -18,7 +19,7 @@ import {
 import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
-import { sortBy } from "lodash";
+import { sortBy, uniq } from "lodash";
 
 interface IProps {
   username: string;
@@ -184,7 +185,7 @@ const Home: React.FC<IProps> = ({
   const loadImagesFromBackend = async () => {
     const formData = new FormData();
     formData.append("username", username);
-    formData.append("project_name", projectName);
+    formData.append("project_name", selectedProject.project_name);
     const response = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/getimage`,
       formData
@@ -202,22 +203,31 @@ const Home: React.FC<IProps> = ({
     // }
     //
     // console.log(files);
-    return response.data.image_urls;
+    return {
+      imageUrls: response.data.image_urls,
+      labels: response.data.labels,
+    };
   };
 
   const startEditor2 = async (projectType: ProjectType) => {
-    const acceptedFiles = await loadImagesFromBackend();
-    if (acceptedFiles.length > 0) {
-      const files = sortBy(acceptedFiles, (item: File) => item.name);
+    const { imageUrls, labels } = await loadImagesFromBackend();
+    if (imageUrls.length > 0) {
       updateProjectDataAction({
         name: selectedProject.project_name,
         type: selectedProject.project_type,
       });
       updateActiveImageIndexAction(0);
       addImageDataAction(
-        files.map((file: File) =>
+        imageUrls.map((file: File) =>
           ImageDataUtil.createImageDataFromFileData(file)
         )
+      );
+
+      // Add unique label names to label names list
+      const unique_label = uniq(labels.map((label) => label.annotations[0]));
+      console.log("unique_label:", unique_label);
+      updateLabelNamesAction(
+        unique_label.map((label) => LabelUtil.createLabelName(label))
       );
       console.log("add image file success");
       // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);

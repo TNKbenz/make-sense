@@ -193,40 +193,46 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
             </tr>
           </thead>
           <tbody>
-            {ListModel.map((Model, index) => (
-              <tr
-                key={Model._id}
-                style={{
-                  backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                }}
-              >
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {Model.model_name}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  <button
-                    className="button-16"
-                    role="button"
-                    style={{
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                    }}
-                    onClick={() => handleSelectListModel(Model.model_name)}
-                  >
-                    Select
-                  </button>
-                  <button
-                    className="button-16"
-                    role="button"
-                    style={{
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                    }}
-                    onClick={() => handleDeleteListModel(Model.model_name)}
-                  >
-                    Delete
-                  </button>
-                </td>
+            {ListModel.length > 0 ? (
+              ListModel.map((Model, index) => (
+                <tr
+                  key={Model._id}
+                  style={{
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                  }}
+                >
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                    {Model.model_name}
+                  </td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                    <button
+                      className="button-16"
+                      role="button"
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                      }}
+                      onClick={() => handleSelectListModel(Model.model_name)}
+                    >
+                      Select
+                    </button>
+                    <button
+                      className="button-16"
+                      role="button"
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                      }}
+                      onClick={() => handleDeleteListModel(Model.model_name)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3">No Models available</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <div>
@@ -259,10 +265,12 @@ const Tab_Train: FC<IProps> = ({
 
   const togglePopupCreate = () => {
     setPopupCreate_Visible(!isPopupCreate_Visible);
+    setPopupSelect_Visible(false);
   };
 
   const togglePopupSelect = () => {
     setPopupSelect_Visible(!isPopupSelect_Visible);
+    setPopupCreate_Visible(false);
   };
 
   for (let i = 0; i < imageData.length; i++) {
@@ -393,7 +401,7 @@ const Tab_Train: FC<IProps> = ({
           value={learningRate}
           onChange={(e) => setLearningRate(e.target.value)}
         />
-        <button onClick={handleSubmit}>Train</button>
+        <button className="button-14" onClick={handleSubmit}>Train</button>
       </div>
     </Fragment>
   );

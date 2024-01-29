@@ -12,10 +12,14 @@
   margin: 10px;
   font-size: 16px;
   background-color: #d68383;
-  color: #000000;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.Home button:hover {
+  background-color: #af5555;
 }
 
 .Train h1 {

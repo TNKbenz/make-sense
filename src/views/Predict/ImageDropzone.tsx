@@ -2,25 +2,26 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie, Tooltip } from "recharts";
+import { PieChart, Pie, Tooltip,ResponsiveContainer } from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
 
 interface ImageDropzoneProps {
-  onUploadSuccess: (predictions: Predictions) => void;
+  onUploadSuccess: (predictions: Predictions[], index: number) => void;
   username: string;
   project_name: string;
   modelname: string;
 }
 
 type Predictions = {
-  [key: string]: number;
+  name: string;
+  value: number;
 };
 
 type PredictionsResult = {
-  predicted: List[number];
-  predicted_labels: List[string];
-  probabilities: List[List[number]];
+  predicted: number[];
+  predicted_labels: string[];
+  probabilities: number[][];
 };
 
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
@@ -28,9 +29,8 @@ const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username, project_name, modelname }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFilesUrls, setSelectedFilesUrls] = useState<string[]>([]);
-  const [predictions, setPredictions] = useState<Predictions | null>(null);
-  const [prob, setProb] = useState<number | null>(null);
-  const [predict_key, setPredict_key] = useState<string | null>(null);
+  const [predictions, setPredictions] = useState<Predictions[]>([]);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -50,79 +50,46 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
     },
   });
 
-  // const handleUpload = async () => {
-  //   for (let i = 0; i < selectedFiles.length; i++) {
-  //     const file = selectedFiles[i];
-  //     const formData = new FormData();
-  //     formData.append("bytefiles", file);
-  //     formData.append("username", username);
-  //     formData.append("project_name", project_name);
-  //     formData.append("modelname", modelname);
-
-  //     try {
-  //       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/uploadfile/`, formData);
-  //       const receivedPredictions: PredictionsResult = response.data;
-
-  //       setPredictions(receivedPredictions);
-  //       onUploadSuccess(receivedPredictions);
-  //       console.log("Receive prediction:", receivedPredictions);
-
-  //       const Predict_Key: string = Object.keys(receivedPredictions.probabilities).reduce(
-  //         (mostLikely, key) =>
-  //           receivedPredictions[key] > receivedPredictions[mostLikely]
-  //             ? key
-  //             : mostLikely,
-  //         Object.keys(receivedPredictions)[0]
-  //       );
-
-  //       setPredict_key(receivedPredictions.predicted_labels[0]);
-  //       setProb(Math.max(...receivedPredictions.probabilities[0]));
-  //       onUploadSuccess(Predict_Key);
-  //     } catch (error) {
-  //       console.error("Error uploading file:", error);
-  //     }
-  //   }
-  // };
-
   const handleUpload = async () => {
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i];
-      const formData = new FormData();
-      formData.append("bytefiles", file);
-      formData.append("username", username);
-      formData.append("project_name", project_name);
-      formData.append("modelname", modelname);
-  
-      try {
-        // สำหรับทดสอบเท่านั้น
-        const mockPredictions: PredictionsResult = {
-          predicted: [1, 2, 3],
-          predicted_labels: ["Label 1", "Label 2", "Label 3"],
-          probabilities: [[0.3, 0.4, 0.3]],
-        };
-        
-        // แทนที่ axios.post ด้วยข้อมูล mock
-        // const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/uploadfile/`, formData);
-        // const receivedPredictions: PredictionsResult = response.data;
-  
-        setPredictions(mockPredictions);
-        onUploadSuccess(mockPredictions);
-        console.log("Receive prediction:", mockPredictions);
-  
-        const Predict_Key: string = Object.keys(mockPredictions.probabilities).reduce(
-          (mostLikely, key) =>
-            mockPredictions[key] > mockPredictions[mostLikely]
-              ? key
-              : mostLikely,
-          Object.keys(mockPredictions)[0]
-        );
-  
-        setPredict_key(mockPredictions.predicted_labels[0]);
-        setProb(Math.max(...mockPredictions.probabilities[0]));
-        onUploadSuccess(Predict_Key);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      }
+    if (!modelname) {
+      setShowErrorPopup(true);
+      setTimeout(() => {
+        setShowErrorPopup(false);
+      }, 5000);
+      return;
+    }
+
+    try {
+      const predictionsResults: PredictionsResult[] = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const formData = new FormData();
+          formData.append("bytefiles", file);
+          formData.append("username", username);
+          formData.append("project_name", project_name);
+          formData.append("modelname", modelname);
+
+          const response = await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/uploadfile/`,
+            formData
+          );
+
+          return response.data;
+        })
+      );
+
+      setPredictions([]);
+
+      predictionsResults.forEach((receivedPredictions, index) => {
+        const predictionsData: Predictions = receivedPredictions.predicted_labels.map((label, labelIndex) => ({
+          name: label,
+          value: receivedPredictions.probabilities[labelIndex][0], 
+        }));
+        setPredictions([predictionsData]);
+        onUploadSuccess(predictionsData, index);
+      });
+
+    } catch (error) {
+      console.error("Error uploading file:", error);
     }
   };
 
@@ -171,58 +138,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
     });
   };
 
-//   return (
-//     <div>
-//       <div {...getRootProps()} className="image-dropzone">
-//         <input {...getInputProps()} />
-//         <p className="Predict-image-dropzone">Upload Image</p>
-//       </div>
-//       {selectedFilesUrls.length > 0 && (
-//         <div className="image-preview-container">
-//           {selectedFilesUrls.map((url, index) => (
-//             <div key={index} className={`image-preview_${selectedFilesUrls.length > 4 ? 0 : selectedFilesUrls.length % 4}`}>
-//               <p></p>
-//               <img src={url} alt={`Selected ${index + 1}`} className="Selected-Image" />
-//               <p>ไฟล์ที่เลือก: {selectedFiles[index].name}</p>
-//               <p>ประเภทไฟล์ที่เลือก: {selectedFiles[index].type}</p>
-
-//               {predictions && (
-//                 <div className="Predictions">
-//                   <h2>
-//                     คาดว่าเป็น: {predict_key} {prob * 100}%
-//                   </h2>
-//                   <div className="Chart">
-//                     <PieChart width={250} height={250}>
-//                       <Pie
-//                         data={Object.keys(predictions).map((key, index) => ({
-//                           name: key,
-//                           value: predictions[key],
-//                           fill: colors[index % colors.length],
-//                         }))}
-//                         cx="50%"
-//                         cy="50%"
-//                         innerRadius={25}
-//                         outerRadius={50}
-//                         dataKey="value"
-//                         label={true}
-//                       ></Pie>
-//                       <Tooltip formatter={(value, name) => [value, name]} />
-//                     </PieChart>
-//                   </div>
-//                 </div>
-//               )}
-
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//       <div>
-//         <button className="PredictButton" onClick={handleUpload}>Predict</button>
-//       </div>
-//     </div>
-//   );
-// };
-
   function truncateFileName(fileName: string, maxLength: number): string {
     return fileName.length > maxLength ? `${fileName.substring(0, maxLength)}...` : fileName;
   };
@@ -243,33 +158,37 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
                   <img src={url} alt={`Selected ${index + 1}`} className="Selected-Image" />
                   <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[index].name, 30)}</p>
                   <p>ประเภทไฟล์ที่เลือก: {selectedFiles[index].type}</p>
-                  <div className="col-right">
-                    {predictions && (
-                      <div className="Predictions">
-                        <h2>
-                          คาดว่าเป็น: {predict_key} {prob * 100}%
-                        </h2>
-                        <div className="Chart">
-                          <PieChart width={250} height={250}>
-                            <Pie
-                              data={Object.keys(predictions).map((key, index) => ({
-                                name: key,
-                                value: predictions[key],
-                                fill: colors[index % colors.length],
-                              }))}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={25}
-                              outerRadius={50}
-                              dataKey="value"
-                              label={true}
-                            ></Pie>
-                            <Tooltip formatter={(value, name) => [value, name]} />
-                          </PieChart>
+                  {predictions.length > 0 && (
+                  <div className="row">
+                    {predictions.map((prediction, index) => (
+                      <div key={index} className={`col-left image-preview_${predictions.length > 2 ? 0 : predictions.length % 2}`}>
+                        <div className="Predictions">
+                          <h2>
+                            คาดว่าเป็น: {prediction[index].name} {prediction[index].value * 100}%
+                          </h2>
+                          <div className="Chart">
+                          <ResponsiveContainer width="100%" height={200}>
+                            <PieChart width={200} height={200}>
+                              <Pie
+                                dataKey="value"
+                                isAnimationActive={true}
+                                data={prediction}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={0}
+                                outerRadius={100}
+                                fill={colors[index % colors.length]}
+                                label
+                              />
+                              <Tooltip />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          </div>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
+                )}
                 </div>
               ))}
             </div>
@@ -279,9 +198,17 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
       <div>
         <button className="PredictButton" onClick={handleUpload}>Predict</button>
       </div>
+      {showErrorPopup && (
+        <div >
+          <p style={{ color: 'red' }}>
+            please select model.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
+
 const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   project_name: state.user.project_name,

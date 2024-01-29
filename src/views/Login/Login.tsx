@@ -144,6 +144,7 @@ const Login: React.FC<IProps> = ({ updateUserLoginAction }) => {
 
           <div>
             <button onClick={handleRegister}>Register</button>
+            <button onClick={handleToggleMode}>Back</button>
           </div>
         </div>
       )}

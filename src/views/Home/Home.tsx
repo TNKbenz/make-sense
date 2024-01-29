@@ -5,7 +5,7 @@ import "./Home.scss";
 import { updateProjectName } from "../../store/users/actionCreators";
 import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
-import { connect } from "react-redux";
+import { connect ,useSelector} from "react-redux";
 import { updateProjectData } from "../../store/general/actionCreators";
 import { ProjectData } from "src/store/general/types";
 import { ImageDataUtil } from "../../utils/ImageDataUtil";
@@ -44,6 +44,7 @@ const Home: React.FC<IProps> = ({
   updateLabelNamesAction,
 }) => {
   const navigate = useNavigate();
+  const user = useSelector((state: AppState) => state.user.username);
   const [showMainPopup, setShowMainPopup] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showListProjectPopup, setShowListProjectPopup] = useState(false);
@@ -56,8 +57,12 @@ const Home: React.FC<IProps> = ({
   const [showErrorPopup, setShowErrorPopup] = useState(false);
 
   useEffect(() => {
-    fetchListProject();
-  }, []);
+    if (!user) {
+      navigate("/login");
+    } else {
+      fetchListProject();
+    }
+  }, [user]);
 
   const fetchListProject = async () => {
     try {

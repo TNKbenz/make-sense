@@ -18,14 +18,34 @@
 
 .TrainButton {
   padding: 10px 20px;
-  margin: 10px;
+  margin: 5px;
   font-size: 16px;
   background-color: #d68383;
-  color: #000000;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   
+}
+
+.TrainButton:hover {
+  background-color: #af5555;
+}
+
+.PredictButton {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
+
+.PredictButton:hover {
+  background-color: #0056b3;
 }
 
   .Predict h2 {
@@ -34,12 +54,12 @@
   }
 
   .Predict-Home {
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     text-align: left; 
   }
 
   .Predict-Train {
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     text-align: right; 
   }
 
@@ -47,7 +67,7 @@
     border: 2px dashed white;
     padding: 20px;
     text-align: center;
-    margin-top: 20px;
+    margin-top: 5px;
     border-radius: 5px;
   }
 
@@ -62,9 +82,72 @@
   }
   
   .image-dropzone p {
-    margin: 0; 
+    border: 2px solid #ccc; /* กำหนด border */
+    padding: 10px;
   }
   
   .image-dropzone button {
     margin-top: 10px; 
   }
+
+  .ImageDropzoneContainerWrapper {
+    width: 70%;
+    margin: auto;
+    border: 2px solid #ccc; /* กำหนด border */
+    padding: 10px; /* กำหนด padding */
+  }
+  
+  .image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px solid #ccc; /* กำหนด border */
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .image-preview_1 {
+    flex: 0 0 calc(100% - 10px); 
+    margin: 5px;
+    text-align: center;
+  }
+
+  .image-preview_0 {
+    flex: 0 0 calc(50% - 10px); 
+    margin: 5px;
+    text-align: center;
+  }
+
+  .Selected-Image {
+    max-width: 100%;
+    max-height: 200px;
+    margin-bottom: 5px;
+  }
+  
+/* .Predictions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+} */
+
+.row {
+  display: flex;
+}
+
+.col-left {
+  flex: 1;
+}
+
+.col-right {
+  flex: 1;
+  margin-left: 20px; /* ระยะห่างระหว่างสองคอลัมน์ */
+}
+
+.Predictions {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.Chart {
+  margin-top: 15px;
+}

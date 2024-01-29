@@ -2,9 +2,18 @@ import React from 'react';
 import ImageDropzone from './ImageDropzone';
 import { useNavigate } from 'react-router-dom';
 import './Predict.css';
+import { AppState } from "src/store";
+import { connect } from "react-redux";
 
 
-const Predict: React.FC = () => {
+interface PredictProps {
+  username: string
+  project_name: string
+  modelname: string
+}
+
+
+const Predict: React.FC<PredictProps > = ({ username, project_name, modelname }) => {
   const navigate = useNavigate();
 
   const handleSelectModelClick = () => {
@@ -24,12 +33,20 @@ const Predict: React.FC = () => {
       </div>
       <div className='Predict'><h2>Welcome to Predict Page </h2></div>
       <button onClick={handleSelectModelClick}>Select Existing Model</button>
-      <h2>Current Model Name</h2>
-      <div className="ImageDropzoneContainer">
-        <ImageDropzone onUploadSuccess={handleUpload} />
+      <h2>Current Model {modelname}</h2>
+      <div className="ImageDropzoneContainerWrapper">
+        <div className="ImageDropzoneContainer">
+          <ImageDropzone onUploadSuccess={handleUpload} />
+        </div>
       </div>
     </div>
   );
 };
 
-export default Predict;
+const mapStateToProps = (state: AppState) => ({
+  username: state.user.username,
+  project_name: state.user.project_name,
+  modelname: state.user.modelname,
+});
+
+export default connect(mapStateToProps)(Predict);

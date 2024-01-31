@@ -128,6 +128,11 @@ const Home: React.FC<IProps> = ({
           import.meta.env.VITE_BACKEND_URL
         }/project/delete/?username=${username}&project_name=${project_name}`
       );
+      await axios.delete(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/deletefolder/?username=${username}&project_name=${project_name}`
+      );
       const updatedList = ListProject.filter(
         (Project) => Project.project_name !== project_name
       );
@@ -200,19 +205,6 @@ const Home: React.FC<IProps> = ({
       `${import.meta.env.VITE_BACKEND_URL}/getimage`,
       formData
     );
-
-    // const files: File[] = [];
-    // for (const r of response.data.image_urls) {
-    //   const imageName = r.split("=").pop();
-    //   const imgRespose = await axios.get(r);
-    //   const blob = new Blob([imgRespose.data]);
-    //   const file = new File([blob], imageName);
-    //
-    //   localStorage.setItem(file.name, JSON.stringify(file));
-    //   files.push(file);
-    // }
-    //
-    // console.log(files);
     return {
       imageUrls: response.data.image_urls,
       labels: response.data.labels,

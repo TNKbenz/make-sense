@@ -1,4 +1,4 @@
-import { ImageData } from "../store/labels/types";
+import { FileUrl, ImageData } from "../store/labels/types";
 import { v4 as uuidv4 } from "uuid";
 import { FileUtil } from "./FileUtil";
 import { ImageRepository } from "../logic/imageRepository/ImageRepository";
@@ -22,7 +22,7 @@ export class ImageDataUtil {
   }
 
   public static createImageDataFromFileDataWithLabel(
-    fileData: File,
+    fileData: File | string | FileUrl,
     label
   ): ImageData {
     return {

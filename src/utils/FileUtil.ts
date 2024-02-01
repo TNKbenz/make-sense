@@ -1,3 +1,5 @@
+import { FileUrl, isFileUrl } from "../store/labels/types";
+
 export class FileUtil {
   public static loadImageBase64(fileData: File): Promise<string | ArrayBuffer> {
     return new Promise((resolve, reject) => {
@@ -8,7 +10,12 @@ export class FileUtil {
     });
   }
 
-  public static loadImage(fileData: File | string): Promise<HTMLImageElement> {
+  public static loadImage(
+    fileData: File | string | FileUrl
+  ): Promise<HTMLImageElement> {
+    if (isFileUrl(fileData)) {
+      return FileUtil.loadImageFromBackendFileUrl(fileData);
+    }
     switch (typeof fileData) {
       case "string": {
         return FileUtil.loadImageFromBackend(fileData);
@@ -34,12 +41,23 @@ export class FileUtil {
     });
   }
 
+  public static loadImageFromBackendFileUrl(
+    fileUrl: FileUrl
+  ): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.src = fileUrl.url;
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+    });
+  }
+
   public static loadImages(
-    fileData: (File | string)[]
+    fileData: (File | string | FileUrl)[]
   ): Promise<HTMLImageElement[]> {
     return new Promise((resolve, reject) => {
       const promises: Promise<HTMLImageElement>[] = fileData.map(
-        (data: File | string) => FileUtil.loadImage(data)
+        (data: File | string | FileUrl) => FileUtil.loadImage(data)
       );
       Promise.all(promises)
         .then((values: HTMLImageElement[]) => resolve(values))

@@ -18,7 +18,7 @@ import {
   updateImageDataById,
 } from "../../store/labels/actionCreators";
 import { useDropzone, DropzoneOptions } from "react-dropzone";
-import { ImageData, LabelName } from "../../store/labels/types";
+import { FileUrl, ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
 import { sortBy, uniq } from "lodash";
 
@@ -205,8 +205,16 @@ const Home: React.FC<IProps> = ({
       `${import.meta.env.VITE_BACKEND_URL}/getimage`,
       formData
     );
+
+    const fileUrls = response.data.image_urls.map((img: string): FileUrl => {
+      return {
+        url: img,
+        name: img.split("=").pop(),
+      };
+    });
+    console.log(fileUrls);
     return {
-      imageUrls: response.data.image_urls,
+      imageUrls: fileUrls,
       labels: response.data.labels,
     };
   };

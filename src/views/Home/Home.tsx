@@ -73,7 +73,7 @@ const Home: React.FC<IProps> = ({
   const fetchListProject = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/project/all/?username=${username}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/all?username=${username}`
       );
 
       setListProject(response.data);
@@ -126,12 +126,12 @@ const Home: React.FC<IProps> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${project_name}`
+        }/project/delete?username=${username}&project_name=${project_name}`
       );
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/deletefolder/?username=${username}&project_name=${project_name}`
+        }/deletefolder?username=${username}&project_name=${project_name}`
       );
       const updatedList = ListProject.filter(
         (Project) => Project.project_name !== project_name

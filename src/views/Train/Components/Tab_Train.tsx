@@ -51,10 +51,10 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
       await axios.post(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`
+        }/model?username=${username}&project_name=${project_name}&model_name=${newModel}`
       );
       updateModelNameAction(newModel);
-      setNewModel("default")
+      setNewModel("default");
     } catch (error) {
       console.error("Error adding ListProject:", error);
     }
@@ -114,7 +114,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}`
+        }/model?username=${username}&project_name=${project_name}`
       );
       setListModel(response.data);
     } catch (error) {
@@ -124,7 +124,9 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
 
   const handleSelectListModel = (model_name) => {
     try {
-      const selected = ListModel.find((Model) => Model.model_name === model_name);
+      const selected = ListModel.find(
+        (Model) => Model.model_name === model_name
+      );
       setSelectedModel(selected);
       console.log("Selected Project:", model_name);
     } catch (error) {
@@ -137,11 +139,11 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}&model_name=${
-          model_name
-        }`
+        }/model?username=${username}&project_name=${project_name}&model_name=${model_name}`
       );
-      const updatedList = ListModel.filter(Model => Model.model_name !== model_name);
+      const updatedList = ListModel.filter(
+        (Model) => Model.model_name !== model_name
+      );
       setListModel(updatedList);
       fetchListModel();
     } catch (error) {
@@ -209,7 +211,8 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleSelectListModel(Model.model_name)}
                     >
@@ -219,7 +222,8 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleDeleteListModel(Model.model_name)}
                     >
@@ -274,8 +278,8 @@ const Tab_Train: FC<IProps> = ({
   };
 
   for (let i = 0; i < imageData.length; i++) {
-    let id = imageData[i]["labelNameIds"][0];
-    let name = LabelsSelector.getLabelNameById(id)["name"];
+    const id = imageData[i]["labelNameIds"][0];
+    const name = LabelsSelector.getLabelNameById(id)["name"];
     labels.push(name);
   }
 
@@ -401,7 +405,9 @@ const Tab_Train: FC<IProps> = ({
           value={learningRate}
           onChange={(e) => setLearningRate(e.target.value)}
         />
-        <button className="button-14" onClick={handleSubmit}>Train</button>
+        <button className="button-14" onClick={handleSubmit}>
+          Train
+        </button>
       </div>
     </Fragment>
   );

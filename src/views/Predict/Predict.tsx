@@ -1,27 +1,24 @@
 import React, { useState, useEffect } from "react";
-import ImageDropzone from './ImageDropzone';
-import { useNavigate } from 'react-router-dom';
-import './Predict.css';
+import ImageDropzone from "./ImageDropzone";
+import { useNavigate } from "react-router-dom";
+import "./Predict.css";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
 import axios from "axios";
 import { updateModelName } from "../../store/users/actionCreators";
 
-
-
 interface PredictProps {
-  username: string
-  project_name: string
-  modelname: string 
-  updateModelNameAction: (modelname: string) => void; 
+  username: string;
+  project_name: string;
+  modelname: string;
+  updateModelNameAction: (modelname: string) => void;
 }
-
 
 const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
   onClose,
   username,
   project_name,
-  updateModelNameAction
+  updateModelNameAction,
 }) => {
   const [ListModel, setListModel] = useState([]);
   const [selectedModel, setSelectedModel] = useState("");
@@ -35,7 +32,7 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}`
+        }/model?username=${username}&project_name=${project_name}`
       );
       setListModel(response.data);
     } catch (error) {
@@ -45,7 +42,9 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
 
   const handleSelectListModel = (model_name) => {
     try {
-      const selected = ListModel.find((Model) => Model.model_name === model_name);
+      const selected = ListModel.find(
+        (Model) => Model.model_name === model_name
+      );
       if (selected) {
         setSelectedModel(selected);
         console.log("Selected Project:", model_name);
@@ -62,11 +61,11 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}&model_name=${
-          model_name
-        }`
+        }/model?username=${username}&project_name=${project_name}&model_name=${model_name}`
       );
-      const updatedList = ListModel.filter(Model => Model.model_name !== model_name);
+      const updatedList = ListModel.filter(
+        (Model) => Model.model_name !== model_name
+      );
       setListModel(updatedList);
       fetchListModel();
     } catch (error) {
@@ -134,7 +133,8 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleSelectListModel(Model.model_name)}
                     >
@@ -144,7 +144,8 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleDeleteListModel(Model.model_name)}
                     >
@@ -173,8 +174,12 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
   );
 };
 
-
-const Predict: React.FC<PredictProps > = ({ username, project_name, modelname,updateModelNameAction }) => {
+const Predict: React.FC<PredictProps> = ({
+  username,
+  project_name,
+  modelname,
+  updateModelNameAction,
+}) => {
   const navigate = useNavigate();
   const [isPopupSelect_Visible, setPopupSelect_Visible] = useState(false);
 
@@ -189,31 +194,37 @@ const Predict: React.FC<PredictProps > = ({ username, project_name, modelname,up
   };
 
   const handleUpload = (imageUrl: string) => {
-    console.log('อัพโหลดไฟล์สำเร็จ รูปภาพอยู่ที่:', imageUrl);
+    console.log("อัพโหลดไฟล์สำเร็จ รูปภาพอยู่ที่:", imageUrl);
   };
 
   return (
     <div className="Predict">
       <div className="ButtonContainer">
-        <button className="TrainButton" onClick={() => navigate('/')}>Home</button>
-        <button className="TrainButton" onClick={() => navigate('/train')} >Train</button>
+        <button className="TrainButton" onClick={() => navigate("/")}>
+          Home
+        </button>
+        <button className="TrainButton" onClick={() => navigate("/train")}>
+          Train
+        </button>
       </div>
-      <div className='Predict'><h2>Welcome to Predict Page </h2></div>
+      <div className="Predict">
+        <h2>Welcome to Predict Page </h2>
+      </div>
       <button onClick={handleSelectModelClick}>Select Existing Model</button>
       <h2>Current Model {modelname}</h2>
       <div className="ImageDropzoneContainerWrapper">
         <div className="ImageDropzoneContainer">
           <ImageDropzone onUploadSuccess={handleUpload} />
         </div>
-          {isPopupSelect_Visible && (
-            <PopupSelect
-              onClose={() => togglePopupSelect()}
-              modelname={modelname}
-              project_name={project_name}
-              username={username}
-              updateModelNameAction={updateModelNameAction}
-            />
-          )}
+        {isPopupSelect_Visible && (
+          <PopupSelect
+            onClose={() => togglePopupSelect()}
+            modelname={modelname}
+            project_name={project_name}
+            username={username}
+            updateModelNameAction={updateModelNameAction}
+          />
+        )}
       </div>
     </div>
   );

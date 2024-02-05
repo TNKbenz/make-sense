@@ -4,6 +4,7 @@ export type UserState = {
   username: string,
   project_name: string,
   modelname: string
+  modeltype: string
 }
 
 interface UpdateUsername {
@@ -27,4 +28,11 @@ interface UpdateModelname {
   }
 }
 
-export type UserActionType = UpdateUsername | UpdateModelname | UpdateProjectName
+interface UpdateModelType {
+  type: typeof Action.UPDATE_MODELTYPE;
+  payload: {
+    modeltype: string
+  }
+}
+
+export type UserActionType = UpdateUsername | UpdateModelname | UpdateProjectName | UpdateModelType

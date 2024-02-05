@@ -4,7 +4,8 @@ import { UserAction, UserState } from "./types";
 const initialState: UserState = {
   username: "",
   project_name: "",
-  modelname: ""
+  modelname: "",
+  modeltype: ""
 };
 
 export function userReducer(
@@ -28,6 +29,12 @@ export function userReducer(
       return {
         ...state,
         modelname: action.payload.modelname
+      }
+    }
+    case Action.UPDATE_MODELTYPE: {
+      return {
+        ...state,
+        modeltype: action.payload.modeltype
       }
     }
     default:

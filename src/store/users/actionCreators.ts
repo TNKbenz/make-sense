@@ -27,3 +27,13 @@ export function updateModelName(modelname: string): UserActionType {
     }
   }
 }
+
+export function updateModelType(modeltype: string): UserActionType {
+  return {
+    type: Action.UPDATE_MODELTYPE,
+    payload: {
+      modeltype
+    }
+  }
+}
+

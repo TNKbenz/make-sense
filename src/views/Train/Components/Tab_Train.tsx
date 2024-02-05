@@ -24,6 +24,7 @@ interface IProps {
   ) => NotificationsActionType;
   updateModelNameAction: (modelname: string) => void;
   projectData: ProjectData;
+  activeLabelType: string;
 }
 
 const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
@@ -35,6 +36,7 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
   project_name,
   updateModelNameAction,
   projectData,
+  activeLabelType,
 }) => {
   const [newModel, setNewModel] = useState("default");
 
@@ -259,6 +261,7 @@ const Tab_Train: FC<IProps> = ({
   username,
   project_name,
   updateModelNameAction,
+  activeLabelType,
 }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
@@ -304,7 +307,7 @@ const Tab_Train: FC<IProps> = ({
       formData.append("lr", learningRate);
       formData.append("username", username);
       formData.append("project_name", project_name || "p1");
-      formData.append("modelname", modelname || "mt1");
+      formData.append("modelname", modelname || "default");
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -317,15 +320,24 @@ const Tab_Train: FC<IProps> = ({
         })
       );
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/train/`,
-        formData
-      );
+      let response;
+      if (activeLabelType === "IMAGE RECOGNITION") {
+        response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/train/`,
+          formData
+        );
+      } else {
+        response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/object/train`,
+          formData
+        );
+      }
+
       console.log(response.data);
       submitNewNotificationAction(
         NotificationUtil.createSuccessNotification({
-          header: "Training success",
-          description: "Model trained successfully",
+          header: "Training is running",
+          description: "Model is training",
         })
       );
     } catch (error) {
@@ -419,6 +431,7 @@ const mapStateToProps = (state: AppState) => ({
   modelname: state.user.modelname,
   project_name: state.user.project_name,
   projectData: state.general.projectData,
+  activeLabelType: state.labels.activeLabelType,
 });
 
 const mapDispatchToProps = {

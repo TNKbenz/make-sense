@@ -45,16 +45,27 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      const resizedImages = await Promise.all(
-        acceptedFiles.map(async (file) =>
-          resizeImage(file, activeLabelType === "IMAGE RECOGNITION" ? 250 : 500, 500)
-        )
-      );
+      if (activeLabelType === "IMAGE RECOGNITION"){
+        const resizedImages = await Promise.all(
+          acceptedFiles.map(async (file) => await resizeImage(file, 250, 250))
+        );  
 
-      setSelectedFiles(resizedImages);
-      setSelectedFilesUrls(resizedImages.map((img) => URL.createObjectURL(img)));
+        setSelectedFiles(resizedImages);
+        setSelectedFilesUrls(
+        resizedImages.map((img) => URL.createObjectURL(img))
+      );
+      } else {
+        const resizedImages = await Promise.all(
+          acceptedFiles.map(async (file) => await resizeImage(file, 500, 500))
+        );  
+
+        setSelectedFiles(resizedImages);
+        setSelectedFilesUrls(
+        resizedImages.map((img) => URL.createObjectURL(img))
+      );
+      }
     }
-  }, [activeLabelType]);
+  }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -64,15 +75,15 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   });
 
   const handleUpload = async () => {
-    if (!modelname) {
-      setShowErrorPopup(true);
-      setTimeout(() => {
-        setShowErrorPopup(false);
-      }, 5000);
-      return;
-    }
-
     try {
+      if (!modelname) {
+        setShowErrorPopup(true);
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 5000);
+        return;
+      }
+  
       const predictionsResults: PredictionsResult[] = await Promise.all(
         selectedFiles.map(async (file) => {
           const formData = new FormData();
@@ -80,8 +91,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           formData.append("username", username);
           formData.append("project_name", project_name);
           formData.append("modelname", modelname);
-
+  
           let response;
+  
           if (activeLabelType === "IMAGE RECOGNITION") {
             response = await axios.post(
               `${import.meta.env.VITE_BACKEND_URL}/uploadfile/`,
@@ -93,52 +105,50 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
               formData
             );
           }
-
+  
           return response.data;
         })
       );
-
-      setPredictions((prevPredictions) => {
-        const newPredictions: any[] = [];
-
-        predictionsResults.forEach((receivedPredictions, index) => {
-          if (activeLabelType === "IMAGE RECOGNITION") {
-            const predictionsData: Predictions = receivedPredictions.predicted_labels.map(
-              (label, labelIndex) => ({
-                name: label,
-                value: receivedPredictions.probabilities[labelIndex][0],
-              })
-            );
-            newPredictions.push(predictionsData);
-            onUploadSuccess(predictionsData, index);
-          } else {
-            const predictionsData = receivedPredictions.map((prediction) => ({
-              boxes: prediction.boxes.map((box, index) => {
-                const [x, y, width, height] = box;
-                const coord = [x, y, width, height];
-                const label = prediction.classes[index].toString(); // Assuming you want the class as the label
-                return { coord, label };
-              }),
-              path: prediction.path,
-              options: {
-                colors: {
-                  normal: "rgba(255,225,255,1)",
-                  selected: "rgba(0,225,204,1)",
-                  unselected: "rgba(100,100,100,1)"
-                },
-                style: {
-                  maxWidth: "100%",
-                  maxHeight: "90vh"
-                }
-                // showLabels: false
-              }
-            }));
-            newPredictions.push(predictionsData);
-            onUploadSuccess(predictionsData, index);
-          }
-        });
-
-        return prevPredictions.concat(newPredictions);
+  
+      predictionsResults.forEach((receivedPredictions, index) => {
+        if (activeLabelType === "IMAGE RECOGNITION") {
+          console.log("Predict CLASS");
+          const predictionsData: Predictions = receivedPredictions.predicted_labels.map(
+            (label, labelIndex) => ({
+              name: label,
+              value: receivedPredictions.probabilities[labelIndex][0],
+            })
+          );
+          setPredictions([predictionsData]);
+          onUploadSuccess(predictionsData, index);
+        } else {
+          console.log("Predict OBJECT");
+          const predictionsData = receivedPredictions.map((prediction) => ({
+            boxes: prediction.boxes.map((box, index) => {
+              const [x, y, width, height] = box;
+              const coord = [x, y, width, height];
+              const label = prediction.classes[index].toString();
+              return { coord, label };
+            }),
+            path: prediction.path,
+            options: {
+              colors: {
+                normal: "rgba(255, 225, 255, 1)",
+                selected: "rgba(0, 225, 204, 1)",
+                unselected: "rgba(100, 100, 100, 1)",
+              },
+              style: {
+                maxWidth: "100%",
+                maxHeight: "90vh",
+              },
+            },
+          }));
+          setPredictions((prevPredictions) => [
+            ...prevPredictions,
+            ...predictionsData,
+          ]);
+          onUploadSuccess(predictionsData, index);
+        }
       });
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -209,22 +219,36 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
               {selectedFilesUrls.map((url, index) => (
                 <div
                   key={index}
-                  className={`image-preview_${selectedFilesUrls.length > 2 ? 0 : selectedFilesUrls.length % 2}`}
+                  className={`image-preview_${
+                    selectedFilesUrls.length > 2
+                      ? 0
+                      : selectedFilesUrls.length % 2
+                  }`}
                 >
                   <p></p>
-                  <img src={url} alt={`Selected ${index + 1}`} className="Selected-Image" />
-                  <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[index].name, 30)}</p>
+                  <img
+                    src={url}
+                    alt={`Selected ${index + 1}`}
+                    className="Selected-Image"
+                  />
+                  <p>
+                    ไฟล์ที่เลือก:{" "}
+                    {truncateFileName(selectedFiles[index].name, 30)}
+                  </p>
                   <p>ประเภทไฟล์ที่เลือก: {selectedFiles[index].type}</p>
                   {predictions.length > 0 && (
                     <div className="row">
                       {predictions.map((prediction, index) => (
                         <div
                           key={index}
-                          className={`col-left image-preview_${predictions.length > 2 ? 0 : predictions.length % 2}`}
+                          className={`col-left image-preview_${
+                            predictions.length > 2 ? 0 : predictions.length % 2
+                          }`}
                         >
                           <div className="Predictions">
                             <h2>
-                              คาดว่าเป็น: {prediction.name} {prediction.value * 100}%
+                              คาดว่าเป็น: {prediction[index].name}{" "}
+                              {prediction[index].value * 100}%
                             </h2>
                             <div className="Chart">
                               <ResponsiveContainer width="100%" height={200}>

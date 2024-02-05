@@ -2,7 +2,7 @@ import React, { useState, useEffect, PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
-import { updateProjectName } from "../../store/users/actionCreators";
+import { updateProjectName,updateModelType } from "../../store/users/actionCreators";
 import { updateModelName } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect, useSelector } from "react-redux";
@@ -30,6 +30,7 @@ interface IProps {
   updateImageDataAction: (imageData: ImageData[]) => void;
   updateActiveImageIndexAction: (activeImageIndex: number) => any;
   updateModelNameAction: (modelname: string) => void;
+  updateModelTypeAction: (modeltype: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
   updateImageDataById: (id: string, newImageData: ImageData) => any;
@@ -44,6 +45,7 @@ const Home: React.FC<IProps> = ({
   projectName,
   addImageDataAction,
   updateModelNameAction,
+  updateModelTypeAction,
   updateActiveImageIndexAction,
   updateLabelNamesAction,
   updateImageDataById,
@@ -107,7 +109,7 @@ const Home: React.FC<IProps> = ({
       });
       fetchListProject();
       updateProjectNameAction(newProject);
-      updateModelNameAction(selectedOption);
+      updateModelTypeAction(selectedOption);
       updateProjectDataAction({
         type: null,
         name: newProject,
@@ -142,15 +144,6 @@ const Home: React.FC<IProps> = ({
       console.error("Error deleting ListProject:", error);
     }
   };
-
-  // const handleGetImages = async (projectId) => {
-  //   try{
-  //     const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
-  //     setImageData(response.data.imageData)
-  //   } catch(error) {
-  //     console.error('Error getting Images:', error);
-  //   }
-  // }
 
   const handleCreateProjectClick = () => {
     setShowMainPopup(false);
@@ -274,22 +267,22 @@ const Home: React.FC<IProps> = ({
     }
   };
 
-  const startEditor = (projectType: ProjectType) => {
-    if (acceptedFiles.length > 0) {
-      const files = sortBy(acceptedFiles, (item: File) => item.name);
-      updateProjectDataAction({
-        name: selectedProject.project_name,
-        type: selectedProject.project_type,
-      });
-      updateActiveImageIndexAction(0);
-      addImageDataAction(
-        files.map((file: File) =>
-          ImageDataUtil.createImageDataFromFileData(file),
-        ),
-      );
-      // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
-    }
-  };
+  // const startEditor = (projectType: ProjectType) => {
+  //   if (acceptedFiles.length > 0) {
+  //     const files = sortBy(acceptedFiles, (item: File) => item.name);
+  //     updateProjectDataAction({
+  //       name: selectedProject.project_name,
+  //       type: selectedProject.project_type,
+  //     });
+  //     updateActiveImageIndexAction(0);
+  //     addImageDataAction(
+  //       files.map((file: File) =>
+  //         ImageDataUtil.createImageDataFromFileData(file),
+  //       ),
+  //     );
+  //     // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+  //   }
+  // };
 
   const handleOpenClick = async () => {
     if (selectedProject) {
@@ -311,7 +304,7 @@ const Home: React.FC<IProps> = ({
         });
         updateImageDataAction([]);
         // getDropZoneContent();
-        await startEditorWithImageRecognition2();
+        await startEditorWithImageRecognition2(selectedProject.project_type);
         // updateImageDataAction(imageData)
         navigate("/home");
       } else {
@@ -355,12 +348,18 @@ const Home: React.FC<IProps> = ({
       );
   };
 
-  const startEditorWithObjectDetection = () =>
-    startEditor(ProjectType.OBJECT_DETECTION);
-  const startEditorWithImageRecognition = () =>
-    startEditor(ProjectType.IMAGE_RECOGNITION);
-  const startEditorWithImageRecognition2 = () =>
-    startEditor2(ProjectType.IMAGE_RECOGNITION);
+  // const startEditorWithObjectDetection = () =>
+  //   startEditor(ProjectType.OBJECT_DETECTION);
+  // const startEditorWithImageRecognition = () =>
+  //   startEditor(ProjectType.IMAGE_RECOGNITION);
+  const startEditorWithImageRecognition2 = (project_type) => {
+    if (project_type === "IMAGE_RECOGNITION") {
+      startEditor2(ProjectType.IMAGE_RECOGNITION);
+    }
+    else {
+      startEditor2(ProjectType.OBJECT_DETECTION);
+    }
+  }
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -561,6 +560,7 @@ const mapDispatchToProps = {
   addImageDataAction: addImageData,
   updateModelNameAction: updateModelName,
   updateLabelNamesAction: updateLabelNames,
+  updateModelTypeAction: updateModelType,
 };
 
 const mapStateToProps = (state: AppState) => ({

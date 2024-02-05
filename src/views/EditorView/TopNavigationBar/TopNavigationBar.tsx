@@ -29,6 +29,7 @@ interface IProps {
   projectData: ProjectData;
   imageData: ImageData[];
   modelname: string;
+  modeltype: string;
   username: string;
   project_name: string;
   submitNewNotificationAction: (
@@ -167,6 +168,7 @@ const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   imageData: state.labels.imagesData,
   modelname: state.user.modelname,
+  modeltype: state.user.modeltype,
   project_name: state.user.project_name,
 });
 

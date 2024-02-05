@@ -11,6 +11,7 @@ interface PredictProps {
   username: string;
   project_name: string;
   modelname: string;
+  modeltype: string 
   updateModelNameAction: (modelname: string) => void;
 }
 
@@ -237,6 +238,7 @@ const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   project_name: state.user.project_name,
   modelname: state.user.modelname,
+  modeltype: state.user.modeltype,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Predict);

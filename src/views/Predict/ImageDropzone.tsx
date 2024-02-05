@@ -5,7 +5,7 @@ import "./Predict.css";
 import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
-import Boundingbox from "react-bounding-box";
+// import Boundingbox from "react-bounding-box";
 
 // Assuming you have defined these types
 interface ImageDropzoneProps {

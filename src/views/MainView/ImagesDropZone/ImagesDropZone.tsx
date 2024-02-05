@@ -18,6 +18,7 @@ interface IProps {
     addImageDataAction: (imageData: ImageData[]) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
+    modeltype: string;
     projectData: ProjectData;
 }
 
@@ -88,12 +89,12 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
             <div className='DropZoneButtons'>
                 <TextButton
                     label={'Object Detection'}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={(!acceptedFiles.length) || (props.modeltype !== "OBJECT_DETECTION")}
                     onClick={startEditorWithObjectDetection}
                 />
                 <TextButton
                     label={'Image recognition'}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={(!acceptedFiles.length) || (props.modeltype !== "IMAGE_RECOGNITION")}
                     onClick={startEditorWithImageRecognition}
                 />
             </div>
@@ -109,7 +110,8 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectData: state.general.projectData
+    projectData: state.general.projectData,
+    modeltype: state.user.modeltype
 });
 
 export default connect(

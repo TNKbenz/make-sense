@@ -352,8 +352,9 @@ const Home: React.FC<IProps> = ({
   //   startEditor(ProjectType.OBJECT_DETECTION);
   // const startEditorWithImageRecognition = () =>
   //   startEditor(ProjectType.IMAGE_RECOGNITION);
-  const startEditorWithImageRecognition2 = (project_type) => {
-    if (project_type === "IMAGE_RECOGNITION") {
+  const startEditorWithImageRecognition2 = (type) => {
+    startEditor2(ProjectType.IMAGE_RECOGNITION);
+    if (type === "IMAGE_RECOGNITION") {
       startEditor2(ProjectType.IMAGE_RECOGNITION);
     }
     else {
@@ -530,7 +531,7 @@ const Home: React.FC<IProps> = ({
         </div>
       )}
 
-      {showDropZonePopup && (
+      {/* {showDropZonePopup && (
         <div
           className="ImagesDropZone"
           style={{
@@ -545,7 +546,7 @@ const Home: React.FC<IProps> = ({
             <button onClick={startEditorWithImageRecognition} />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

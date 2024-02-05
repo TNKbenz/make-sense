@@ -81,19 +81,35 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
     }
     props.imageData.forEach((fileInfo, index) => {
       const file = fileInfo.fileData;
-      formData.append("bytefiles", file);
+      if (file instanceof File) {
+        console.log("File(s) to save: ", file.name);
+        formData.append("image_file", file);
+      }
+      formData.append("file_name", file.name);
     });
     formData.append("username", props.username);
     formData.append("project_name", props.project_name);
     labels.forEach((label, index) => {
       formData.append("labels", label);
     });
-    console.log(formData);
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
     const response = axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/saveimage/`,
       formData
     );
-    navigate("/train");
+    response
+      .then((result) => {
+        console.log(
+          "Image(s) and label(s) saved successfully with response: ",
+          result.data
+        );
+        navigate("/train");
+      })
+      .catch((error) => {
+        console.error("Error saving image(s) and label(s):", error);
+      });
   };
 
   return (

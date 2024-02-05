@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie, Tooltip,ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
 
@@ -11,6 +11,7 @@ interface ImageDropzoneProps {
   username: string;
   project_name: string;
   modelname: string;
+  activeLabelType: string;
 }
 
 type Predictions = {
@@ -26,7 +27,13 @@ type PredictionsResult = {
 
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
 
-const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username, project_name, modelname }) => {
+const ImageDropzone: React.FC<ImageDropzoneProps> = ({
+  onUploadSuccess,
+  username,
+  project_name,
+  modelname,
+  activeLabelType,
+}) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFilesUrls, setSelectedFilesUrls] = useState<string[]>([]);
   const [predictions, setPredictions] = useState<Predictions[]>([]);
@@ -39,7 +46,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
       );
 
       setSelectedFiles(resizedImages);
-      setSelectedFilesUrls(resizedImages.map((img) => URL.createObjectURL(img)));
+      setSelectedFilesUrls(
+        resizedImages.map((img) => URL.createObjectURL(img))
+      );
     }
   }, []);
 
@@ -68,10 +77,18 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
           formData.append("project_name", project_name);
           formData.append("modelname", modelname);
 
-          const response = await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/uploadfile/`,
-            formData
-          );
+          let response;
+          if (activeLabelType === "IMAGE RECOGNITION") {
+            response = await axios.post(
+              `${import.meta.env.VITE_BACKEND_URL}/uploadfile/`,
+              formData
+            );
+          } else {
+            response = await axios.post(
+              `${import.meta.env.VITE_BACKEND_URL}/object/predict`,
+              formData
+            );
+          }
 
           return response.data;
         })
@@ -80,14 +97,14 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
       setPredictions([]);
 
       predictionsResults.forEach((receivedPredictions, index) => {
-        const predictionsData: Predictions = receivedPredictions.predicted_labels.map((label, labelIndex) => ({
-          name: label,
-          value: receivedPredictions.probabilities[labelIndex][0], 
-        }));
+        const predictionsData: Predictions =
+          receivedPredictions.predicted_labels.map((label, labelIndex) => ({
+            name: label,
+            value: receivedPredictions.probabilities[labelIndex][0],
+          }));
         setPredictions([predictionsData]);
         onUploadSuccess(predictionsData, index);
       });
-
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -139,9 +156,11 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
   };
 
   function truncateFileName(fileName: string, maxLength: number): string {
-    return fileName.length > maxLength ? `${fileName.substring(0, maxLength)}...` : fileName;
-  };
-  
+    return fileName.length > maxLength
+      ? `${fileName.substring(0, maxLength)}...`
+      : fileName;
+  }
+
   return (
     <div>
       <div {...getRootProps()} className="image-dropzone">
@@ -153,42 +172,62 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
           <div className="col-left">
             <div className="image-preview-container">
               {selectedFilesUrls.map((url, index) => (
-                <div key={index} className={`image-preview_${selectedFilesUrls.length > 2 ? 0 : selectedFilesUrls.length % 2}`}>
+                <div
+                  key={index}
+                  className={`image-preview_${
+                    selectedFilesUrls.length > 2
+                      ? 0
+                      : selectedFilesUrls.length % 2
+                  }`}
+                >
                   <p></p>
-                  <img src={url} alt={`Selected ${index + 1}`} className="Selected-Image" />
-                  <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[index].name, 30)}</p>
+                  <img
+                    src={url}
+                    alt={`Selected ${index + 1}`}
+                    className="Selected-Image"
+                  />
+                  <p>
+                    ไฟล์ที่เลือก:{" "}
+                    {truncateFileName(selectedFiles[index].name, 30)}
+                  </p>
                   <p>ประเภทไฟล์ที่เลือก: {selectedFiles[index].type}</p>
                   {predictions.length > 0 && (
-                  <div className="row">
-                    {predictions.map((prediction, index) => (
-                      <div key={index} className={`col-left image-preview_${predictions.length > 2 ? 0 : predictions.length % 2}`}>
-                        <div className="Predictions">
-                          <h2>
-                            คาดว่าเป็น: {prediction[index].name} {prediction[index].value * 100}%
-                          </h2>
-                          <div className="Chart">
-                          <ResponsiveContainer width="100%" height={200}>
-                            <PieChart width={200} height={200}>
-                              <Pie
-                                dataKey="value"
-                                isAnimationActive={true}
-                                data={prediction}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={0}
-                                outerRadius={100}
-                                fill={colors[index % colors.length]}
-                                label
-                              />
-                              <Tooltip />
-                            </PieChart>
-                          </ResponsiveContainer>
+                    <div className="row">
+                      {predictions.map((prediction, index) => (
+                        <div
+                          key={index}
+                          className={`col-left image-preview_${
+                            predictions.length > 2 ? 0 : predictions.length % 2
+                          }`}
+                        >
+                          <div className="Predictions">
+                            <h2>
+                              คาดว่าเป็น: {prediction[index].name}{" "}
+                              {prediction[index].value * 100}%
+                            </h2>
+                            <div className="Chart">
+                              <ResponsiveContainer width="100%" height={200}>
+                                <PieChart width={200} height={200}>
+                                  <Pie
+                                    dataKey="value"
+                                    isAnimationActive={true}
+                                    data={prediction}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={0}
+                                    outerRadius={100}
+                                    fill={colors[index % colors.length]}
+                                    label
+                                  />
+                                  <Tooltip />
+                                </PieChart>
+                              </ResponsiveContainer>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -196,23 +235,24 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onUploadSuccess, username
         </div>
       )}
       <div>
-        <button className="PredictButton" onClick={handleUpload}>Predict</button>
+        <button className="PredictButton" onClick={handleUpload}>
+          Predict
+        </button>
       </div>
       {showErrorPopup && (
-        <div >
-          <p style={{ color: 'red' }}>
-            please select model.
-          </p>
+        <div>
+          <p style={{ color: "red" }}>please select model.</p>
         </div>
       )}
     </div>
   );
-}
+};
 
 const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   project_name: state.user.project_name,
   modelname: state.user.modelname,
+  activeLabelType: state.labels.activeLabelType,
 });
 
 export default connect(mapStateToProps)(ImageDropzone);

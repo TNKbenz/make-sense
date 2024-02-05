@@ -24,6 +24,7 @@ interface IProps {
   ) => NotificationsActionType;
   updateModelNameAction: (modelname: string) => void;
   projectData: ProjectData;
+  activeLabelType: string;
 }
 
 const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
@@ -35,6 +36,7 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
   project_name,
   updateModelNameAction,
   projectData,
+  activeLabelType,
 }) => {
   const [newModel, setNewModel] = useState("default");
 
@@ -51,10 +53,10 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
       await axios.post(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`
+        }/model?username=${username}&project_name=${project_name}&model_name=${newModel}`
       );
       updateModelNameAction(newModel);
-      setNewModel("default")
+      setNewModel("default");
     } catch (error) {
       console.error("Error adding ListProject:", error);
     }
@@ -114,7 +116,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}`
+        }/model?username=${username}&project_name=${project_name}`
       );
       setListModel(response.data);
     } catch (error) {
@@ -124,7 +126,9 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
 
   const handleSelectListModel = (model_name) => {
     try {
-      const selected = ListModel.find((Model) => Model.model_name === model_name);
+      const selected = ListModel.find(
+        (Model) => Model.model_name === model_name
+      );
       setSelectedModel(selected);
       console.log("Selected Project:", model_name);
     } catch (error) {
@@ -137,11 +141,11 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model/?username=${username}&project_name=${project_name}&model_name=${
-          model_name
-        }`
+        }/model?username=${username}&project_name=${project_name}&model_name=${model_name}`
       );
-      const updatedList = ListModel.filter(Model => Model.model_name !== model_name);
+      const updatedList = ListModel.filter(
+        (Model) => Model.model_name !== model_name
+      );
       setListModel(updatedList);
       fetchListModel();
     } catch (error) {
@@ -209,7 +213,8 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleSelectListModel(Model.model_name)}
                     >
@@ -219,7 +224,8 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                       className="button-16"
                       role="button"
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                       }}
                       onClick={() => handleDeleteListModel(Model.model_name)}
                     >
@@ -255,6 +261,7 @@ const Tab_Train: FC<IProps> = ({
   username,
   project_name,
   updateModelNameAction,
+  activeLabelType,
 }) => {
   const navigate = useNavigate();
   const [epoch, setEpoch] = useState<string>("");
@@ -274,8 +281,8 @@ const Tab_Train: FC<IProps> = ({
   };
 
   for (let i = 0; i < imageData.length; i++) {
-    let id = imageData[i]["labelNameIds"][0];
-    let name = LabelsSelector.getLabelNameById(id)["name"];
+    const id = imageData[i]["labelNameIds"][0];
+    const name = LabelsSelector.getLabelNameById(id)["name"];
     labels.push(name);
   }
 
@@ -300,7 +307,7 @@ const Tab_Train: FC<IProps> = ({
       formData.append("lr", learningRate);
       formData.append("username", username);
       formData.append("project_name", project_name || "p1");
-      formData.append("modelname", modelname || "mt1");
+      formData.append("modelname", modelname || "default");
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -313,15 +320,24 @@ const Tab_Train: FC<IProps> = ({
         })
       );
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/train/`,
-        formData
-      );
+      let response;
+      if (activeLabelType === "IMAGE RECOGNITION") {
+        response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/train/`,
+          formData
+        );
+      } else {
+        response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/object/train`,
+          formData
+        );
+      }
+
       console.log(response.data);
       submitNewNotificationAction(
         NotificationUtil.createSuccessNotification({
-          header: "Training success",
-          description: "Model trained successfully",
+          header: "Training is running",
+          description: "Model is training",
         })
       );
     } catch (error) {
@@ -401,7 +417,9 @@ const Tab_Train: FC<IProps> = ({
           value={learningRate}
           onChange={(e) => setLearningRate(e.target.value)}
         />
-        <button className="button-14" onClick={handleSubmit}>Train</button>
+        <button className="button-14" onClick={handleSubmit}>
+          Train
+        </button>
       </div>
     </Fragment>
   );
@@ -413,6 +431,7 @@ const mapStateToProps = (state: AppState) => ({
   modelname: state.user.modelname,
   project_name: state.user.project_name,
   projectData: state.general.projectData,
+  activeLabelType: state.labels.activeLabelType,
 });
 
 const mapDispatchToProps = {

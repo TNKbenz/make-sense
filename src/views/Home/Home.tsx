@@ -73,7 +73,7 @@ const Home: React.FC<IProps> = ({
   const fetchListProject = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/project/all/?username=${username}`
+        `${import.meta.env.VITE_BACKEND_URL}/project/all?username=${username}`,
       );
 
       setListProject(response.data);
@@ -90,7 +90,7 @@ const Home: React.FC<IProps> = ({
         "newProject",
         newProject,
         " selectedOption",
-        selectedOption
+        selectedOption,
       );
       if (newProject.trim() === "" || newProject.includes(" ")) {
         setShowErrorPopup(true);
@@ -126,15 +126,15 @@ const Home: React.FC<IProps> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/project/delete/?username=${username}&project_name=${project_name}`
+        }/project/delete?username=${username}&project_name=${project_name}`,
       );
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/deletefolder/?username=${username}&project_name=${project_name}`
+        }/deletefolder/?username=${username}&project_name=${project_name}`,
       );
       const updatedList = ListProject.filter(
-        (Project) => Project.project_name !== project_name
+        (Project) => Project.project_name !== project_name,
       );
       setListProject(updatedList);
       fetchListProject();
@@ -178,7 +178,7 @@ const Home: React.FC<IProps> = ({
       console.log("ListProject:", ListProject);
       console.log("project_name:", project_name);
       const selected = ListProject.find(
-        (Project) => Project.project_name === project_name
+        (Project) => Project.project_name === project_name,
       );
       setSelectedProject(selected);
       console.log("Selected Project:", selected);
@@ -202,8 +202,8 @@ const Home: React.FC<IProps> = ({
     formData.append("username", username);
     formData.append("project_name", selectedProject.project_name);
     const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/getimage`,
-      formData
+      `${import.meta.env.VITE_BACKEND_URL}/getimage/`,
+      formData,
     );
 
     const fileUrls = response.data.image_urls.map((img: string): FileUrl => {
@@ -232,16 +232,16 @@ const Home: React.FC<IProps> = ({
       const unique_label = uniq(labels.map((label) => label.annotations[0]));
       console.log("unique_label:", unique_label);
       const created_label = unique_label.map((label) =>
-        LabelUtil.createLabelName(label)
+        LabelUtil.createLabelName(label),
       );
       console.log("Created Labels:", created_label);
       updateLabelNamesAction(
         // unique_label.map((label) => LabelUtil.createLabelName(label))
-        created_label
+        created_label,
       );
 
       const labelMap = new Map(
-        created_label.map((label) => [label.name, label.id])
+        created_label.map((label) => [label.name, label.id]),
       );
       const labelarr = [];
 
@@ -262,7 +262,7 @@ const Home: React.FC<IProps> = ({
       for (let i = 0; i < imageUrls.length; i++) {
         const imgdata = ImageDataUtil.createImageDataFromFileDataWithLabel(
           imageUrls[i],
-          labelarr[i]
+          labelarr[i],
         );
         ImageDataArr.push(imgdata);
       }
@@ -284,8 +284,8 @@ const Home: React.FC<IProps> = ({
       updateActiveImageIndexAction(0);
       addImageDataAction(
         files.map((file: File) =>
-          ImageDataUtil.createImageDataFromFileData(file)
-        )
+          ImageDataUtil.createImageDataFromFileData(file),
+        ),
       );
       // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
     }
@@ -294,7 +294,7 @@ const Home: React.FC<IProps> = ({
   const handleOpenClick = async () => {
     if (selectedProject) {
       const isInListProject = ListProject.find(
-        (project) => project.project_name === selectedProject.project_name
+        (project) => project.project_name === selectedProject.project_name,
       );
 
       if (isInListProject) {
@@ -302,7 +302,7 @@ const Home: React.FC<IProps> = ({
           "Selected Project:",
           selectedProject.project_name,
           " Type Project:",
-          selectedProject.project_type
+          selectedProject.project_type,
         );
         updateProjectNameAction(selectedProject.project_name);
         updateProjectDataAction({

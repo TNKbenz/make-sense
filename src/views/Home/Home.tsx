@@ -2,8 +2,8 @@ import React, { useState, useEffect, PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
-import { updateProjectName,updateModelType } from "../../store/users/actionCreators";
-import { updateModelName } from "../../store/users/actionCreators";
+import { updateProjectName} from "../../store/users/actionCreators";
+import { updateModelName,updateModelType } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
 import { connect, useSelector } from "react-redux";
 import { updateProjectData } from "../../store/general/actionCreators";
@@ -21,7 +21,6 @@ import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { FileUrl, ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
 import { sortBy, uniq } from "lodash";
-
 interface IProps {
   username: string;
   projectName: string;
@@ -36,7 +35,6 @@ interface IProps {
   updateImageDataById: (id: string, newImageData: ImageData) => any;
   labelNames: LabelName[];
 }
-
 const Home: React.FC<IProps> = ({
   updateProjectNameAction,
   updateProjectDataAction,
@@ -63,7 +61,6 @@ const Home: React.FC<IProps> = ({
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
-
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -71,19 +68,16 @@ const Home: React.FC<IProps> = ({
       fetchListProject();
     }
   }, [user]);
-
   const fetchListProject = async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/project/all?username=${username}`,
       );
-
       setListProject(response.data);
     } catch (error) {
       console.error("Error fetching ListProject:", error);
     }
   };
-
   const handleAddProject = async () => {
     try {
       console.log(
@@ -109,6 +103,7 @@ const Home: React.FC<IProps> = ({
       });
       fetchListProject();
       updateProjectNameAction(newProject);
+      // updateModelNameAction(selectedOption);
       updateModelTypeAction(selectedOption);
       updateProjectDataAction({
         type: null,
@@ -122,7 +117,6 @@ const Home: React.FC<IProps> = ({
       console.error("Error adding ListProject:", error);
     }
   };
-
   const handleDeleteListProject = async (project_name) => {
     try {
       await axios.delete(
@@ -145,27 +139,33 @@ const Home: React.FC<IProps> = ({
     }
   };
 
+  // const handleGetImages = async (projectId) => {
+  //   try{
+  //     const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/???/?username=${username}/?projectId=${projectId}`)
+  //     setImageData(response.data.imageData)
+  //   } catch(error) {
+  //     console.error('Error getting Images:', error);
+  //   }
+  // }
+
   const handleCreateProjectClick = () => {
     setShowMainPopup(false);
     setShowCreatePopup(true);
     setShowListProjectPopup(false);
     setShowDropZonePopup(false);
   };
-
   const handleOpenProjectClick = () => {
     setShowMainPopup(false);
     setShowCreatePopup(false);
     setShowListProjectPopup(true);
     setShowDropZonePopup(true);
   };
-
   const handleBackClick = () => {
     setShowMainPopup(true);
     setShowCreatePopup(false);
     setShowListProjectPopup(false);
     setShowDropZonePopup(false);
   };
-
   const handleSelectListProject = (project_name) => {
     try {
       console.log("ListProject:", ListProject);
@@ -179,17 +179,14 @@ const Home: React.FC<IProps> = ({
       console.error("Error:", error);
     }
   };
-
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
   };
-
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [".jpeg", ".png"],
     },
   } as DropzoneOptions);
-
   const loadImagesFromBackend = async () => {
     const formData = new FormData();
     formData.append("username", username);
@@ -198,7 +195,6 @@ const Home: React.FC<IProps> = ({
       `${import.meta.env.VITE_BACKEND_URL}/getimage/`,
       formData,
     );
-
     const fileUrls = response.data.image_urls.map((img: string): FileUrl => {
       return {
         url: img,
@@ -211,7 +207,6 @@ const Home: React.FC<IProps> = ({
       labels: response.data.labels,
     };
   };
-
   const startEditor2 = async (projectType: ProjectType) => {
     const { imageUrls, labels } = await loadImagesFromBackend();
     if (imageUrls.length > 0) {
@@ -220,7 +215,6 @@ const Home: React.FC<IProps> = ({
         type: selectedProject.project_type,
       });
       updateActiveImageIndexAction(0);
-
       // Add unique label names to label names list
       const unique_label = uniq(labels.map((label) => label.annotations[0]));
       console.log("unique_label:", unique_label);
@@ -232,16 +226,13 @@ const Home: React.FC<IProps> = ({
         // unique_label.map((label) => LabelUtil.createLabelName(label))
         created_label,
       );
-
       const labelMap = new Map(
         created_label.map((label) => [label.name, label.id]),
       );
       const labelarr = [];
-
       for (let i = 0; i < labels.length; i++) {
         const annotation = labels[i].annotations[0];
         const labelId = labelMap.get(annotation);
-
         if (labelId !== undefined) {
           labelarr.push(labelId);
         } else {
@@ -250,7 +241,6 @@ const Home: React.FC<IProps> = ({
       }
       console.log("labelMap:", labelMap);
       console.log("labelarr:", labelarr);
-
       const ImageDataArr = [];
       for (let i = 0; i < imageUrls.length; i++) {
         const imgdata = ImageDataUtil.createImageDataFromFileDataWithLabel(
@@ -261,35 +251,33 @@ const Home: React.FC<IProps> = ({
       }
       console.log("ImageDataArr:", ImageDataArr);
       addImageDataAction(ImageDataArr);
-
       console.log("add image file success");
       // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
     }
   };
 
-  // const startEditor = (projectType: ProjectType) => {
-  //   if (acceptedFiles.length > 0) {
-  //     const files = sortBy(acceptedFiles, (item: File) => item.name);
-  //     updateProjectDataAction({
-  //       name: selectedProject.project_name,
-  //       type: selectedProject.project_type,
-  //     });
-  //     updateActiveImageIndexAction(0);
-  //     addImageDataAction(
-  //       files.map((file: File) =>
-  //         ImageDataUtil.createImageDataFromFileData(file),
-  //       ),
-  //     );
-  //     // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
-  //   }
-  // };
+  const startEditor = (projectType: ProjectType) => {
+    if (acceptedFiles.length > 0) {
+      const files = sortBy(acceptedFiles, (item: File) => item.name);
+      updateProjectDataAction({
+        name: selectedProject.project_name,
+        type: selectedProject.project_type,
+      });
+      updateActiveImageIndexAction(0);
+      addImageDataAction(
+        files.map((file: File) =>
+          ImageDataUtil.createImageDataFromFileData(file),
+        ),
+      );
+      // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+    }
+  };
 
   const handleOpenClick = async () => {
     if (selectedProject) {
       const isInListProject = ListProject.find(
         (project) => project.project_name === selectedProject.project_name,
       );
-
       if (isInListProject) {
         console.log(
           "Selected Project:",
@@ -304,7 +292,7 @@ const Home: React.FC<IProps> = ({
         });
         updateImageDataAction([]);
         // getDropZoneContent();
-        await startEditorWithImageRecognition2(selectedProject.project_type);
+        await startEditorWithImageRecognition2();
         // updateImageDataAction(imageData)
         navigate("/home");
       } else {
@@ -312,7 +300,6 @@ const Home: React.FC<IProps> = ({
       }
     }
   };
-
   const getDropZoneContent = () => {
     if (acceptedFiles.length === 0)
       return (
@@ -348,24 +335,16 @@ const Home: React.FC<IProps> = ({
       );
   };
 
-  // const startEditorWithObjectDetection = () =>
-  //   startEditor(ProjectType.OBJECT_DETECTION);
-  // const startEditorWithImageRecognition = () =>
-  //   startEditor(ProjectType.IMAGE_RECOGNITION);
-  const startEditorWithImageRecognition2 = (type) => {
+  const startEditorWithObjectDetection = () =>
+    startEditor(ProjectType.OBJECT_DETECTION);
+  const startEditorWithImageRecognition = () =>
+    startEditor(ProjectType.IMAGE_RECOGNITION);
+  const startEditorWithImageRecognition2 = () =>
     startEditor2(ProjectType.IMAGE_RECOGNITION);
-    if (type === "IMAGE_RECOGNITION") {
-      startEditor2(ProjectType.IMAGE_RECOGNITION);
-    }
-    else {
-      startEditor2(ProjectType.OBJECT_DETECTION);
-    }
-  }
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h2>Welcome to Home Page</h2>
-
       {showMainPopup && (
         <div>
           <button className="button-1" onClick={handleCreateProjectClick}>
@@ -377,7 +356,6 @@ const Home: React.FC<IProps> = ({
           </button>
         </div>
       )}
-
       {showCreatePopup && (
         <div>
           <h2>Create Project</h2>
@@ -422,7 +400,6 @@ const Home: React.FC<IProps> = ({
           </div>
         </div>
       )}
-
       {showListProjectPopup && (
         <div>
           <h2>Select Project</h2>
@@ -530,8 +507,7 @@ const Home: React.FC<IProps> = ({
           </div>
         </div>
       )}
-
-      {/* {showDropZonePopup && (
+      {showDropZonePopup && (
         <div
           className="ImagesDropZone"
           style={{
@@ -546,13 +522,11 @@ const Home: React.FC<IProps> = ({
             <button onClick={startEditorWithImageRecognition} />
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
-
 // export default Home;
-
 const mapDispatchToProps = {
   updateProjectNameAction: updateProjectName,
   updateProjectDataAction: updateProjectData,
@@ -560,8 +534,8 @@ const mapDispatchToProps = {
   updateActiveImageIndexAction: updateActiveImageIndex,
   addImageDataAction: addImageData,
   updateModelNameAction: updateModelName,
-  updateLabelNamesAction: updateLabelNames,
   updateModelTypeAction: updateModelType,
+  updateLabelNamesAction: updateLabelNames,
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -570,5 +544,4 @@ const mapStateToProps = (state: AppState) => ({
   projectData: state.general.projectData,
   labelNames: state.labels.labels,
 });
-
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

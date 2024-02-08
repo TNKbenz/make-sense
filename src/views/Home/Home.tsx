@@ -103,7 +103,7 @@ const Home: React.FC<IProps> = ({
       });
       fetchListProject();
       updateProjectNameAction(newProject);
-      // updateModelNameAction(selectedOption);
+      updateModelNameAction(null);
       updateModelTypeAction(selectedOption);
       updateProjectDataAction({
         type: null,
@@ -291,6 +291,10 @@ const Home: React.FC<IProps> = ({
           name: selectedProject.project_name,
         });
         updateImageDataAction([]);
+        updateModelTypeAction(selectedProject.project_type);
+        updateModelNameAction("");
+        
+        
         // getDropZoneContent();
         await startEditorWithImageRecognition2();
         // updateImageDataAction(imageData)

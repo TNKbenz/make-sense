@@ -279,13 +279,16 @@ const Tab_Train: FC<IProps> = ({
     setPopupSelect_Visible(!isPopupSelect_Visible);
     setPopupCreate_Visible(false);
   };
-
-  for (let i = 0; i < imageData.length; i++) {
-    const id = imageData[i]["labelNameIds"][0];
-    const name = LabelsSelector.getLabelNameById(id)["name"];
-    labels.push(name);
+  
+  if (activeLabelType === "IMAGE RECOGNITION"){
+    for (let i = 0; i < imageData.length; i++) {
+      const id = imageData[i]["labelNameIds"][0];
+      const name = LabelsSelector.getLabelNameById(id)["name"];
+      labels.push(name);
+    }
+  } else {
+    console.log("object")
   }
-
   const handleSubmit = async () => {
     try {
       const formData = new FormData();

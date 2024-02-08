@@ -5,6 +5,7 @@ import "./Predict.css";
 import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
+import BBoxAnnotator, { EntryType } from 'react-bbox-annotator';
 
 // Assuming you have defined these types
 interface ImageDropzoneProps {
@@ -44,6 +45,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   const [Results, setResults] = useState([]);
   const [modifiedResults, setmodifiedResults] = useState([]);
   const [maxValues, setmaxValues] = useState([]);
+  const [data, setdata] = useState([]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setResults([]);
@@ -131,15 +133,15 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         acc.push(maxVal);
         return acc;
       }, []);
-      
+
       const ChartData = modifiedData.map(item => [
         {
           name: item.name[0],
-          value: item.value[1]
+          value: item.value[0]
         },
         {
           name: item.name[1],
-          value: item.value[0]
+          value: item.value[1]
         }
       ]);
 
@@ -152,71 +154,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
 
     } catch (error) {
       console.error("Error uploading file:", error);
-      const mockData = [
-        {
-          "boxes": [
-            [
-              154.1825714111328,
-              7.5833868980407715,
-              176.99964904785156,
-              42.36884689331055
-            ],
-            [
-              175.34991455078125,
-              8.12913703918457,
-              203.90542602539062,
-              47.07293701171875
-            ],
-            [
-              35.22364807128906,
-              61.724979400634766,
-              65.57614135742188,
-              103.93618774414062
-            ],
-            [
-              176.47796630859375,
-              13.385398864746094,
-              199.4116668701172,
-              47.5186767578125
-            ],
-            [
-              267.6794738769531,
-              19.45416831970215,
-              275.0,
-              54.36579132080078
-            ]
-          ],
-          "classes": [0.0, 1.0, 1.0, 1.0, 0.0],
-          "path": "images12.jpg"
-        }
-      ];
-      
-      const predictionsData: Predictions = {
-        // Assuming you want to display only the first set of predictions for simplicity
-        boxes: receivedPredictions[0].boxes.map((box, boxIndex) => {
-          const [x, y, width, height] = box;
-          const coord = [x, y, width, height];
-          const label = receivedPredictions[0].classes[boxIndex].toString();
-          return { coord, label };
-        }),
-        path: receivedPredictions[0].path,
-        options: {
-          colors: {
-            normal: "rgba(255, 225, 255, 1)",
-            selected: "rgba(0, 225, 204, 1)",
-            unselected: "rgba(100, 100, 100, 1)",
-          },
-          style: {
-            maxWidth: "100%",
-            maxHeight: "90vh",
-          },
-        },
-      };
-      setPredictions((prevPredictions) => [
-        ...prevPredictions,
-        predictionsData,
-      ]);
-      onUploadSuccess([predictionsData], index);
     }
     
   };
@@ -271,6 +208,37 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
       ? `${fileName.substring(0, maxLength)}...`
       : fileName;
   }
+
+  const mockData = [
+    {
+      "boxes": [
+        [154.1825714111328, 7.5833868980407715, 176.99964904785156, 42.36884689331055],
+        [175.34991455078125, 8.12913703918457, 203.90542602539062, 47.07293701171875],
+        [35.22364807128906, 61.724979400634766, 65.57614135742188, 103.93618774414062],
+        [176.47796630859375, 13.385398864746094, 199.4116668701172, 47.5186767578125],
+        [267.6794738769531, 19.45416831970215, 275.0, 54.36579132080078]
+      ],
+      "classes": [0.0, 1.0, 1.0, 1.0, 0.0],
+      "path": "images12.jpg"
+    }
+  ];
+  
+  // แปลงข้อมูล bounding box เพื่อแสดงใน React component
+  const convertedBoundingBoxes = mockData.map(item => {
+    const boxes = item.boxes.map(box => {
+      const [x, y, width, height] = box;
+      return { x, y, width, height };
+    });
+  
+    return {
+      boxes,
+      classes: item.classes,
+      path: item.path
+    };
+  });
+
+  const labels = ['cat', 'dog'];
+  const [entries, setEntries] = useState<EntryType[]>([]);
 
   return (
     <div>
@@ -338,35 +306,25 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
       {(selectedFilesUrls.length > 0 && activeLabelType === "OBJECT_DETECTION") && (
         <div className="image-preview-container">
           <div className="image-preview_1">
-            {selectedFilesUrls.slice(0, 1).map((url,) => (
-              <div key={0} style={{ position: 'relative' }}>
-                <img
-                  src={url}
-                  alt={`Selected ${0}`}
-                  className="Selected-Image_1"
-                />
-                {/* {predictions.length > 0 && (
-                  <div className="bounding-box-container">
-                    {predictions[0].boxes.map((box, boxIndex) => (
-                      <div
-                        key={boxIndex}
-                        className="bounding-box"
-                        style={{
-                          left: `${box.coord[0]}%`,
-                          top: `${box.coord[1]}%`,
-                          width: `${box.coord[2] - box.coord[0]}%`,
-                          height: `${box.coord[3] - box.coord[1]}%`,
-                        }}
-                      ></div>
-                  ))}
+            {selectedFilesUrls.slice(0, 1).map((url, index) => (
+              <div key={index} style={{ position: 'center' }}>
+                <div style={{ width: '50%' , position: 'center' }}>
+                  <BBoxAnnotator
+                    url={url}
+                    inputMethod="text"
+                    labels={"cat"}
+                    onChange={(e: EntryType[]) => setEntries(e)}
+                  />
                 </div>
-                )} */}
-                <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
-                <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>
+                <div>
+                  <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
+                  <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>
+                </div>
+                <pre>{JSON.stringify(entries)}</pre>
               </div>
             ))}
           </div>
-        </div> 
+        </div>
       )}
       <div>
         <button className="PredictButton" onClick={handleUpload}>

@@ -22,6 +22,7 @@ import {
   INotification,
   NotificationsActionType,
 } from "../../../store/notifications/types";
+import { RectLabelsExporter } from "../../../logic/export/RectLabelsExporter";
 
 interface IProps {
   updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -59,14 +60,13 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
 
   const TrainPage = () => {
     const formData = new FormData();
-    const labels = [];
-    if (props.modeltype === "IMAGE_RECOGNITION"){
+    if (props.modeltype === "IMAGE_RECOGNITION") {
+      const labels = [];
       for (let i = 0; i < props.imageData.length; i++) {
         let id = props.imageData[i]["labelNameIds"][0];
         if (
           LabelsSelector.getLabelNameById(id) === undefined ||
-          LabelsSelector.getLabelNameById(id) === null ||
-          LabelsSelector.getLabelNameById(id) === ""
+          LabelsSelector.getLabelNameById(id) === null
         ) {
           props.submitNewNotificationAction(
             NotificationUtil.createErrorNotification({
@@ -113,8 +113,53 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           console.error("Error saving image(s) and label(s):", error);
         });
     } else {
-      console.log("Type OBJECT")
-      navigate("/train");
+      // Object Detection
+      const yololabels = RectLabelsExporter.YOLOLabelsdata();
+      console.log("yololabels: ", yololabels);
+      const labelobject = {};
+      for (let i = 0; i < props.imageData.length; i++) {
+        // Not all images are labeled
+        if (props.imageData[i]["labelRects"].length === 0) {
+          props.submitNewNotificationAction(
+            NotificationUtil.createErrorNotification({
+              header: "Missing Label",
+              description:
+                "All images must be labeled before proceed to training.",
+            })
+          );
+          break;
+        } else {
+          labelobject[props.imageData[i].fileData.name] = yololabels[i];
+        }
+        formData.append("labels", JSON.stringify(labelobject));
+      }
+      formData.append("username", props.username);
+      formData.append("project_name", props.project_name);
+      props.imageData.forEach((fileInfo, index) => {
+        const file = fileInfo.fileData;
+        if (file instanceof File) {
+          console.log("File(s) to save: ", file.name);
+          formData.append("image_file", file);
+        }
+      });
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      const response = axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/saveobject/`,
+        formData
+      );
+      response
+        .then((result) => {
+          console.log(
+            "Image(s) and label(s) saved successfully with response: ",
+            result.data
+          );
+          navigate("/train");
+        })
+        .catch((error) => {
+          console.error("Error saving image(s) and label(s):", error);
+        });
     }
   };
 

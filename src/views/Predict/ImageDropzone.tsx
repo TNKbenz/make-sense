@@ -5,7 +5,7 @@ import "./Predict.css";
 import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
-import BBoxAnnotator, { EntryType } from 'react-bbox-annotator';
+import ObjectDetectionVisualizer from "object-detection-visualizer";
 
 // Assuming you have defined these types
 interface ImageDropzoneProps {
@@ -240,6 +240,60 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   const labels = ['cat', 'dog'];
   const [entries, setEntries] = useState<EntryType[]>([]);
 
+  type BoundingBoxStyles={
+    // Fill Color for the bounding box
+    boudingBoxFill?:string;
+    //Stoke color for the bounding box
+    boudingBoxStroke?:string;
+    //Opacity of the bounding box between 0 and 1
+    boundingBoxOpacity?:number;
+    //Color of the label text
+    boundingBoxTextColor?:string;
+    //Font of the label text
+    boundingBoxTextFont?:string;
+    //Positon of the Label Text Enum
+    boundingBoxTextPosition?:TextPosition,
+    //No label is displayed if this is false. Default True
+    disableLabel?:boolean;
+    //The bounding box has no stroke is displayed if this is false
+    disableStroke?:boolean;
+    //The bounding box has no fill is displayed if this is false
+    disableFill?:boolean;    
+}
+
+  type ObjectDetectionVisualizerProps={
+    //URL of Image
+    image:string;
+    //Annotation in CreateML Format
+    annotations:Annotation[];
+    //Styles of boundingBox
+    boundingBoxStyles?:BoundingBoxStyles;
+  }
+  /**
+   *Coordinates and Label of the bounding box accoridng to the createML Annotation format
+  */
+  type Annotation={
+      label:string;
+      coordinates:Coordinate;
+  }
+  /**
+   * Coordinates of bounding box according to the createML Annotation format (x and y are coordinates of the center)
+   */
+  type Coordinate={
+      x:number;
+      y:number;
+      width:number;
+      height:number;
+  }
+
+  enum TextPosition{
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Center
+  }
+
   return (
     <div>
       <div {...getRootProps()} className="image-dropzone">
@@ -303,19 +357,31 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           </div>
         </div>
       )}
-      {(selectedFilesUrls.length > 0 && activeLabelType === "OBJECT_DETECTION") && (
+      {(selectedFilesUrls.length > 0 && activeLabelType !== "OBJECT_DETECTION") && (
         <div className="image-preview-container">
           <div className="image-preview_1">
             {selectedFilesUrls.slice(0, 1).map((url, index) => (
               <div key={index} style={{ position: 'center' }}>
-                <div style={{ width: '50%' , position: 'center' }}>
-                  <BBoxAnnotator
-                    url={url}
-                    inputMethod="text"
-                    labels={"cat"}
-                    onChange={(e: EntryType[]) => setEntries(e)}
+                  <ObjectDetectionVisualizer
+                    annotations={mockData[index].boxes.map((box) => ({
+                      label: "cat",
+                      coordinates: {
+                        x: box[0],
+                        y: box[1],
+                        width: box[2] - box[0],
+                        height: box[3] - box[1],
+                      },
+                    }))}
+                    image={url}
+                    boundingBoxStyles={{
+                      boundingBoxOpacity: 0.2,
+                      boudingBoxStroke: "red",
+                      boundingBoxTextColor:"black",
+                      boudingBoxFill:"red",
+                      boundingBoxTextFont:"18px Arial",
+                      boundingBoxTextPosition:TextPosition.BottomRight,
+                    }}
                   />
-                </div>
                 <div>
                   <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
                   <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>

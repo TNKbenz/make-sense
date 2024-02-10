@@ -284,25 +284,6 @@ const Tab_Train: FC<IProps> = ({
     setPopupCreate_Visible(false);
   };
 
-  const handleEpochChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEpoch(e.target.value);
-    setEpochEdited(true);
-  };
-
-  const handleLearningRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLearningRate(e.target.value);
-    setLearningRateEdited(true);
-  };
-  
-  if (activeLabelType === "IMAGE RECOGNITION"){
-    for (let i = 0; i < imageData.length; i++) {
-      const id = imageData[i]["labelNameIds"][0];
-      const name = LabelsSelector.getLabelNameById(id)["name"];
-      labels.push(name);
-    }
-  } else {
-    console.log("object")
-  }
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
@@ -323,7 +304,7 @@ const Tab_Train: FC<IProps> = ({
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
       formData.append("username", username);
-      formData.append("project_name", project_name || "p1");
+      formData.append("project_name", project_name );
       formData.append("modelname", modelname || "default");
 
       labels.forEach((label, index) => {

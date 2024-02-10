@@ -124,19 +124,24 @@ h3 {
 }
 
 .Parameter div {
-  margin-bottom: 5px; /* เพิ่มระยะห่างระหว่างแต่ละช่อง input */
+  margin-bottom: 5px; 
+  margin-top: 5px;
+}
+
+.placeholder-text {
+  color: #888; 
 }
 
 .Parameter label {
-  display: block; /* แสดง label เป็นบรรทัดใหม่ */
-  font-weight: bold; /* ทำให้ข้อความ label หนาขึ้น */
+  display: block; 
+  font-weight: bold; 
 }
 
 .Parameter input {
-  width: 100%; /* ขยาย input ให้เต็มความกว้างของพื้นที่ของ Parameter */
-  padding: 5px; /* เพิ่มระยะห่างรอบขอบของ input */
-  border: 1px solid #000000; /* สร้างเส้นกรอบสำหรับ input */
-  border-radius: 4px; /* ทำให้มีมุมโค้งบนขอบของ input */
+  width: 50%; 
+  padding: 6px; 
+  border: 1px solid #000000; 
+  border-radius: 4px; 
 }
 input {
   display: block;

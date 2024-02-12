@@ -19,15 +19,18 @@ import {
   updateLabelNames,
   updateImageData,
   updateImageDataById,
+  updateActiveLabelType,
 } from "../../store/labels/actionCreators";
 import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { FileUrl, ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
 import { sortBy, uniq } from "lodash";
+import {LabelType} from "../../data/enums/LabelType";
 
 interface IProps {
   username: string;
   projectName: string;
+  updateActiveLabelTypeAction: (activeLabelType: string) => void;
   updateProjectNameAction: (project_name: string) => void;
   updateProjectDataAction: (projectData: ProjectData) => void;
   updateImageDataAction: (imageData: ImageData[]) => void;
@@ -53,6 +56,7 @@ const Home: React.FC<IProps> = ({
   updateLabelNamesAction,
   updateImageDataById,
   labelNames,
+  updateActiveLabelTypeAction,
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: AppState) => state.user.username);
@@ -326,6 +330,7 @@ const Home: React.FC<IProps> = ({
           name: selectedProject.project_name,
         });
         updateImageDataAction([]);
+        updateActiveLabelTypeAction(null);
         updateModelTypeAction(selectedProject.project_type);
         updateModelNameAction("");
 
@@ -573,6 +578,7 @@ const mapDispatchToProps = {
   updateModelNameAction: updateModelName,
   updateModelTypeAction: updateModelType,
   updateLabelNamesAction: updateLabelNames,
+  updateActiveLabelTypeAction :updateActiveLabelType,
 };
 
 const mapStateToProps = (state: AppState) => ({

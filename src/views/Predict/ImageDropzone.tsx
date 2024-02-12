@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState , useEffect} from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
@@ -46,9 +46,10 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   const [modifiedResults, setmodifiedResults] = useState([]);
   const [maxValues, setmaxValues] = useState([]);
   const [ResultsObject, setResultsObject] = useState([]);
-  const [ClassObject, setClassObject] = useState([]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setResultsObject([]);
+    // setClassObject([]);
     setResults([]);
     setmaxValues([]);
     if (acceptedFiles.length > 0) {
@@ -63,7 +64,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
       );
       } else {
         const resizedImages = await Promise.all(
-          acceptedFiles.map(async (file) => await resizeImage(file, 250, 250))
+          acceptedFiles.map(async (file) => await resizeImage(file, 500, 500))
         );  
 
         setSelectedFiles(resizedImages);
@@ -90,7 +91,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         }, 5000);
         return;
       }
-  
       const predictionsResults: PredictionsResult[] = await Promise.all(
         selectedFiles.map(async (file) => {
           const formData = new FormData();
@@ -112,11 +112,10 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
               formData
             );
           }
-  
+          console.log("response.data",response.data)
           return response.data; 
         })
       );
-      
       if (activeLabelType === "IMAGE RECOGNITION") {
         const convertedData = predictionsResults.map(item => {
           return {
@@ -150,24 +149,10 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         setmodifiedResults(ChartData);
         setmaxValues(maxValues)
         console.log("predictionsResults",ChartData)
-      } else {
+      } 
+      else {
+        console.log("predictionsResults" ,predictionsResults )
         setResultsObject(predictionsResults)
-        const mockClass_labels = ["cat", "dog","human","mock1","mock2","mock3"];
-        setClassObject(mockClass_labels)
-        // const mockData = [
-        //   {
-        //     "boxes": [
-        //       [154.1825714111328, 7.5833868980407715, 176.99964904785156, 42.36884689331055],
-        //       [175.34991455078125, 8.12913703918457, 203.90542602539062, 47.07293701171875],
-        //       [35.22364807128906, 61.724979400634766, 65.57614135742188, 103.93618774414062],
-        //       [176.47796630859375, 13.385398864746094, 199.4116668701172, 47.5186767578125],
-        //       [267.6794738769531, 19.45416831970215, 275.0, 54.36579132080078]
-        //     ],
-        //     "classes": [0.0, 1.0, 1.0, 1.0, 0.0],
-        //     "path": "images12.jpg"
-        //   }
-        // ];
-
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -327,35 +312,49 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           </div>
         </div>
       )}
-      {(selectedFilesUrls.length > 0 && activeLabelType === "OBJECT_DETECTION") && (
+      {(selectedFilesUrls.length > 0 && activeLabelType !== "IMAGE RECOGNITION") && (
         <div className="image-preview-container">
           <div className="image-preview_1">
             {selectedFilesUrls.slice(0, 1).map((url, index) => (
-              <div key={index} style={{ position: 'center' }}>
-                  <ObjectDetectionVisualizer
-                    annotations={ResultsObject[index].boxes.map((box, idx) => ({
-                      label: ClassObject[ResultsObject[index].classes[idx]],
-                      coordinates: {
-                        x: box[0],
-                        y: box[1],
-                        width: box[2] - box[0],
-                        height: box[3] - box[1],
-                      },
-                    }))}
-                    image={url}
-                    boundingBoxStyles={{
-                      boundingBoxOpacity: 0.2,
-                      boudingBoxStroke: "red",
-                      boundingBoxTextColor:"black",
-                      boudingBoxFill:"red",
-                      boundingBoxTextFont:"18px Arial",
-                      boundingBoxTextPosition:TextPosition.BottomRight,
-                    }}
-                  />
-                <div>
-                  <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
-                  <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>
-                </div>
+              <div key={index} style={{ textAlign: 'center' }}>
+                {ResultsObject.length === 0 && (
+                  <div>
+                    <img
+                      src={url}
+                    />
+                    <div>
+                      <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
+                      <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>
+                    </div>
+                  </div>
+                )}
+                {ResultsObject.length > 0 && (
+                  <div>
+                    <ObjectDetectionVisualizer
+                      annotations={ResultsObject[0][index].boxes.map((box, idx) => ({
+                        label: ResultsObject[0][index].classes[idx],
+                        coordinates: {
+                          x: (box[0] + box[2]) / 2,
+                          y: (box[1] + box[3]) / 2,
+                          width: box[2] - box[0],
+                          height: box[3] - box[1],
+                        },
+                      }))}
+                      image={url}
+                      boundingBoxStyles={{
+                        boundingBoxOpacity: 0.2,
+                        boundingBoxStroke: "red",
+                        boundingBoxTextColor: "black",
+                        boundingBoxFill: "red",
+                        boundingBoxTextFont: "18px Arial",
+                        boundingBoxTextPosition: TextPosition.BottomRight,
+                      }}
+                    />
+                    {/* <div>
+                      <p> d</p>
+                    </div> */}
+                  </div>
+                )}
               </div>
             ))}
           </div>

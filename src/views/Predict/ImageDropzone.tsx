@@ -45,7 +45,8 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   const [Results, setResults] = useState([]);
   const [modifiedResults, setmodifiedResults] = useState([]);
   const [maxValues, setmaxValues] = useState([]);
-  const [data, setdata] = useState([]);
+  const [ResultsObject, setResultsObject] = useState([]);
+  const [ClassObject, setClassObject] = useState([]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setResults([]);
@@ -62,7 +63,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
       );
       } else {
         const resizedImages = await Promise.all(
-          acceptedFiles.map(async (file) => await resizeImage(file, 500, 500))
+          acceptedFiles.map(async (file) => await resizeImage(file, 250, 250))
         );  
 
         setSelectedFiles(resizedImages);
@@ -115,43 +116,59 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           return response.data; 
         })
       );
-
-      const convertedData = predictionsResults.map(item => {
-        return {
-          name: item.predicted_labels[0],
-          value: item.probabilities[0],
-        };
-      });
-
-      const modifiedData = convertedData.map(entry => ({
-        ...entry,
-        name: [entry.name.toString(), 'not ' + entry.name.toString()]
-      }));
-
-      const maxValues = convertedData.reduce((acc, obj) => {
-        const maxVal = Math.max(...obj.value);
-        acc.push(maxVal);
-        return acc;
-      }, []);
-
-      const ChartData = modifiedData.map(item => [
-        {
-          name: item.name[0],
-          value: item.value[0]
-        },
-        {
-          name: item.name[1],
-          value: item.value[1]
-        }
-      ]);
-
-
-      setResults(convertedData);
-      setmodifiedResults(ChartData);
-      setmaxValues(maxValues)
-      console.log("predictionsResults",ChartData)
       
+      if (activeLabelType === "IMAGE RECOGNITION") {
+        const convertedData = predictionsResults.map(item => {
+          return {
+            name: item.predicted_labels[0],
+            value: item.probabilities[0],
+          };
+        });
 
+        const modifiedData = convertedData.map(entry => ({
+          ...entry,
+          name: [entry.name.toString(), 'not ' + entry.name.toString()]
+        }));
+
+        const maxValues = convertedData.reduce((acc, obj) => {
+          const maxVal = Math.max(...obj.value);
+          acc.push(maxVal);
+          return acc;
+        }, []);
+
+        const ChartData = modifiedData.map(item => [
+          {
+            name: item.name[0],
+            value: item.value[0]
+          },
+          {
+            name: item.name[1],
+            value: item.value[1]
+          }
+        ]);
+        setResults(convertedData);
+        setmodifiedResults(ChartData);
+        setmaxValues(maxValues)
+        console.log("predictionsResults",ChartData)
+      } else {
+        setResultsObject(predictionsResults)
+        const mockClass_labels = ["cat", "dog","human","mock1","mock2","mock3"];
+        setClassObject(mockClass_labels)
+        // const mockData = [
+        //   {
+        //     "boxes": [
+        //       [154.1825714111328, 7.5833868980407715, 176.99964904785156, 42.36884689331055],
+        //       [175.34991455078125, 8.12913703918457, 203.90542602539062, 47.07293701171875],
+        //       [35.22364807128906, 61.724979400634766, 65.57614135742188, 103.93618774414062],
+        //       [176.47796630859375, 13.385398864746094, 199.4116668701172, 47.5186767578125],
+        //       [267.6794738769531, 19.45416831970215, 275.0, 54.36579132080078]
+        //     ],
+        //     "classes": [0.0, 1.0, 1.0, 1.0, 0.0],
+        //     "path": "images12.jpg"
+        //   }
+        // ];
+
+      }
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -209,76 +226,29 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
       : fileName;
   }
 
-  const mockData = [
-    {
-      "boxes": [
-        [154.1825714111328, 7.5833868980407715, 176.99964904785156, 42.36884689331055],
-        [175.34991455078125, 8.12913703918457, 203.90542602539062, 47.07293701171875],
-        [35.22364807128906, 61.724979400634766, 65.57614135742188, 103.93618774414062],
-        [176.47796630859375, 13.385398864746094, 199.4116668701172, 47.5186767578125],
-        [267.6794738769531, 19.45416831970215, 275.0, 54.36579132080078]
-      ],
-      "classes": [0.0, 1.0, 1.0, 1.0, 0.0],
-      "path": "images12.jpg"
-    }
-  ];
-  
-  // แปลงข้อมูล bounding box เพื่อแสดงใน React component
-  const convertedBoundingBoxes = mockData.map(item => {
-    const boxes = item.boxes.map(box => {
-      const [x, y, width, height] = box;
-      return { x, y, width, height };
-    });
-  
-    return {
-      boxes,
-      classes: item.classes,
-      path: item.path
-    };
-  });
-
-  const labels = ['cat', 'dog'];
-  const [entries, setEntries] = useState<EntryType[]>([]);
-
   type BoundingBoxStyles={
-    // Fill Color for the bounding box
     boudingBoxFill?:string;
-    //Stoke color for the bounding box
     boudingBoxStroke?:string;
-    //Opacity of the bounding box between 0 and 1
     boundingBoxOpacity?:number;
-    //Color of the label text
     boundingBoxTextColor?:string;
-    //Font of the label text
     boundingBoxTextFont?:string;
-    //Positon of the Label Text Enum
     boundingBoxTextPosition?:TextPosition,
-    //No label is displayed if this is false. Default True
     disableLabel?:boolean;
-    //The bounding box has no stroke is displayed if this is false
     disableStroke?:boolean;
-    //The bounding box has no fill is displayed if this is false
     disableFill?:boolean;    
 }
 
   type ObjectDetectionVisualizerProps={
-    //URL of Image
     image:string;
-    //Annotation in CreateML Format
     annotations:Annotation[];
-    //Styles of boundingBox
     boundingBoxStyles?:BoundingBoxStyles;
   }
-  /**
-   *Coordinates and Label of the bounding box accoridng to the createML Annotation format
-  */
+
   type Annotation={
       label:string;
       coordinates:Coordinate;
   }
-  /**
-   * Coordinates of bounding box according to the createML Annotation format (x and y are coordinates of the center)
-   */
+
   type Coordinate={
       x:number;
       y:number;
@@ -357,14 +327,14 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           </div>
         </div>
       )}
-      {(selectedFilesUrls.length > 0 && activeLabelType !== "OBJECT_DETECTION") && (
+      {(selectedFilesUrls.length > 0 && activeLabelType === "OBJECT_DETECTION") && (
         <div className="image-preview-container">
           <div className="image-preview_1">
             {selectedFilesUrls.slice(0, 1).map((url, index) => (
               <div key={index} style={{ position: 'center' }}>
                   <ObjectDetectionVisualizer
-                    annotations={mockData[index].boxes.map((box) => ({
-                      label: "cat",
+                    annotations={ResultsObject[index].boxes.map((box, idx) => ({
+                      label: ClassObject[ResultsObject[index].classes[idx]],
                       coordinates: {
                         x: box[0],
                         y: box[1],
@@ -386,7 +356,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                   <p>ไฟล์ที่เลือก: {truncateFileName(selectedFiles[0].name, 30)}</p>
                   <p>ประเภทไฟล์ที่เลือก: {selectedFiles[0].type}</p>
                 </div>
-                <pre>{JSON.stringify(entries)}</pre>
               </div>
             ))}
           </div>

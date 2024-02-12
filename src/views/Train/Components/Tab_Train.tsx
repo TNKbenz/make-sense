@@ -312,13 +312,13 @@ const Tab_Train: FC<IProps> = ({
           await axios.delete(
             `${
               import.meta.env.VITE_BACKEND_URL
-            }/model?username=${username}&project_name=${project_name}&model_name=${"default"}`
+            }/model/?username=${username}&project_name=${project_name}&model_name=${"default"}`
           );
         }
         await axios.post(
           `${
             import.meta.env.VITE_BACKEND_URL
-          }/model?username=${username}&project_name=${project_name}&model_name=${"default"}`
+          }/model/?username=${username}&project_name=${project_name}&model_name=${"default"}`
         );
         updateModelNameAction("default");
       }

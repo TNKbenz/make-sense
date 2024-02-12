@@ -11,7 +11,7 @@ interface PredictProps {
   username: string;
   project_name: string;
   modelname: string;
-  modeltype: string 
+  modeltype: string;
   updateModelNameAction: (modelname: string) => void;
 }
 
@@ -33,7 +33,7 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model?username=${username}&project_name=${project_name}`
+        }/model/?username=${username}&project_name=${project_name}`,
       );
       setListModel(response.data);
     } catch (error) {
@@ -44,7 +44,7 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
   const handleSelectListModel = (model_name) => {
     try {
       const selected = ListModel.find(
-        (Model) => Model.model_name === model_name
+        (Model) => Model.model_name === model_name,
       );
       if (selected) {
         setSelectedModel(selected);
@@ -62,10 +62,10 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model?username=${username}&project_name=${project_name}&model_name=${model_name}`
+        }/model/?username=${username}&project_name=${project_name}&model_name=${model_name}`,
       );
       const updatedList = ListModel.filter(
-        (Model) => Model.model_name !== model_name
+        (Model) => Model.model_name !== model_name,
       );
       setListModel(updatedList);
       fetchListModel();

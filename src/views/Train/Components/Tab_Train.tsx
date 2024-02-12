@@ -304,7 +304,7 @@ const Tab_Train: FC<IProps> = ({
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
       formData.append("username", username);
-      formData.append("project_name", project_name );
+      formData.append("project_name", project_name);
       formData.append("modelname", modelname || "default");
 
       labels.forEach((label, index) => {
@@ -332,12 +332,12 @@ const Tab_Train: FC<IProps> = ({
       }
 
       console.log(response.data);
-      submitNewNotificationAction(
-        NotificationUtil.createSuccessNotification({
-          header: "Training is running",
-          description: "Model is training",
-        })
-      );
+      // submitNewNotificationAction(
+      //   NotificationUtil.createSuccessNotification({
+      //     header: "Training is running",
+      //     description: "Model is training",
+      //   })
+      // );
     } catch (error) {
       console.error("Error:", error);
       submitNewNotificationAction(
@@ -407,16 +407,20 @@ const Tab_Train: FC<IProps> = ({
         <input
           type="text"
           value={epoch}
-          onChange={(e) => {setEpoch(e.target.value);
-            setEpochEdited(true);}}
+          onChange={(e) => {
+            setEpoch(e.target.value);
+            setEpochEdited(true);
+          }}
           className={epochEdited ? "" : "placeholder-text"}
         />
         <div>Learning Rate</div>
         <input
           type="text"
           value={learningRate}
-          onChange={(e) => {setLearningRate(e.target.value);
-            setLearningRateEdited(true);}}
+          onChange={(e) => {
+            setLearningRate(e.target.value);
+            setLearningRateEdited(true);
+          }}
           className={learningRateEdited ? "" : "placeholder-text"}
         />
         <button className="button-14" onClick={handleSubmit}>

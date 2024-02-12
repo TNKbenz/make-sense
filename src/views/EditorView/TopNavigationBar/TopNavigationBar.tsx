@@ -133,6 +133,11 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           labelobject[props.imageData[i].fileData.name] = yololabels[i];
         }
       }
+      const cname = [];
+      LabelsSelector.getLabelNames().forEach((name, index) => {
+        cname.push(name.name);
+      });
+      formData.append("classnames", JSON.stringify(cname));
       formData.append("labels", JSON.stringify(labelobject));
       formData.append("username", props.username);
       formData.append("project_name", props.project_name);

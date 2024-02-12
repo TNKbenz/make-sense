@@ -4,7 +4,9 @@ import { FileUtil } from "./FileUtil";
 import { ImageRepository } from "../logic/imageRepository/ImageRepository";
 
 export class ImageDataUtil {
-  public static createImageDataFromFileData(fileData: File): ImageData {
+  public static createImageDataFromFileData(
+    fileData: File | FileUrl
+  ): ImageData {
     return {
       id: uuidv4(),
       fileData,

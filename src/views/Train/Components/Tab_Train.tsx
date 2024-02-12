@@ -20,7 +20,7 @@ interface IProps {
   username: string;
   project_name: string;
   submitNewNotificationAction: (
-    notification: INotification
+    notification: INotification,
   ) => NotificationsActionType;
   updateModelNameAction: (modelname: string) => void;
   projectData: ProjectData;
@@ -48,12 +48,12 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
         "project_name",
         project_name,
         "model_name",
-        newModel
+        newModel,
       );
       await axios.post(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model?username=${username}&project_name=${project_name}&model_name=${newModel}`
+        }/model/?username=${username}&project_name=${project_name}&model_name=${newModel}`,
       );
       updateModelNameAction(newModel);
       onClose();
@@ -118,7 +118,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model?username=${username}&project_name=${project_name}`
+        }/model/?username=${username}&project_name=${project_name}`,
       );
       setListModel(response.data);
     } catch (error) {
@@ -129,7 +129,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
   const handleSelectListModel = (model_name) => {
     try {
       const selected = ListModel.find(
-        (Model) => Model.model_name === model_name
+        (Model) => Model.model_name === model_name,
       );
       setSelectedModel(selected);
       console.log("Selected Model:", model_name);
@@ -143,10 +143,10 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
       await axios.delete(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/model?username=${username}&project_name=${project_name}&model_name=${model_name}`
+        }/model/?username=${username}&project_name=${project_name}&model_name=${model_name}`,
       );
       const updatedList = ListModel.filter(
-        (Model) => Model.model_name !== model_name
+        (Model) => Model.model_name !== model_name,
       );
       setListModel(updatedList);
       fetchListModel();
@@ -285,14 +285,14 @@ const Tab_Train: FC<IProps> = ({
     setPopupCreate_Visible(false);
   };
 
-  if (activeLabelType === "IMAGE RECOGNITION"){
+  if (activeLabelType === "IMAGE RECOGNITION") {
     for (let i = 0; i < imageData.length; i++) {
       const id = imageData[i]["labelNameIds"][0];
       const name = LabelsSelector.getLabelNameById(id)["name"];
       labels.push(name);
     }
   } else {
-    console.log("object")
+    console.log("object");
   }
 
   const handleSubmit = async () => {
@@ -303,7 +303,7 @@ const Tab_Train: FC<IProps> = ({
           NotificationUtil.createErrorNotification({
             header: "Training prevented",
             description: "Some paremeter is missing a value",
-          })
+          }),
         );
         return;
       }
@@ -341,19 +341,19 @@ const Tab_Train: FC<IProps> = ({
         NotificationUtil.createMessageNotification({
           header: "Train started",
           description: "Model training started",
-        })
+        }),
       );
 
       let response;
       if (activeLabelType === "IMAGE RECOGNITION") {
         response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/train/`,
-          formData
+          formData,
         );
       } else {
         response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/object/train`,
-          formData
+          formData,
         );
       }
 
@@ -370,7 +370,7 @@ const Tab_Train: FC<IProps> = ({
         NotificationUtil.createErrorNotification({
           header: "Training failed",
           description: "Some paremeter is missing a value",
-        })
+        }),
       );
     }
   };
@@ -473,15 +473,15 @@ const mapDispatchToProps = {
 
 const connectPopupCreate = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(PopupCreate);
 const connectPopupSelect = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(PopupSelect);
 const connectTab_Train = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(Tab_Train);
 
 export { connectPopupCreate, connectPopupSelect, connectTab_Train };

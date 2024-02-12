@@ -117,6 +117,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
       const yololabels = RectLabelsExporter.YOLOLabelsdata();
       console.log("yololabels: ", yololabels);
       const labelobject = {};
+      console.log("props.imageData.length", props.imageData.length);
       for (let i = 0; i < props.imageData.length; i++) {
         // Not all images are labeled
         if (props.imageData[i]["labelRects"].length === 0) {
@@ -131,8 +132,8 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
         } else {
           labelobject[props.imageData[i].fileData.name] = yololabels[i];
         }
-        formData.append("labels", JSON.stringify(labelobject));
       }
+      formData.append("labels", JSON.stringify(labelobject));
       formData.append("username", props.username);
       formData.append("project_name", props.project_name);
       props.imageData.forEach((fileInfo, index) => {

@@ -78,6 +78,7 @@ const PopupSelect: React.FC<PredictProps & { onClose: () => void }> = ({
     if (selectedModel) {
       console.log("Selected Model:", selectedModel.model_name);
       updateModelNameAction(selectedModel.model_name);
+      onClose()
     }
   };
 

@@ -57,6 +57,7 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
       );
       updateModelNameAction(newModel);
       setNewModel("default");
+      onClose();
     } catch (error) {
       console.error("Error adding ListProject:", error);
     }
@@ -157,6 +158,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
     if (selectedModel) {
       console.log("Selected Model:", selectedModel.model_name);
       updateModelNameAction(selectedModel.model_name);
+      onClose();
     }
   };
 
@@ -264,8 +266,10 @@ const Tab_Train: FC<IProps> = ({
   activeLabelType,
 }) => {
   const navigate = useNavigate();
-  const [epoch, setEpoch] = useState<string>("");
-  const [learningRate, setLearningRate] = useState<string>("");
+  const [epoch, setEpoch] = useState<string>("10"); // ตั้งค่าเริ่มต้นเป็น "10"
+  const [learningRate, setLearningRate] = useState<string>("0.01"); // ตั้งค่าเริ่มต้นเป็น "0.01"
+  const [epochEdited, setEpochEdited] = useState<boolean>(false); // epoch ได้รับการแก้มั้ย
+  const [learningRateEdited, setLearningRateEdited] = useState<boolean>(false); //learning rate ได้รับการแก้มั้ย
   const labels = [];
   const [isPopupCreate_Visible, setPopupCreate_Visible] = useState(false);
   const [isPopupSelect_Visible, setPopupSelect_Visible] = useState(false);
@@ -279,16 +283,7 @@ const Tab_Train: FC<IProps> = ({
     setPopupSelect_Visible(!isPopupSelect_Visible);
     setPopupCreate_Visible(false);
   };
-  
-  if (activeLabelType === "IMAGE RECOGNITION"){
-    for (let i = 0; i < imageData.length; i++) {
-      const id = imageData[i]["labelNameIds"][0];
-      const name = LabelsSelector.getLabelNameById(id)["name"];
-      labels.push(name);
-    }
-  } else {
-    console.log("object")
-  }
+
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
@@ -309,7 +304,7 @@ const Tab_Train: FC<IProps> = ({
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
       formData.append("username", username);
-      formData.append("project_name", project_name || "p1");
+      formData.append("project_name", project_name);
       formData.append("modelname", modelname || "default");
 
       labels.forEach((label, index) => {
@@ -337,12 +332,12 @@ const Tab_Train: FC<IProps> = ({
       }
 
       console.log(response.data);
-      submitNewNotificationAction(
-        NotificationUtil.createSuccessNotification({
-          header: "Training is running",
-          description: "Model is training",
-        })
-      );
+      // submitNewNotificationAction(
+      //   NotificationUtil.createSuccessNotification({
+      //     header: "Training is running",
+      //     description: "Model is training",
+      //   })
+      // );
     } catch (error) {
       console.error("Error:", error);
       submitNewNotificationAction(
@@ -407,18 +402,26 @@ const Tab_Train: FC<IProps> = ({
         </button>
       </div>
       <div className="Parameter">
-        <h3>Model tuning</h3>
+        <h3>Model tuning [{modelname}]</h3>
         <div>Epoch</div>
         <input
           type="text"
           value={epoch}
-          onChange={(e) => setEpoch(e.target.value)}
+          onChange={(e) => {
+            setEpoch(e.target.value);
+            setEpochEdited(true);
+          }}
+          className={epochEdited ? "" : "placeholder-text"}
         />
         <div>Learning Rate</div>
         <input
           type="text"
           value={learningRate}
-          onChange={(e) => setLearningRate(e.target.value)}
+          onChange={(e) => {
+            setLearningRate(e.target.value);
+            setLearningRateEdited(true);
+          }}
+          className={learningRateEdited ? "" : "placeholder-text"}
         />
         <button className="button-14" onClick={handleSubmit}>
           Train

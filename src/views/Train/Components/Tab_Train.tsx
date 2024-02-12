@@ -56,8 +56,9 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
         }/model?username=${username}&project_name=${project_name}&model_name=${newModel}`
       );
       updateModelNameAction(newModel);
-      setNewModel("default");
       onClose();
+      setNewModel("default");
+      console.log("model name create",modelname)
     } catch (error) {
       console.error("Error adding ListProject:", error);
     }
@@ -131,7 +132,7 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
         (Model) => Model.model_name === model_name
       );
       setSelectedModel(selected);
-      console.log("Selected Project:", model_name);
+      console.log("Selected Model:", model_name);
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
@@ -306,6 +307,21 @@ const Tab_Train: FC<IProps> = ({
         );
         return;
       }
+      if (modelname === "default" || modelname === "" ){
+        if (modelname === "default"){
+          await axios.delete(
+            `${
+              import.meta.env.VITE_BACKEND_URL
+            }/model?username=${username}&project_name=${project_name}&model_name=${"default"}`
+          );
+        }
+        await axios.post(
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/model?username=${username}&project_name=${project_name}&model_name=${"default"}`
+        );
+        updateModelNameAction("default");
+      }
 
       imageData.forEach((fileInfo, index) => {
         const file = fileInfo.fileData;
@@ -342,12 +358,12 @@ const Tab_Train: FC<IProps> = ({
       }
 
       console.log(response.data);
-      // submitNewNotificationAction(
-      //   NotificationUtil.createSuccessNotification({
-      //     header: "Training is running",
-      //     description: "Model is training",
-      //   })
-      // );
+      submitNewNotificationAction(
+        NotificationUtil.createSuccessNotification({
+          header: "Training is running",
+          description: "Model is training",
+        })
+      );
     } catch (error) {
       console.error("Error:", error);
       submitNewNotificationAction(

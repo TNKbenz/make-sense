@@ -13,6 +13,7 @@ import { updateProjectData } from "../../store/general/actionCreators";
 import { ProjectData } from "src/store/general/types";
 import { ImageDataUtil } from "../../utils/ImageDataUtil";
 import { LabelUtil } from "../../utils/LabelUtil";
+import { YOLOUtils } from "../../logic/import/yolo/YOLOUtils";
 import {
   addImageData,
   updateActiveImageIndex,
@@ -25,12 +26,12 @@ import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { FileUrl, ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
 import { sortBy, uniq } from "lodash";
+import classNames from "classnames";
 import {LabelType} from "../../data/enums/LabelType";
 
 interface IProps {
   username: string;
   projectName: string;
-  updateActiveLabelTypeAction: (activeLabelType: string) => void;
   updateProjectNameAction: (project_name: string) => void;
   updateProjectDataAction: (projectData: ProjectData) => void;
   updateImageDataAction: (imageData: ImageData[]) => void;
@@ -40,6 +41,7 @@ interface IProps {
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
   updateImageDataById: (id: string, newImageData: ImageData) => any;
+  updateActiveLabelTypeAction: (activeLabelType: string) => void;
   labelNames: LabelName[];
 }
 
@@ -55,8 +57,8 @@ const Home: React.FC<IProps> = ({
   updateActiveImageIndexAction,
   updateLabelNamesAction,
   updateImageDataById,
-  labelNames,
   updateActiveLabelTypeAction,
+  labelNames,
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: AppState) => state.user.username);
@@ -205,9 +207,18 @@ const Home: React.FC<IProps> = ({
   } as DropzoneOptions);
 
   const loadImagesFromBackend = async () => {
+    const hostAddress = window.location.origin;
     const formData = new FormData();
     formData.append("username", username);
     formData.append("project_name", selectedProject.project_name);
+    if (hostAddress.includes("localhost")) {
+      formData.append("address", `${import.meta.env.VITE_BACKEND_URL}`);
+    } else {
+      formData.append(
+        "address",
+        hostAddress + `${import.meta.env.VITE_BACKEND_URL}`
+      );
+    }
     const response = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/getimage/`,
       formData
@@ -280,9 +291,18 @@ const Home: React.FC<IProps> = ({
   };
 
   const loadobjectfrombackend = async () => {
+    const hostAddress = window.location.origin;
     const formData = new FormData();
     formData.append("username", username);
     formData.append("project_name", selectedProject.project_name);
+    if (hostAddress.includes("localhost")) {
+      formData.append("address", `${import.meta.env.VITE_BACKEND_URL}`);
+    } else {
+      formData.append(
+        "address",
+        hostAddress + `${import.meta.env.VITE_BACKEND_URL}`
+      );
+    }
     const response = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/getobject/`,
       formData
@@ -294,11 +314,16 @@ const Home: React.FC<IProps> = ({
       };
     });
     console.log(fileUrls);
-    return fileUrls;
+    return {
+      imageUrls: fileUrls,
+      classNames: response.data.classnames,
+      annotations: response.data.images,
+    };
   };
 
   const startEditor2 = async (projectType: ProjectType) => {
-    const imageUrls = await loadobjectfrombackend();
+    const { imageUrls, classNames, annotations } =
+      await loadobjectfrombackend();
     if (imageUrls.length > 0) {
       updateProjectDataAction({
         name: selectedProject.project_name,
@@ -308,6 +333,9 @@ const Home: React.FC<IProps> = ({
       addImageDataAction(
         imageUrls.map((url) => ImageDataUtil.createImageDataFromFileData(url))
       );
+      const labelNames = YOLOUtils.parseLabelsNamesFromListString(classNames);
+      updateLabelNamesAction(labelNames);
+      console.log("annotations:", annotations);
       console.log("add image file success");
     }
   };
@@ -578,7 +606,6 @@ const mapDispatchToProps = {
   updateModelNameAction: updateModelName,
   updateModelTypeAction: updateModelType,
   updateLabelNamesAction: updateLabelNames,
-  updateActiveLabelTypeAction :updateActiveLabelType,
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -586,5 +613,6 @@ const mapStateToProps = (state: AppState) => ({
   projectName: state.user.project_name,
   projectData: state.general.projectData,
   labelNames: state.labels.labels,
+  updateActiveLabelTypeAction :updateActiveLabelType,
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

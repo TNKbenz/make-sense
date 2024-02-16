@@ -12,6 +12,13 @@ import {
 } from "recharts";
 import { connect } from "react-redux";
 
+interface IProps {
+  modelname: string;
+  username: string;
+  project_name: string;
+  modeltype: string;
+}
+
 // mock data
 
 //Confusion-Matrix
@@ -40,34 +47,65 @@ const ModelPerformanceChart = ({
   data,
   validationCurveData,
   precisionRecallCurveData,
-}) => {
+  modeltype,
+
+  }) => {
+  console.log("activeLabelType",modeltype)
   return (
     <div className="model-performance-chart">
       <h2>Model Performance</h2>
-
+      
       <div className="accuracy-graph">
-        <h3>Accuracy</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis
-              dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
-            />
-            <YAxis
-              label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
-            />
-            <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="accuracy"
-              name="Accuracy"
-              stroke="#8884d8"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {modeltype === "IMAGE_RECOGNITION" ? (
+        <React.Fragment>
+          <h3>Accuracy</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data}>
+              <XAxis
+                dataKey="epoch"
+                label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+              />
+              <YAxis
+                label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
+              />
+              <CartesianGrid strokeDasharray="3 3" />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="accuracy"
+                name="Accuracy"
+                stroke="#8884d8"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <h3>Fitness</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data}>
+              <XAxis
+                dataKey="epoch"
+                label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+              />
+              <YAxis
+                label={{ value: "Fitness", angle: -90, position: "insideLeft" }}
+              />
+              <CartesianGrid strokeDasharray="3 3" />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="accuracy"
+                name="Fitness"
+                stroke="#8884d8"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </React.Fragment>
+      )}
+    </div>
 
       <div className="cost-graph">
         <h3>Cost (Loss)</h3>
@@ -155,17 +193,13 @@ const ModelPerformanceChart = ({
   );
 };
 
-interface IProps {
-  modelname: string;
-  username: string;
-  project_name: string;
-}
 
 // Example data for accuracy and cost over epochs
 const Tab_Visualize: React.FC<IProps> = ({
   modelname,
   username,
   project_name,
+  modeltype,
 }) => {
   const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
@@ -178,6 +212,7 @@ const Tab_Visualize: React.FC<IProps> = ({
       username: username,
       project_name: project_name,
       modelname: modelname,
+      modeltype: modeltype,
     };
     axios
       .post(dataUrl, data)
@@ -240,7 +275,7 @@ const Tab_Visualize: React.FC<IProps> = ({
 
         setValidationCurveData(transformedValidationCurveData);
         setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
-        //
+        
       });
   }, []); // The empty dependency array [] ensures this effect runs once when the component mounts
 
@@ -250,6 +285,7 @@ const Tab_Visualize: React.FC<IProps> = ({
         data={data}
         validationCurveData={validationCurveData}
         precisionRecallCurveData={precisionRecallCurveData}
+        modeltype={modeltype}
       />
     </div>
   );
@@ -260,6 +296,7 @@ const mapStateToProps = (state) => {
     username: state.user.username,
     project_name: state.user.project_name,
     modelname: state.user.modelname,
+    modeltype: state.user.modeltype,
   };
 };
 

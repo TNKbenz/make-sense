@@ -2,13 +2,13 @@ import React, { useState, useEffect, PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Home.scss";
-import { updateProjectName } from "../../store/users/actionCreators";
 import {
   updateModelName,
   updateModelType,
+  updateProjectName,
 } from "../../store/users/actionCreators";
 import { AppState } from "../../store";
-import { connect, useSelector } from "react-redux";
+import { connect, useSelector, useDispatch } from "react-redux";
 import { updateProjectData } from "../../store/general/actionCreators";
 import { ProjectData } from "src/store/general/types";
 import { ImageDataUtil } from "../../utils/ImageDataUtil";
@@ -17,15 +17,20 @@ import { YOLOUtils } from "../../logic/import/yolo/YOLOUtils";
 import {
   addImageData,
   updateActiveImageIndex,
+  updateActiveLabelType,
+  updateActiveLabelId,
   updateLabelNames,
   updateImageData,
   updateImageDataById,
+  setObjectData,
 } from "../../store/labels/actionCreators";
 import { useDropzone, DropzoneOptions } from "react-dropzone";
 import { FileUrl, ImageData, LabelName } from "../../store/labels/types";
 import { ProjectType } from "../../data/enums/ProjectType";
-import { sortBy, uniq } from "lodash";
-import classNames from "classnames";
+import { set, sortBy, uniq, update } from "lodash";
+import { LabelsSelector } from "../../store/selectors/LabelsSelector";
+import { FileUtil } from "../../utils/FileUtil";
+import { LabelType } from "../../../src/data/enums/LabelType";
 
 interface IProps {
   username: string;
@@ -38,8 +43,11 @@ interface IProps {
   updateModelTypeAction: (modeltype: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
-  updateImageDataById: (id: string, newImageData: ImageData) => any;
+  updateImageDataByIdAction: (id: string, newImageData: ImageData) => any;
   labelNames: LabelName[];
+  updateActiveLabelTypeAction: (activeLabelType: LabelType) => any;
+  updateActiveLabelIdAction: (activeLabelId: string) => any;
+  setObjectDataAction: (objectData: any) => any;
 }
 
 const Home: React.FC<IProps> = ({
@@ -53,8 +61,11 @@ const Home: React.FC<IProps> = ({
   updateModelTypeAction,
   updateActiveImageIndexAction,
   updateLabelNamesAction,
-  updateImageDataById,
+  updateImageDataByIdAction,
   labelNames,
+  updateActiveLabelTypeAction,
+  updateActiveLabelIdAction,
+  setObjectDataAction,
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: AppState) => state.user.username);
@@ -68,6 +79,7 @@ const Home: React.FC<IProps> = ({
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!user) {
@@ -280,7 +292,9 @@ const Home: React.FC<IProps> = ({
         ImageDataArr.push(imgdata);
       }
       console.log("ImageDataArr:", ImageDataArr);
-      addImageDataAction(ImageDataArr);
+      updateImageDataAction(ImageDataArr);
+      updateActiveLabelTypeAction(LabelType.IMAGE_RECOGNITION);
+      updateActiveLabelIdAction(null);
       console.log("add image file success");
       // updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
     }
@@ -303,35 +317,33 @@ const Home: React.FC<IProps> = ({
       `${import.meta.env.VITE_BACKEND_URL}/getobject/`,
       formData
     );
+    dispatch(setObjectData(response.data));
     const fileUrls = response.data.images.map((img: string): FileUrl => {
       return {
         url: img.url,
         name: img.filename,
       };
     });
-    console.log(fileUrls);
     return {
       imageUrls: fileUrls,
       classNames: response.data.classnames,
-      annotations: response.data.images,
+      images: response.data.images,
     };
   };
 
   const startEditor2 = async (projectType: ProjectType) => {
-    const { imageUrls, classNames, annotations } =
-      await loadobjectfrombackend();
+    const { imageUrls, classNames, images } = await loadobjectfrombackend();
     if (imageUrls.length > 0) {
       updateProjectDataAction({
         name: selectedProject.project_name,
         type: selectedProject.project_type,
       });
       updateActiveImageIndexAction(0);
-      addImageDataAction(
+      updateActiveLabelTypeAction(LabelType.RECT);
+      updateActiveLabelIdAction(null);
+      await addImageDataAction(
         imageUrls.map((url) => ImageDataUtil.createImageDataFromFileData(url))
       );
-      const labelNames = YOLOUtils.parseLabelsNamesFromListString(classNames);
-      updateLabelNamesAction(labelNames);
-      console.log("annotations:", annotations);
       console.log("add image file success");
     }
   };
@@ -354,6 +366,8 @@ const Home: React.FC<IProps> = ({
           name: selectedProject.project_name,
         });
         updateImageDataAction([]);
+        updateLabelNamesAction([]);
+        setObjectDataAction(null);
         updateModelTypeAction(selectedProject.project_type);
         updateModelNameAction("");
 
@@ -596,11 +610,15 @@ const mapDispatchToProps = {
   updateProjectNameAction: updateProjectName,
   updateProjectDataAction: updateProjectData,
   updateImageDataAction: updateImageData,
+  updateImageDataByIdAction: updateImageDataById,
   updateActiveImageIndexAction: updateActiveImageIndex,
   addImageDataAction: addImageData,
   updateModelNameAction: updateModelName,
   updateModelTypeAction: updateModelType,
   updateLabelNamesAction: updateLabelNames,
+  setObjectDataAction: setObjectData,
+  updateActiveLabelTypeAction: updateActiveLabelType,
+  updateActiveLabelIdAction: updateActiveLabelId,
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -608,5 +626,6 @@ const mapStateToProps = (state: AppState) => ({
   projectName: state.user.project_name,
   projectData: state.general.projectData,
   labelNames: state.labels.labels,
+  imageData: state.labels.imagesData,
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

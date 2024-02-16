@@ -80,6 +80,7 @@ export type LabelsState = {
   imagesData: ImageData[];
   firstLabelCreatedFlag: boolean;
   labels: LabelName[];
+  objectData: any;
 };
 
 interface UpdateActiveImageIndex {
@@ -153,6 +154,13 @@ interface UpdateFirstLabelCreatedFlag {
   };
 }
 
+interface SetObjectData {
+  type: typeof Action.SET_OBJECT_DATA;
+  payload: {
+    objectData: any;
+  };
+}
+
 export type LabelsActionTypes =
   | UpdateActiveImageIndex
   | UpdateActiveLabelNameId
@@ -163,4 +171,5 @@ export type LabelsActionTypes =
   | UpdateLabelNames
   | UpdateActiveLabelId
   | UpdateHighlightedLabelId
-  | UpdateFirstLabelCreatedFlag;
+  | UpdateFirstLabelCreatedFlag
+  | SetObjectData;

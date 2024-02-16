@@ -10,6 +10,7 @@ const initialState: LabelsState = {
   imagesData: [],
   firstLabelCreatedFlag: false,
   labels: [],
+  objectData: null,
 };
 
 export function labelsReducer(
@@ -82,6 +83,11 @@ export function labelsReducer(
         firstLabelCreatedFlag: action.payload.firstLabelCreatedFlag,
       };
     }
+    case Action.SET_OBJECT_DATA:
+      return {
+        ...state,
+        objectData: action.payload,
+      };
     default:
       return state;
   }

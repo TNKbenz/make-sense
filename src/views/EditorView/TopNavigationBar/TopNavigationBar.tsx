@@ -56,11 +56,11 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
   //     name: value,
   //   });
   // };
+  const navigate = useNavigate();
 
   const closePopup = () =>
-    props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
-
-  const navigate = useNavigate();
+    // props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
+    navigate("/");
 
   const TrainPage = async () => {
     const formData = new FormData();
@@ -186,7 +186,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
               alt={"make-sense"}
               src={"/make-sense-ico-transparent.png"}
             />
-            Make Sense
+            Home Page
           </div>
         </div>
         <div className="NavigationBarGroupWrapper">

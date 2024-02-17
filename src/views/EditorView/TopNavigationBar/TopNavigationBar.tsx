@@ -8,6 +8,7 @@ import {
   updateActivePopupType,
   updateProjectData,
 } from "../../../store/general/actionCreators";
+import { setObjectData } from "../../../store/labels/actionCreators";
 import TextInput from "../../Common/TextInput/TextInput";
 import { ImageButton } from "../../Common/ImageButton/ImageButton";
 import { Settings } from "../../../settings/Settings";
@@ -23,6 +24,7 @@ import {
   NotificationsActionType,
 } from "../../../store/notifications/types";
 import { RectLabelsExporter } from "../../../logic/export/RectLabelsExporter";
+import { ImageDataUtil } from "../../../../src/utils/ImageDataUtil";
 
 interface IProps {
   updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -36,6 +38,8 @@ interface IProps {
   submitNewNotificationAction: (
     notification: INotification
   ) => NotificationsActionType;
+  ImageDataUtil: ImageDataUtil;
+  setObjectDataAction: (imagesData: ImageData[]) => any;
 }
 
 const TopNavigationBar: React.FC<IProps> = (props) => {
@@ -58,7 +62,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
 
   const navigate = useNavigate();
 
-  const TrainPage = () => {
+  const TrainPage = async () => {
     const formData = new FormData();
     if (props.modeltype === "IMAGE_RECOGNITION") {
       const labels = [];
@@ -114,6 +118,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
         });
     } else {
       // Object Detection
+      await ImageDataUtil.loadMissingImages(props.imageData);
       const yololabels = RectLabelsExporter.YOLOLabelsdata();
       console.log("yololabels: ", yololabels);
       const labelobject = {};
@@ -166,6 +171,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
         .catch((error) => {
           console.error("Error saving image(s) and label(s):", error);
         });
+      props.setObjectDataAction(null);
     }
   };
 
@@ -217,6 +223,7 @@ const mapDispatchToProps = {
   updateActivePopupTypeAction: updateActivePopupType,
   updateProjectDataAction: updateProjectData,
   submitNewNotificationAction: submitNewNotification,
+  setObjectDataAction: setObjectData,
 };
 
 const mapStateToProps = (state: AppState) => ({

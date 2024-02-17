@@ -7,6 +7,7 @@ import LoadLabelsPopup from './LoadLabelNamesPopup/LoadLabelNamesPopup';
 import InsertLabelNamesPopup from './InsertLabelNamesPopup/InsertLabelNamesPopup';
 import ExitProjectPopup from './ExitProjectPopup/ExitProjectPopup';
 import LoadMoreImagesPopup from './LoadMoreImagesPopup/LoadMoreImagesPopup';
+import LoadImagesFolderPopup from './LoadImagesFolderPopup/LoadImagesFolderPopup';
 import SuggestLabelNamesPopup from './SuggestLabelNamesPopup/SuggestLabelNamesPopup';
 import { CSSHelper } from '../../logic/helpers/CSSHelper';
 import { ClipLoader } from 'react-spinners';
@@ -42,6 +43,8 @@ const PopupView: React.FC<IProps> = ({ activePopupType }) => {
                 return <ExitProjectPopup />;
             case PopupWindowType.IMPORT_IMAGES:
                 return <LoadMoreImagesPopup />;
+            case PopupWindowType.IMPORT_IMAGES_FOLDER:
+                return <LoadImagesFolderPopup />;
             case PopupWindowType.LOAD_AI_MODEL:
                 return <LoadModelPopup />;
             case PopupWindowType.LOAD_YOLO_V5_MODEL:

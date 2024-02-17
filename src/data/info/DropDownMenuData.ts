@@ -52,6 +52,14 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.EXPORT_ANNOTATIONS))
             },
             {
+                name: 'Import Images by Folder',
+                description: 'Load more images',
+                imageSrc: 'ico/camera.png',
+                imageAlt: 'images',
+                disabled: false,
+                onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.IMPORT_IMAGES_FOLDER))
+            },
+            {
                 name: 'Run AI locally',
                 description: 'Run annotation model in browser',
                 imageSrc: 'ico/ai.png',
@@ -76,7 +84,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
         disabled: false,
         children: [
             {
-                name: 'Documentation',
+                name: 'Make Sense',
                 description: 'Read more about Make Sense',
                 imageSrc: 'ico/documentation.png',
                 imageAlt: 'documentation',
@@ -90,6 +98,15 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: 'bug',
                 disabled: false,
                 onClick: () => window.open('https://github.com/SkalskiP/make-sense/issues', '_blank')
+            }
+            ,
+            {
+                name: 'GitHub',
+                description: 'Read more about me',
+                imageSrc: 'ico/documentation.png',
+                imageAlt: 'documentation',
+                disabled: false,
+                onClick: () => window.open('https://github.com/TNKbenz/make-sense', '_blank')
             }
         ]
     }

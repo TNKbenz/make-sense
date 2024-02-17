@@ -1,4 +1,4 @@
-import React, {PropsWithChildren} from 'react';
+import React, {PropsWithChildren,useState} from 'react';
 import './ImagesDropZone.scss';
 import {useDropzone,DropzoneOptions} from 'react-dropzone';
 import {TextButton} from '../../Common/TextButton/TextButton';
@@ -23,6 +23,8 @@ interface IProps {
 }
 
 const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
+    const [inputValue, setInputValue] = useState('');
+
     const {acceptedFiles, getRootProps, getInputProps} = useDropzone({
         accept: {
             'image/*': ['.jpeg', '.png']
@@ -81,23 +83,65 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
     const startEditorWithObjectDetection = () => startEditor(ProjectType.OBJECT_DETECTION)
     const startEditorWithImageRecognition = () => startEditor(ProjectType.IMAGE_RECOGNITION)
 
+    const getContentFolder = (value: string) => {
+        setInputValue(value);
+        if (acceptedFiles.length > 0) {
+            const files = sortBy(acceptedFiles, (item: File) => item.name)
+            props.updateProjectDataAction({
+                ...props.projectData,
+                type: ProjectType.IMAGE_RECOGNITION
+            });
+            props.updateActiveImageIndexAction(0);
+            // props.addImageDataAction(files.map((file:File) => ImageDataUtil
+            //     .createImageDataFromFileData(file)));
+        }
+        console.log(`Add images by`,value)
+    }
+
     return(
         <div className='ImagesDropZone'>
+            {props.modeltype === "IMAGE_RECOGNITION" && (
+                <div className='DropZoneButtons_Top'>
+                    <input className='TextInput'
+                        type="text"
+                        placeholder="Add labels by name (Image recognition)"
+                        disabled={!acceptedFiles.length}
+                        value={inputValue}
+                        onChange={(event) => getContentFolder(event.target.value)}
+                    />
+                </div>
+            )}
             <div {...getRootProps({className: 'DropZone'})}>
                 {getDropZoneContent()}
             </div>
-            <div className='DropZoneButtons'>
-                <TextButton
-                    label={'Object Detection'}
-                    isDisabled={(!acceptedFiles.length) || (props.modeltype !== "OBJECT_DETECTION")}
-                    onClick={startEditorWithObjectDetection}
-                />
-                <TextButton
-                    label={'Image recognition'}
-                    isDisabled={(!acceptedFiles.length) || (props.modeltype !== "IMAGE_RECOGNITION")}
-                    onClick={startEditorWithImageRecognition}
-                />
-            </div>
+            {props.modeltype !== "IMAGE_RECOGNITION" && (
+                <div className='DropZoneButtons'>
+                    <TextButton
+                        label={'Object Detection'}
+                        isDisabled={(!acceptedFiles.length) || (props.modeltype !== "OBJECT_DETECTION")}
+                        onClick={startEditorWithObjectDetection}
+                    />
+                    <TextButton
+                        label={'Image recognition'}
+                        isDisabled={(!acceptedFiles.length) || (props.modeltype !== "IMAGE_RECOGNITION")}
+                        onClick={startEditorWithImageRecognition}
+                    />
+                </div>
+            )}
+            {props.modeltype === "IMAGE_RECOGNITION" && (
+                <div className='DropZoneButtons'>
+                    <TextButton
+                        label={'Add Class by Name'}
+                        isDisabled={(!acceptedFiles.length) || (inputValue === "")}
+                        onClick={startEditorWithObjectDetection}
+                    />
+                    <TextButton
+                        label={'Image recognition'}
+                        isDisabled={(!acceptedFiles.length) || (inputValue !== "")}
+                        onClick={startEditorWithImageRecognition}
+                    />
+                </div>
+            )}
         </div>
     )
 };

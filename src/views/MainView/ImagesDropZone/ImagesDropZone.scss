@@ -73,4 +73,66 @@
       }
     }
   }
+
+  .DropZoneButtons_Top {
+    align-self: stretch;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+
+    .TextInput::placeholder {
+      color: #747373; /* สีเทาหรือสีที่คุณต้องการให้ placeholder text แสดง */
+    }
+
+    .TextButton {
+      width: calc(100% - 3px);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+
+      &.disabled {
+        box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 2px inset;
+        color: rgba(0, 0, 0, 0.2);
+        cursor: default;
+
+        &:hover {
+          box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 2px inset;
+          color: rgba(0, 0, 0, 0.2);
+          background-color: transparent;
+        }
+      }
+    }
+
+    .TextInput {
+      width: calc(100% - 3px);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #000000; /* เพิ่มการกำหนดรูปแบบกรอบ */
+      border-radius: 2px; /* เพิ่มการกำหนดรูปแบบของมุม */
+      padding: 8px; /* เพิ่มการกำหนดรูปแบบของขอบ */
+      font-size: 16px; /* เพิ่มการกำหนดรูปแบบขนาดตัวอักษร */
+      text-align: center;
+      font-weight: bold;
+    
+      &.disabled {
+        box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 2px inset;
+        color: rgba(0, 0, 0, 0.2);
+        cursor: default;
+      
+        &:hover {
+          box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 2px inset;
+          color: rgba(0, 0, 0, 0.2);
+          background-color: transparent;
+        }
+      }
+    }
+  }  
 }

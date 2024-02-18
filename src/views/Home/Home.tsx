@@ -156,10 +156,10 @@ const Home: React.FC<IProps> = ({
         (Project) => Project.project_name !== project_name
       );
       setListProject(updatedList);
-      fetchListProject();
     } catch (error) {
       console.error("Error deleting ListProject:", error);
     }
+    fetchListProject();
   };
 
   // const handleGetImages = async (projectId) => {
@@ -178,6 +178,7 @@ const Home: React.FC<IProps> = ({
     setShowDropZonePopup(false);
   };
   const handleOpenProjectClick = () => {
+    setSelectedProject("");
     setShowMainPopup(false);
     setShowCreatePopup(false);
     setShowListProjectPopup(true);
@@ -317,7 +318,8 @@ const Home: React.FC<IProps> = ({
       `${import.meta.env.VITE_BACKEND_URL}/getobject/`,
       formData
     );
-    dispatch(setObjectData(response.data));
+    // dispatch(setObjectData(response.data));
+    setObjectDataAction(response.data);
     const fileUrls = response.data.images.map((img: string): FileUrl => {
       return {
         url: img.url,

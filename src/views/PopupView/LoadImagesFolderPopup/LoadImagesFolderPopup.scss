@@ -1,4 +1,4 @@
-@import '../../../settings/Settings';
+@import "../../../settings/Settings";
 
 .LoadImagesFolderPopupContent {
   display: flex;
@@ -51,5 +51,23 @@
         font-weight: 600;
       }
     }
+  }
+}
+.TextInput {
+  width: calc(100% - 3px);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center; // Update to center
+  margin: 0 auto; // Add margin to center horizontally
+  border: 2px solid #000000; /* Add border style */
+  border-radius: 2px; /* Add border radius */
+  padding: 8px;
+  font-size: 16px;
+  text-align: center;
+  font-weight: bold;
+  color: #ffffff; /* Set the text color to white */
+
+  &.disabled {
+    // Existing styles for disabled state
   }
 }

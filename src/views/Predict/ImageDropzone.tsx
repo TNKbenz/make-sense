@@ -2,7 +2,7 @@ import React, { useCallback, useState , useEffect} from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Tooltip, ResponsiveContainer ,Cell ,Legend} from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
 import ObjectDetectionVisualizer from "object-detection-visualizer";
@@ -28,7 +28,7 @@ type PredictionsResult = {
   probabilities: number[][];
 };
 
-const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f0e", "#d1300e"];
+const colors = ["#ADD8E6","#ffb6c1","#ff7f0e", "#d1300e","#8884d8","#82ca9d","#ffc658"];
 
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   onUploadSuccess,
@@ -296,11 +296,15 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                               cy="50%"
                               innerRadius={0}
                               outerRadius={100}
-                              fill={colors[index % colors.length]}
+                              fill={colors[index]}
                               label={(entry) => entry.name[0] + ` ${(entry.value * 100).toFixed(3)}%`}
-                            >     
+                            > 
+                              {modifiedResults[index].map((entry, idx) => (
+                                <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
+                              ))}    
                             </Pie>
                             <Tooltip formatter={(value) => value.toFixed(4)} />
+                            <Legend align="right" verticalAlign="middle" layout="vertical" />
                           </PieChart>
                         </ResponsiveContainer>
                       </div>

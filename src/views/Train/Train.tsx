@@ -55,13 +55,12 @@ interface IProps {
 const Train: React.FC<IProps> = (props) => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
-  const WS_URL = `${import.meta.env.VITE_BACKEND_WS_URL}/${props.username}_${
-    props.project_name
-  }`;
+  const WS_URL = `ws://${window.location.hostname}/ws/${props.username}_${props.project_name}`;
   const { sendJsonMessage, lastMessage, readyState } = useWebSocket(WS_URL, {
     share: false,
     shouldReconnect: () => true,
   });
+  console.log("websocket url:", WS_URL);
 
   // Run when the connection state (readyState) changes
   useEffect(() => {

@@ -34,7 +34,7 @@ export class RectLabelsExporter {
     const Labels = [];
     LabelsSelector.getImagesData().forEach((imageData: ImageData) => {
       const fileContent: string =
-        RectLabelsExporter.wrapRectLabelsIntoYOLO(imageData);
+        RectLabelsExporter.wrapRectLabelsIntoYOLO2(imageData);
       if (fileContent) {
         Labels.push(fileContent);
       }
@@ -141,6 +141,24 @@ export class RectLabelsExporter {
 
   private static wrapRectLabelsIntoYOLO(imageData: ImageData): string {
     if (imageData.labelRects.length === 0 || !imageData.loadStatus) return null;
+
+    const labelNames: LabelName[] = LabelsSelector.getLabelNames();
+    const image: HTMLImageElement = ImageRepository.getById(imageData.id);
+    const imageSize: ISize = { width: image.width, height: image.height };
+    const labelRectsString: string[] = imageData.labelRects
+      .filter((labelRect: LabelRect) => labelRect.labelId !== null)
+      .map((labelRect: LabelRect) => {
+        return RectLabelsExporter.wrapRectLabelIntoYOLO(
+          labelRect,
+          labelNames,
+          imageSize
+        );
+      });
+    return labelRectsString.join("\n");
+  }
+
+  private static wrapRectLabelsIntoYOLO2(imageData: ImageData): string {
+    if (imageData.labelRects.length === 0) return null;
 
     const labelNames: LabelName[] = LabelsSelector.getLabelNames();
     const image: HTMLImageElement = ImageRepository.getById(imageData.id);

@@ -25,7 +25,7 @@ import {
 } from "../../../store/notifications/types";
 import { RectLabelsExporter } from "../../../logic/export/RectLabelsExporter";
 import { ImageDataUtil } from "../../../../src/utils/ImageDataUtil";
-
+import { ImageData } from "../../../store/labels/types";
 interface IProps {
   updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
   updateProjectDataAction: (projectData: ProjectData) => any;

@@ -90,7 +90,6 @@ class Editor extends React.Component<IProps, IState> {
     } = this.props;
 
     if (objectData !== null) {
-      console.log("KUY");
       const images = objectData.images;
       const labelNames = YOLOUtils.parseLabelsNamesFromListString(
         objectData.classnames

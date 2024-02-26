@@ -79,6 +79,7 @@ const Home: React.FC<IProps> = ({
   const [imageData, setImageData] = useState([]);
   const [showDropZonePopup, setShowDropZonePopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [openProjectClicked, setOpenProjectClicked] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -351,39 +352,49 @@ const Home: React.FC<IProps> = ({
   };
 
   const handleOpenClick = async () => {
-    if (selectedProject) {
-      const isInListProject = ListProject.find(
-        (project) => project.project_name === selectedProject.project_name
-      );
-      if (isInListProject) {
-        console.log(
-          "Selected Project:",
-          selectedProject.project_name,
-          " Type Project:",
-          selectedProject.project_type
-        );
-        updateProjectNameAction(selectedProject.project_name);
-        updateProjectDataAction({
-          type: selectedProject.project_type,
-          name: selectedProject.project_name,
-        });
-        updateImageDataAction([]);
-        updateLabelNamesAction([]);
-        setObjectDataAction(null);
-        updateModelTypeAction(selectedProject.project_type);
-        updateModelNameAction("");
+    if (!openProjectClicked && selectedProject) {
+      try {
+        setOpenProjectClicked(true);
 
-        if (selectedProject.project_type === ProjectType.IMAGE_RECOGNITION) {
-          await startEditorWithImageRecognition();
-          navigate("/home");
-        } else if (
-          selectedProject.project_type === ProjectType.OBJECT_DETECTION
-        ) {
-          await startEditorWithObjectDetection();
-          navigate("/home");
-        } else {
-          console.error("Error");
+        const isInListProject = ListProject.find(
+          (project) => project.project_name === selectedProject.project_name
+        );
+
+        if (isInListProject) {
+          console.log(
+            "Selected Project:",
+            selectedProject.project_name,
+            " Type Project:",
+            selectedProject.project_type
+          );
+
+          updateProjectNameAction(selectedProject.project_name);
+          updateProjectDataAction({
+            type: selectedProject.project_type,
+            name: selectedProject.project_name,
+          });
+          updateImageDataAction([]);
+          updateLabelNamesAction([]);
+          setObjectDataAction(null);
+          updateModelTypeAction(selectedProject.project_type);
+          updateModelNameAction("");
+
+          if (selectedProject.project_type === ProjectType.IMAGE_RECOGNITION) {
+            await startEditorWithImageRecognition();
+            navigate("/home");
+          } else if (
+            selectedProject.project_type === ProjectType.OBJECT_DETECTION
+          ) {
+            await startEditorWithObjectDetection();
+            navigate("/home");
+          } else {
+            console.error("Error");
+          }
         }
+      } catch (error) {
+        console.error("Error opening project:", error);
+      } finally {
+        setOpenProjectClicked(false);
       }
     }
   };
@@ -579,7 +590,11 @@ const Home: React.FC<IProps> = ({
             </tbody>
           </table>
           <div>
-            <button className="button-1" onClick={handleOpenClick}>
+            <button
+              className="button-1"
+              onClick={handleOpenClick}
+              disabled={openProjectClicked}
+            >
               Open {selectedProject.project_name} Project
             </button>
             <button className="button-1" onClick={handleBackClick}>

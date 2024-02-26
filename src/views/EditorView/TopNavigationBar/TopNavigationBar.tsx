@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./TopNavigationBar.scss";
 import StateBar from "../StateBar/StateBar";
 import { PopupWindowType } from "../../../data/enums/PopupWindowType";
@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import {
   updateActivePopupType,
   updateProjectData,
+  updateFetching,
 } from "../../../store/general/actionCreators";
 import { setObjectData } from "../../../store/labels/actionCreators";
 import TextInput from "../../Common/TextInput/TextInput";
@@ -26,6 +27,8 @@ import {
 import { RectLabelsExporter } from "../../../logic/export/RectLabelsExporter";
 import { ImageDataUtil } from "../../../../src/utils/ImageDataUtil";
 import { ImageData } from "../../../store/labels/types";
+import { PopupActions } from "../../../logic/actions/PopupActions";
+
 interface IProps {
   updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
   updateProjectDataAction: (projectData: ProjectData) => any;
@@ -40,9 +43,11 @@ interface IProps {
   ) => NotificationsActionType;
   ImageDataUtil: ImageDataUtil;
   setObjectDataAction: (imagesData: ImageData[]) => any;
+  updateFetchingAction: (fetching: string) => any;
 }
 
 const TopNavigationBar: React.FC<IProps> = (props) => {
+  const [isTrainButtonClicked, setTrainButtonClicked] = useState(false);
   const onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     event.target.setSelectionRange(0, event.target.value.length);
   };
@@ -63,8 +68,14 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
     navigate("/");
 
   const TrainPage = async () => {
+    if (isTrainButtonClicked) {
+      return;
+    }
+    setTrainButtonClicked(true);
+    props.updateActivePopupTypeAction(PopupWindowType.LOADING);
     const formData = new FormData();
     if (props.modeltype === "IMAGE_RECOGNITION") {
+      props.updateFetchingAction("Preparing Data");
       const labels = [];
       for (let i = 0; i < props.imageData.length; i++) {
         let id = props.imageData[i]["labelNameIds"][0];
@@ -72,6 +83,8 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           LabelsSelector.getLabelNameById(id) === undefined ||
           LabelsSelector.getLabelNameById(id) === null
         ) {
+          props.updateFetchingAction("");
+          PopupActions.close();
           props.submitNewNotificationAction(
             NotificationUtil.createErrorNotification({
               header: "Missing Label",
@@ -101,6 +114,8 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
       for (const [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
       }
+      console.log("waiting for response");
+      props.updateFetchingAction("Waiting for Response");
       const response = axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/saveimage/`,
         formData
@@ -111,21 +126,31 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
             "Image(s) and label(s) saved successfully with response: ",
             result.data
           );
+          setTrainButtonClicked(false);
+          props.updateFetchingAction("Done");
+          PopupActions.close();
           navigate("/train");
         })
         .catch((error) => {
+          setTrainButtonClicked(false);
+          props.updateFetchingAction("");
+          PopupActions.close();
           console.error("Error saving image(s) and label(s):", error);
         });
     } else {
       // Object Detection
+      props.updateFetchingAction("Loading Image(s) Data");
       await ImageDataUtil.loadMissingImages(props.imageData);
+      props.updateFetchingAction("Converting to YOLO Format");
       const yololabels = RectLabelsExporter.YOLOLabelsdata();
-      console.log("yololabels: ", yololabels);
+      props.updateFetchingAction("Preparing Data");
       const labelobject = {};
       console.log("props.imageData.length", props.imageData.length);
       for (let i = 0; i < props.imageData.length; i++) {
         // Not all images are labeled
         if (props.imageData[i]["labelRects"].length === 0) {
+          props.updateFetchingAction("");
+          PopupActions.close();
           props.submitNewNotificationAction(
             NotificationUtil.createErrorNotification({
               header: "Missing Label",
@@ -133,7 +158,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
                 "All images must be labeled before proceed to training.",
             })
           );
-          break;
+          return;
         } else {
           labelobject[props.imageData[i].fileData.name] = yololabels[i];
         }
@@ -153,9 +178,12 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           formData.append("image_file", file);
         }
       });
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
+      // for (const [key, value] of formData.entries()) {
+      //   console.log(`${key}: ${value}`);
+      // }
+
+      console.log("waiting for response");
+      props.updateFetchingAction("Waiting for Response");
       const response = axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/saveobject/`,
         formData
@@ -166,9 +194,15 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
             "Image(s) and label(s) saved successfully with response: ",
             result.data
           );
+          setTrainButtonClicked(false);
+          props.updateFetchingAction("Done");
+          PopupActions.close();
           navigate("/train");
         })
         .catch((error) => {
+          setTrainButtonClicked(false);
+          props.updateFetchingAction("");
+          PopupActions.close();
           console.error("Error saving image(s) and label(s):", error);
         });
       props.setObjectDataAction(null);
@@ -202,7 +236,10 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
           />
         </div>
         <div className="NavigationBarGroupWrapper">
-          <div className="Name" onClick={TrainPage}>
+          <div
+            className={`Name ${isTrainButtonClicked ? "disabled" : ""}`}
+            onClick={TrainPage}
+          >
             Train
           </div>
         </div>
@@ -224,6 +261,7 @@ const mapDispatchToProps = {
   updateProjectDataAction: updateProjectData,
   submitNewNotificationAction: submitNewNotification,
   setObjectDataAction: setObjectData,
+  updateFetchingAction: updateFetching,
 };
 
 const mapStateToProps = (state: AppState) => ({

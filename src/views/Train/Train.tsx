@@ -5,6 +5,7 @@ import Tabs from "./Components/Tabs";
 // Tabs Components
 import Tab_Visualize from "./Components/Tab_Visualize";
 import Tab_DataHealth from "./Components/Tab_DataHealth";
+import Tab_Compare from "./Components/Tab_Compare";
 import NotificationsView from "../../views/NotificationsView/NotificationsView";
 import { connectTab_Train as Tab_Train } from "./Components/Tab_Train";
 import useWebSocket, { ReadyState } from "react-use-websocket";
@@ -39,6 +40,11 @@ const tabs: TabsType = [
     label: "Health Check",
     index: 3,
     Component: Tab_DataHealth,
+  },
+  {
+    label: "Compare models",
+    index: 4,
+    Component: Tab_Compare,
   },
 ];
 

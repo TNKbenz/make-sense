@@ -13,6 +13,7 @@ import {
 } from "../../../store/notifications/types";
 import { ProjectData } from "src/store/general/types";
 import { updateModelName } from "../../../store/users/actionCreators";
+import { PieChart, Pie, Tooltip, ResponsiveContainer ,Cell ,Legend} from "recharts";
 
 interface IProps {
   imageData: ImageData[];
@@ -274,6 +275,14 @@ const Tab_Train: FC<IProps> = ({
   const labels = [];
   const [isPopupCreate_Visible, setPopupCreate_Visible] = useState(false);
   const [isPopupSelect_Visible, setPopupSelect_Visible] = useState(false);
+  const [DataSplit1,setDataSplit1] = useState<string>("80");
+  const [DataSplit2,setDataSplit2] = useState<string>("10");
+  const [DataSplit3,setDataSplit3] = useState<string>("10");
+  const [DataSplit1Edited, setDataSplit1Edited] = useState<boolean>(false);
+  const [DataSplit2Edited, setDataSplit2Edited] = useState<boolean>(false);
+  const [DataSplit3Edited, setDataSplit3Edited] = useState<boolean>(false);
+  const [HaveResult,setHaveResult] = useState<boolean>(false);
+  const [Data,setData] = useState(null);
 
   const togglePopupCreate = () => {
     setPopupCreate_Visible(!isPopupCreate_Visible);
@@ -356,7 +365,7 @@ const Tab_Train: FC<IProps> = ({
           formData,
         );
       }
-
+      
       console.log(response.data);
       submitNewNotificationAction(
         NotificationUtil.createSuccessNotification({
@@ -364,6 +373,8 @@ const Tab_Train: FC<IProps> = ({
           description: "Model is training",
         })
       );
+      setHaveResult(true);
+      setData(response.data)
     } catch (error) {
       console.error("Error:", error);
       submitNewNotificationAction(
@@ -375,6 +386,26 @@ const Tab_Train: FC<IProps> = ({
     }
   };
 
+  const pieChartData = [
+    { name: "Training", value: parseInt(DataSplit1) },
+    { name: "Testing", value: parseInt(DataSplit2) },
+    { name: "Validation", value: parseInt(DataSplit3) }
+  ];
+
+  const COLORS = ['#EAAA7F', '#71C363', '#77690F', '#FF8042'];
+
+  const handleIncrement = () => {
+    setDataSplit1((parseInt(DataSplit1) + 2).toString());
+    setDataSplit2((parseInt(DataSplit2) - 1).toString());
+    setDataSplit3((parseInt(DataSplit3) - 1).toString());
+  };
+
+  const handleDecrement = () => {
+    setDataSplit1((parseInt(DataSplit1) - 2).toString());
+    setDataSplit2((parseInt(DataSplit2) + 1).toString());
+    setDataSplit3((parseInt(DataSplit3) + 1).toString());
+  };
+  
   return (
     <Fragment>
       <div
@@ -386,7 +417,7 @@ const Tab_Train: FC<IProps> = ({
         }}
       >
         <button
-          className="button-14"
+          className="button-6"
           role="button"
           onClick={() => togglePopupCreate()}
         >
@@ -403,7 +434,7 @@ const Tab_Train: FC<IProps> = ({
           />
         )}
         <button
-          className="button-14"
+          className="button-6"
           role="button"
           onClick={() => togglePopupSelect()}
         >
@@ -420,39 +451,137 @@ const Tab_Train: FC<IProps> = ({
           />
         )}
         <button
-          className="button-14"
+          className="button-6"
           role="button"
           onClick={() => navigate("/home")}
         >
           Add & label Images
         </button>
       </div>
-      <div className="Parameter">
-        <h3>Model tuning [{modelname}]</h3>
-        <div>Epoch</div>
-        <input
-          type="text"
-          value={epoch}
-          onChange={(e) => {
-            setEpoch(e.target.value);
-            setEpochEdited(true);
-          }}
-          className={epochEdited ? "" : "placeholder-text"}
-        />
-        <div>Learning Rate</div>
-        <input
-          type="text"
-          value={learningRate}
-          onChange={(e) => {
-            setLearningRate(e.target.value);
-            setLearningRateEdited(true);
-          }}
-          className={learningRateEdited ? "" : "placeholder-text"}
-        />
-        <button className="button-14" onClick={handleSubmit}>
-          Train
-        </button>
+      <div className="Parameter" style={{ display: "flex", flexDirection: "row" }}>
+        <div style={{ flex: "1 1 30%" }}>
+          <h3>Model Tuning [{modelname}]</h3>
+          <div>Epoch</div>
+          <input
+            type="text"
+            value={epoch}
+            onChange={(e) => {
+              setEpoch(e.target.value);
+              setEpochEdited(true);
+            }}
+            className={epochEdited ? "" : "placeholder-text"}
+          />
+          <div>Learning Rate</div>
+          <input
+            type="text"
+            value={learningRate}
+            onChange={(e) => {
+              setLearningRate(e.target.value);
+              setLearningRateEdited(true);
+            }}
+            className={learningRateEdited ? "" : "placeholder-text"}
+          />
+        </div>
+
+        <div style={{ flex: "1 1 30%", display: "flex", flexDirection: "column" ,marginTop: "40px"}}>
+          <div>Data Split [ Training / Testing / Validation]</div>
+          <div className="DataSplit" style={{ display: 'flex', flexDirection: "row" , justifyContent: "center"}}>
+            <button className="button-14" onClick={handleIncrement} style={{ marginTop: "1px" }}>
+              +
+            </button>
+            <input 
+              type="text"
+              value={DataSplit1}
+              onChange={(e) => {
+                setDataSplit1(e.target.value);
+                setDataSplit1Edited(true);
+              }}
+              className={DataSplit1Edited ? "" : "placeholder-text"}
+            />
+            <input
+              type="text"
+              value={DataSplit2}
+              onChange={(e) => {
+                setDataSplit2(e.target.value);
+                setDataSplit2Edited(true);
+              }}
+              className={DataSplit2Edited ? "" : "placeholder-text"}
+            />
+            <input
+              type="text"
+              value={DataSplit3}
+              onChange={(e) => {
+                setDataSplit3(e.target.value);
+                setDataSplit3Edited(true);
+              }}
+              className={DataSplit3Edited ? "" : "placeholder-text"}
+            />
+            <button className="button-14" onClick={handleDecrement} style={{ marginTop: "1px" }} >
+              -
+            </button>
+          </div>
+          <button className="button-14" onClick={() => {setHaveResult(false); setData([]); handleSubmit(); }} style={{ marginTop: "125px" }}>
+            Train
+          </button>
+        </div>
+
+        <div style={{ flex: "1 1 30%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="Chart" style={{ width: "300px", height: "300px" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieChartData}
+                  cx="50%"
+                  cy="50%"
+                  startAngle={0}
+                  endAngle={360}
+                  innerRadius={35}
+                  outerRadius={55}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                  label
+                >
+                  {pieChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => value} />
+                <Legend align="right" verticalAlign="middle" layout="vertical" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
+
+      {HaveResult && ( 
+        <div>
+          <div className="Parameter" style={{ marginTop: "20px"}}>
+            <h3>Result</h3>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-around" }}>
+                <div style={{ flex: 1 }}>Average Precision {Data}%</div>
+                <div style={{ flex: 1 }}>Training images {Data}</div>
+                <div style={{ flex: 1 }}>Total images {Data}</div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-around" }}>
+                <div style={{ flex: 1 }}>Precision {Data}%</div>
+                <div style={{ flex: 1 }}>Testing images {Data}</div>
+                <div style={{ flex: 1 }}></div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-around" }}>
+                <div style={{ flex: 1 }}>Recall {Data}%</div>
+                <div style={{ flex: 1 }}>Validation images {Data}</div>
+                <div style={{ flex: 1 }}></div>
+              </div>
+            </div>
+          </div>
+          <div className="Parameter" style={{ marginTop: "20px"}}>
+            <h3>Confusion Matrix</h3>
+            {Data}
+          </div>
+        </div>
+      )}
     </Fragment>
   );
 };

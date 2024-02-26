@@ -19,30 +19,6 @@ interface IProps {
   modeltype: string;
 }
 
-// mock data
-
-//Confusion-Matrix
-// const matrix = {
-//   truePositives: 42,
-//   trueNegatives: 89,
-//   falsePositives: 5,
-//   falseNegatives: 14,
-// };
-
-const validationCurve_Params = [1, 2, 3, 4, 5, 6, 7, 8];
-const validationCurve_Cross_Validation_Score = [
-  0.85, 0.88, 0.92, 0.91, 0.89, 0.94, 0.96, 0.98,
-];
-const validationCurve_Training_Score = [
-  0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89,
-];
-const precisionRecallCurve_Precision = [
-  0.75, 0.82, 0.89, 0.91, 0.95, 0.75, 0.82, 0.89, 0.91, 0.95,
-];
-const precisionRecallCurve_Recall = [
-  0.1, 0.2, 0.4, 0.6, 0.65, 0.68, 0.75, 0.82, 0.88, 0.92,
-];
-
 const ModelPerformanceChart = ({
   data,
   validationCurveData,
@@ -127,7 +103,7 @@ const ModelPerformanceChart = ({
       </div>
 
       <div className="Validation-Curve-graph">
-        <h3>Validation Curve</h3>
+        <h3>Training and Validation Loss</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={validationCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -135,13 +111,13 @@ const ModelPerformanceChart = ({
               dataKey="parameter"
               type="number"
               label={{
-                value: "Parameter Value",
+                value: "Epochs",
                 position: "insideBottom",
                 offset: 0,
               }}
             />
             <YAxis
-              label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
+              label={{ value: "Loss", angle: -90, position: "insideLeft" }}
             />
             <Tooltip />
             <Legend />
@@ -160,9 +136,9 @@ const ModelPerformanceChart = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      <div className="Precision-Recall-Curve-graph">
-        <h3>Precision Recall Curve</h3>
+      
+      <div className="Precision-Curve-graph">
+        <h3>Precision</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={precisionRecallCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -186,9 +162,34 @@ const ModelPerformanceChart = ({
         </ResponsiveContainer>
       </div>
 
-      {/* <div className="Confusion-Matrix">
+      <div className="Precision-Recall-Curve-graph">
+        <h3>Precision Recall</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={precisionRecallCurveData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="recall"
+              type="number"
+              label={{ value: "Recall", position: "insideBottom", offset: 0 }}
+            />
+            <YAxis
+              label={{ value: "Precision", angle: -90, position: "insideLeft" }}
+            />
+            <Tooltip />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="precision"
+              name="Precision"
+              stroke="green"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="Confusion-Matrix">
         <h3>Confusion Matrix</h3>
-      </div> */}
+      </div>
     </div>
   );
 };
@@ -207,7 +208,6 @@ const Tab_Visualize: React.FC<IProps> = ({
   const [precisionRecallCurveData, setPrecisionRecallCurveData] = useState([]);
 
   useEffect(() => {
-    // Make the API request inside the useEffect hook
     const data = {
       username: username,
       project_name: project_name,
@@ -225,18 +225,18 @@ const Tab_Visualize: React.FC<IProps> = ({
         }));
 
         // Additional transformations for validationCurveData and precisionRecallCurveData
-        const transformedValidationCurveData = validationCurve_Params.map(
+        const transformedValidationCurveData = response.data.validationCurve_Params.map(
           (param, index) => ({
             parameter: param,
-            crossValidationScore: validationCurve_Cross_Validation_Score[index],
-            trainingScore: validationCurve_Training_Score[index],
+            crossValidationScore: response.data.validationCurve_Cross_Validation_Score[index],
+            trainingScore: response.data.validationCurve_Training_Score[index],
           })
         );
 
         const transformedPrecisionRecallCurveData =
-          precisionRecallCurve_Precision.map((precision, index) => ({
+        response.data.precisionRecallCurve_Precision.map((precision, index) => ({
             precision,
-            recall: precisionRecallCurve_Recall[index],
+            recall: response.data.precisionRecallCurve_Recall[index],
           }));
 
         setData(transformedData);
@@ -277,7 +277,7 @@ const Tab_Visualize: React.FC<IProps> = ({
         setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
         
       });
-  }, []); // The empty dependency array [] ensures this effect runs once when the component mounts
+  }, []);
 
   return (
     <div className="App">

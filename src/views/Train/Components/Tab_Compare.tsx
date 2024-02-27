@@ -34,9 +34,9 @@ const ModelPerformanceChart = ({
     <div className="model-performance-chart">
         <div style={{ display: "flex"}}>
             <h2>Model Preformance </h2>
-            <h2 style={{ color: '#76D7D5' ,marginLeft: "20px"}}>sda{modelname}</h2>
+            <h2 style={{ color: '#76D7D5' ,marginLeft: "20px"}}>Model 1{modelname}</h2>
             <h2 style={{ color: '#EF2C12' ,marginLeft: "20px"}}> VS </h2>
-            <h2 style={{ color: '#D476D7' ,marginLeft: "20px"}}>dsd{modelname}</h2>
+            <h2 style={{ color: '#D476D7' ,marginLeft: "20px"}}>Model 2{modelname}</h2>
             <button className="button-14" style={{ marginTop: "20px", marginLeft: "20px"}} onClick={() => {}}>
                 Select Compare Model
             </button>

@@ -603,7 +603,7 @@ const Home: React.FC<IProps> = ({
           </div>
         </div>
       )}
-      {showDropZonePopup && (
+      {/* {showDropZonePopup && (
         <div
           className="ImagesDropZone"
           style={{
@@ -618,7 +618,7 @@ const Home: React.FC<IProps> = ({
             <button onClick={startEditorWithImageRecognition} />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

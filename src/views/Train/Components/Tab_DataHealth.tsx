@@ -88,31 +88,6 @@ const DataHealth: React.FC<IProps> = ({ imageData }) => {
     { name: 'Jumbo', count: classifiedSizes.jumbo.length },
   ];
 
-  const findMostFrequentOrAverageRatio = (data_SizeImage) => {
-    data_SizeImage.sort((a, b) => a - b);
-
-    let medianSize;
-    const middleIndex = Math.floor(data_SizeImage.length / 2);
-
-    if (data_SizeImage.length % 2 === 0) {
-      medianSize = (data_SizeImage[middleIndex - 1] + data_SizeImage[middleIndex]) / 2;
-    } else {
-      medianSize = data_SizeImage[middleIndex];
-    }
-    return medianSize
-  };
-   const mostFrequentOrAverageRatio = findMostFrequentOrAverageRatio(data_SizeImage);
-
-  const colorStyle = {
-    color:
-      mostFrequentOrAverageRatio >= 1048576
-        ? 'red'
-        : mostFrequentOrAverageRatio >= 262144
-        ? 'blue'
-        : mostFrequentOrAverageRatio <= 20736
-        ? 'yellow'
-        : 'green',
-  };
   return (
     <div>
       <div>
@@ -129,11 +104,6 @@ const DataHealth: React.FC<IProps> = ({ imageData }) => {
               <h3 style={{ color: 'rgb(136, 132, 216)' }}>{annotationCount}</h3>
               <h4><span style={{ color: 'rgb(136, 132, 216)' }}>{annotationsPerImage}</span> per image (average)</h4>
               <h4>across <span style={{ color: 'rgb(136, 132, 216)' }}>{classCount}</span> classes</h4>
-            </div>
-            <div className="ParameterBox">
-              <h4>Median Image Size</h4>
-              <h3 style={colorStyle} >{mostFrequentOrAverageRatio}</h3>
-              <h4>square</h4>
             </div>
           </div>
           <div className="Parameter" style={{overflow : "auto" , marginBottom: '10px'}}>

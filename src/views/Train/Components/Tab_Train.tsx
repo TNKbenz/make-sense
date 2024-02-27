@@ -283,6 +283,7 @@ const Tab_Train: FC<IProps> = ({
   const [DataSplit3Edited, setDataSplit3Edited] = useState<boolean>(false);
   const [HaveResult,setHaveResult] = useState<boolean>(false);
   const [Data,setData] = useState(null);
+  const [ConfusionMatrix,setConfusionMatrix] = useState(null);
 
   const togglePopupCreate = () => {
     setPopupCreate_Visible(!isPopupCreate_Visible);
@@ -336,11 +337,20 @@ const Tab_Train: FC<IProps> = ({
         const file = fileInfo.fileData;
         formData.append("bytefiles", file);
       });
+      if (parseInt(DataSplit1) + parseInt(DataSplit2) + parseInt(DataSplit3) > 100) {
+        setDataSplit1("80");
+        setDataSplit2("10");
+        setDataSplit3("10");
+      }
+      
       formData.append("epochs", epoch);
       formData.append("lr", learningRate);
       formData.append("username", username);
       formData.append("project_name", project_name);
       formData.append("modelname", modelname || "default");
+      formData.append("train_size", (parseFloat(DataSplit1) / 100).toFixed(2));
+      formData.append("test_size", (parseFloat(DataSplit2) / 100).toFixed(2));
+      formData.append("validate_size", (parseFloat(DataSplit3) / 100).toFixed(2));
 
       labels.forEach((label, index) => {
         formData.append("labels", label);
@@ -365,7 +375,7 @@ const Tab_Train: FC<IProps> = ({
           formData,
         );
       }
-      
+
       console.log(response.data);
       submitNewNotificationAction(
         NotificationUtil.createSuccessNotification({
@@ -373,8 +383,8 @@ const Tab_Train: FC<IProps> = ({
           description: "Model is training",
         })
       );
-      setHaveResult(true);
-      setData(response.data)
+      handleGetMeta();
+      handleGetConfusionMatrix();
     } catch (error) {
       console.error("Error:", error);
       submitNewNotificationAction(
@@ -385,6 +395,52 @@ const Tab_Train: FC<IProps> = ({
       );
     }
   };
+
+  const handleGetMeta = async () => {
+    try {
+      let response2;
+      if (activeLabelType === "IMAGE RECOGNITION") {
+        response2 = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/model/metadata?username=${username}&project_name=${project_name}&model_name=${modelname}`
+        );
+      } else {
+        response2 = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/model/metadata?username=${username}&project_name=${project_name}&model_name=${modelname}`
+        );
+      }
+      await setData(response2.data);
+      setHaveResult(true);
+      console.log("response2.data",response2.data)
+    } catch (error) {
+      console.error("Error:", error);
+      setHaveResult(false);
+    }
+  };
+
+  const handleGetConfusionMatrix = async () => {
+    try {
+      let response3;
+      if (activeLabelType === "IMAGE RECOGNITION") {
+        response3 = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/model/confusion_matrix?username=${username}&project_name=${project_name}&model_name=${modelname}`
+        );
+      } else {
+        response3 = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/model/confusion_matrix?username=${username}&project_name=${project_name}&model_name=${modelname}`
+        );
+      }
+
+      setConfusionMatrix(`${import.meta.env.VITE_BACKEND_URL}/model/confusion_matrix?username=${username}&project_name=${project_name}&model_name=${modelname}`);
+    } catch (error) {
+      console.error("Error:", error);
+      setHaveResult(false);
+    }
+  };
+
+  useEffect(() => {
+    handleGetMeta();
+    handleGetConfusionMatrix();
+  }, [modelname]);
 
   const pieChartData = [
     { name: "Training", value: parseInt(DataSplit1) },
@@ -520,7 +576,7 @@ const Tab_Train: FC<IProps> = ({
               -
             </button>
           </div>
-          <button className="button-14" onClick={() => {setHaveResult(false); setData([]); handleSubmit(); }} style={{ marginTop: "125px" }}>
+          <button className="button-14" onClick={() => {setHaveResult(false); setData(null); setConfusionMatrix(null); handleSubmit(); }} style={{ marginTop: "125px" }}>
             Train
           </button>
         </div>
@@ -560,25 +616,27 @@ const Tab_Train: FC<IProps> = ({
             <h3>Result</h3>
             <div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
-                <div style={{ flex: 1 }}>Average Precision {Data}%</div>
-                <div style={{ flex: 1 }}>Training images {Data}</div>
-                <div style={{ flex: 1 }}>Total images {Data}</div>
+                <div style={{ flex: 1 }}>Average Precision {Data.average_precision !== null && Data.average_precision !== undefined  ? ` ${Data.average_precision.toFixed(2)}` : 'not available'}</div>
+                <div style={{ flex: 1 }}>Training images {Data.train_image}</div>
+                <div style={{ flex: 1 }}>Total images {Data.total_image}</div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
-                <div style={{ flex: 1 }}>Precision {Data}%</div>
-                <div style={{ flex: 1 }}>Testing images {Data}</div>
+                <div style={{ flex: 1 }}>Precision {Data.precision !== null && Data.precision !== undefined ? ` ${Data.precision.toFixed(2)}` : 'not available'}</div>
+                <div style={{ flex: 1 }}>Testing images {Data.test_image}</div>
                 <div style={{ flex: 1 }}></div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
-                <div style={{ flex: 1 }}>Recall {Data}%</div>
-                <div style={{ flex: 1 }}>Validation images {Data}</div>
+                <div style={{ flex: 1 }}>Recall {Data.recall !== null && Data.recall !== undefined ? ` ${Data.recall.toFixed(2)}` : 'not available'}</div>
+                <div style={{ flex: 1 }}>Validation images {Data.validate_image}</div>
                 <div style={{ flex: 1 }}></div>
               </div>
             </div>
           </div>
           <div className="Parameter" style={{ marginTop: "20px"}}>
             <h3>Confusion Matrix</h3>
-            {Data}
+            <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              {ConfusionMatrix && <img src={ConfusionMatrix} alt="Confusion Matrix" style={{ width: "80%", height: "auto" }} />}
+            </div>
           </div>
         </div>
       )}

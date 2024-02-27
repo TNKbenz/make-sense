@@ -22,7 +22,9 @@ interface IProps {
 const ModelPerformanceChart = ({
   data,
   validationCurveData,
-  precisionRecallCurveData,
+  precisionCurveData,
+  recallCurveData,
+  ConfusionMatrix,
   modeltype,
 
   }) => {
@@ -102,50 +104,75 @@ const ModelPerformanceChart = ({
         </ResponsiveContainer>
       </div>
 
-      <div className="Validation-Curve-graph">
-        <h3>Training and Validation Loss</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={validationCurveData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="parameter"
-              type="number"
-              label={{
-                value: "Epochs",
-                position: "insideBottom",
-                offset: 0,
-              }}
-            />
-            <YAxis
-              label={{ value: "Loss", angle: -90, position: "insideLeft" }}
-            />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="crossValidationScore"
-              name="Cross Validation Score"
-              stroke="blue"
-            />
-            <Line
-              type="monotone"
-              dataKey="trainingScore"
-              name="Training Score"
-              stroke="red"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      
+      {modeltype === "IMAGE_RECOGNITION" && (
+        <div className="Validation-Curve-graph">
+          <h3>Validation Accuracy</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={validationCurveData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="epoch"
+                label={{
+                  value: "Epoch",
+                  position: "insideBottom",
+                  offset: 0,
+                }}
+                domain={[1, 'auto']} // กำหนดให้แกน x เริ่มต้นที่ 1
+              />
+              <YAxis
+                label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
+              />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="accuracy"
+                name="validation accuracy"
+                stroke="#030C56"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {modeltype === "IMAGE_RECOGNITION" && (
+        <div className="Validation-Curve-graph">
+          <h3>Validation Loss</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={validationCurveData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="epoch"
+                label={{
+                  value: "Epoch",
+                  position: "insideBottom",
+                  offset: 0,
+                }}
+                domain={[1, 'auto']}
+              />
+              <YAxis
+                label={{ value: "Loss", angle: -90, position: "insideLeft" ,offset: 0}}
+              />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="cost"
+                name="validation loss"
+                stroke="#560305"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       <div className="Precision-Curve-graph">
         <h3>Precision</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={precisionRecallCurveData}>
+          <LineChart data={precisionCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey="recall"
-              type="number"
-              label={{ value: "Recall", position: "insideBottom", offset: 0 }}
+              dataKey="epoch"
+              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
             />
             <YAxis
               label={{ value: "Precision", angle: -90, position: "insideLeft" }}
@@ -156,40 +183,43 @@ const ModelPerformanceChart = ({
               type="monotone"
               dataKey="precision"
               name="Precision"
-              stroke="green"
+              stroke="#2FEEDC"
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="Precision-Recall-Curve-graph">
-        <h3>Precision Recall</h3>
+      <div className="Recall-Curve-graph">
+        <h3>Recall</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={precisionRecallCurveData}>
+          <LineChart data={recallCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey="recall"
-              type="number"
-              label={{ value: "Recall", position: "insideBottom", offset: 0 }}
+              dataKey="epoch"
+              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
             />
             <YAxis
-              label={{ value: "Precision", angle: -90, position: "insideLeft" }}
+              label={{ value: "Recall", angle: -90, position: "insideLeft" }}
             />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
-              dataKey="precision"
-              name="Precision"
+              dataKey="recall"
+              name="Recall"
               stroke="green"
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="Confusion-Matrix">
+      <div className="Confusion-Matrix" style={{ marginTop: "15px"}}>
         <h3>Confusion Matrix</h3>
+        <div className="Confusion-Matrix" style={{ display: "grid", placeItems: "center" }}>
+          {ConfusionMatrix && <img src={ConfusionMatrix} alt="Confusion Matrix" style={{ width: "80%", height: "auto" ,}} />}
+        </div>
       </div>
+
     </div>
   );
 };
@@ -205,7 +235,9 @@ const Tab_Visualize: React.FC<IProps> = ({
   const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
   const [validationCurveData, setValidationCurveData] = useState([]);
-  const [precisionRecallCurveData, setPrecisionRecallCurveData] = useState([]);
+  const [precisionCurveData, setPrecisionCurveData] = useState([]);
+  const [RecallCurveData, setRecallCurveData] = useState([]);
+  const [ConfusionMatrix,setConfusionMatrix] = useState(null);
 
   useEffect(() => {
     const data = {
@@ -224,58 +256,42 @@ const Tab_Visualize: React.FC<IProps> = ({
           cost: loss,
         }));
 
-        // Additional transformations for validationCurveData and precisionRecallCurveData
-        const transformedValidationCurveData = response.data.validationCurve_Params.map(
-          (param, index) => ({
-            parameter: param,
-            crossValidationScore: response.data.validationCurve_Cross_Validation_Score[index],
-            trainingScore: response.data.validationCurve_Training_Score[index],
+        const transformedPrecisionCurveData = response.data.precision.map(
+          (precision, index) => ({
+            precision,
+            epoch: index + 1,
+          })
+        );
+      
+        const transformedRecallCurveData = response.data.recall.map(
+          (recall, index) => ({
+            recall,
+            epoch: index + 1,
           })
         );
 
-        const transformedPrecisionRecallCurveData =
-        response.data.precisionRecallCurve_Precision.map((precision, index) => ({
-            precision,
-            recall: response.data.precisionRecallCurve_Recall[index],
-          }));
+        try {
+          setConfusionMatrix(`${import.meta.env.VITE_BACKEND_URL}/model/confusion_matrix?username=${username}&project_name=${project_name}&model_name=${modelname}`);
+        } catch (error) {
+          console.error("Error:", error);
+        }
 
         setData(transformedData);
-        setValidationCurveData(transformedValidationCurveData);
-        setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
+        setPrecisionCurveData(transformedPrecisionCurveData);
+        setRecallCurveData(transformedRecallCurveData);
+        if (modeltype === "IMAGE_RECOGNITION") {
+          const transformedValidationCurveData = response.data.val_loss.map(
+            (loss, index) => ({
+              accuracy: response.data.val_accuracy[index],
+              epoch: index + 1,
+              cost: loss,
+            })
+          );
+          setValidationCurveData(transformedValidationCurveData);
+        }
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
-        // mock data
-        const validationCurve_Params = [1, 2, 3, 4, 5, 6, 7, 8];
-        const validationCurve_Cross_Validation_Score = [
-          0.85, 0.88, 0.92, 0.91, 0.89, 0.94, 0.96, 0.98,
-        ];
-        const validationCurve_Training_Score = [
-          0.99, 0.98, 0.92, 0.95, 0.89, 0.98, 0.92, 0.95, 0.89,
-        ];
-        const precisionRecallCurve_Precision = [
-          0.75, 0.82, 0.89, 0.91, 0.95, 0.75, 0.82, 0.89, 0.91, 0.95,
-        ];
-        const precisionRecallCurve_Recall = [
-          0.1, 0.2, 0.4, 0.6, 0.65, 0.68, 0.75, 0.82, 0.88, 0.92,
-        ];
-        const transformedValidationCurveData = validationCurve_Params.map(
-          (param, index) => ({
-            parameter: param,
-            crossValidationScore: validationCurve_Cross_Validation_Score[index],
-            trainingScore: validationCurve_Training_Score[index],
-          })
-        );
-
-        const transformedPrecisionRecallCurveData =
-          precisionRecallCurve_Precision.map((precision, index) => ({
-            precision,
-            recall: precisionRecallCurve_Recall[index],
-          }));
-
-        setValidationCurveData(transformedValidationCurveData);
-        setPrecisionRecallCurveData(transformedPrecisionRecallCurveData);
-        
+        console.error("Error fetching data:", error);     
       });
   }, []);
 
@@ -284,7 +300,9 @@ const Tab_Visualize: React.FC<IProps> = ({
       <ModelPerformanceChart
         data={data}
         validationCurveData={validationCurveData}
-        precisionRecallCurveData={precisionRecallCurveData}
+        precisionCurveData={precisionCurveData}
+        recallCurveData={RecallCurveData}
+        ConfusionMatrix={ConfusionMatrix}
         modeltype={modeltype}
       />
     </div>

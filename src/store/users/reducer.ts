@@ -5,7 +5,9 @@ const initialState: UserState = {
   username: "",
   project_name: "",
   modelname: "",
-  modeltype: ""
+  modeltype: "",
+  compare_modelname: "",
+  notice_update: "",
 };
 
 export function userReducer(
@@ -35,6 +37,18 @@ export function userReducer(
       return {
         ...state,
         modeltype: action.payload.modeltype
+      }
+    }
+    case Action.UPDATE_COMPARE_MODELNAME: {
+      return {
+        ...state,
+        compare_modelname: action.payload.compare_modelname
+      }
+    }
+    case Action.UPDATE_NOTICE_UPDATE: {
+      return {
+        ...state,
+        notice_update: action.payload.notice_update
       }
     }
     default:

@@ -27,12 +27,29 @@ export function updateModelName(modelname: string): UserActionType {
     }
   }
 }
-
 export function updateModelType(modeltype: string): UserActionType {
   return {
     type: Action.UPDATE_MODELTYPE,
     payload: {
       modeltype
+    }
+  }
+}
+
+export function updateCompareModelName(compare_modelname: string): UserActionType {
+  return {
+    type: Action.UPDATE_COMPARE_MODELNAME,
+    payload: {
+      compare_modelname
+    }
+  }
+}
+
+export function updateNoticeUpdate(notice_update: string): UserActionType {
+  return {
+    type: Action.UPDATE_NOTICE_UPDATE,
+    payload: {
+      notice_update
     }
   }
 }

@@ -3,8 +3,10 @@ import { Action } from "../Actions";
 export type UserState = {
   username: string,
   project_name: string,
-  modelname: string
-  modeltype: string
+  modelname: string,
+  modeltype: string,
+  compare_modelname: string,
+  notice_update: string,
 }
 
 interface UpdateUsername {
@@ -35,4 +37,18 @@ interface UpdateModelType {
   }
 }
 
-export type UserActionType = UpdateUsername | UpdateModelname | UpdateProjectName | UpdateModelType
+interface UpdateCompareModelname {
+  type: typeof Action.UPDATE_COMPARE_MODELNAME;
+  payload: {
+    compare_modelname: string
+  }
+}
+
+interface UpdateNoticeUpdate {
+  type: typeof Action.UPDATE_NOTICE_UPDATE;
+  payload: {
+    notice_update: string
+  }
+}
+
+export type UserActionType = UpdateUsername | UpdateModelname | UpdateProjectName | UpdateModelType | UpdateCompareModelname | UpdateNoticeUpdate

@@ -18,6 +18,7 @@ const initialState: GeneralState = {
   },
   zoom: ViewPointSettings.MIN_ZOOM,
   fetching: "",
+  progress: undefined,
 };
 
 export function generalReducer(
@@ -89,6 +90,10 @@ export function generalReducer(
       return {
         ...state,
         fetching: action.payload.fetching,
+        progress:
+          action.payload.progress !== undefined
+            ? action.payload.progress
+            : state.progress,
       };
     }
     default:

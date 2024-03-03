@@ -6,9 +6,11 @@ import { PopupActions } from "../../../logic/actions/PopupActions";
 import { Blocks } from "react-loader-spinner";
 import ProgressBar from "@ramonak/react-progress-bar";
 import { ProjectData } from "../../../store/general/types";
+import { set } from "lodash";
 
 interface IProps {
   fetching: string;
+  progress: number;
   projectData: ProjectData;
 }
 
@@ -17,58 +19,14 @@ const LoadingPopup: React.FC<IProps> = (props) => {
   const [barlabel, setBarlabel] = useState("");
 
   const updateProgress = () => {
-    const { type } = props.projectData;
-    const status = props.fetching;
-
-    if (status === "") {
-      setProgress(0);
-      return;
-    }
-
-    setBarlabel(status);
-
-    switch (type) {
-      case "IMAGE_RECOGNITION":
-        switch (status) {
-          case "Preparing Data":
-            setProgress(0);
-            break;
-          case "Waiting for Response":
-            setProgress(50);
-            break;
-          case "Done":
-            setProgress(100);
-            break;
-          default:
-            setProgress(0);
-        }
-        break;
-      default:
-        switch (status) {
-          case "Loading Image(s) Data":
-            setProgress(0);
-            break;
-          case "Converting to YOLO Format":
-            setProgress(25);
-            break;
-          case "Preparing Data":
-            setProgress(50);
-            break;
-          case "Waiting for Response":
-            setProgress(75);
-            break;
-          case "Done":
-            setProgress(100);
-            break;
-          default:
-            setProgress(0);
-        }
-    }
+    console.log("Progress: ", props.progress, "Fetching: ", props.fetching);
+    setBarlabel(props.fetching);
+    setProgress(props.progress);
   };
 
   useEffect(() => {
     updateProgress();
-  }, [props.fetching]);
+  }, [props.fetching, props.progress]);
 
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
@@ -127,6 +85,7 @@ const LoadingPopup: React.FC<IProps> = (props) => {
 
 const mapStateToProps = (state: AppState) => ({
   fetching: state.general.fetching,
+  progress: state.general.progress,
   projectData: state.general.projectData,
 });
 

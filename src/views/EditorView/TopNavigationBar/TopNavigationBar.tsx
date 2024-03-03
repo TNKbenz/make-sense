@@ -43,7 +43,7 @@ interface IProps {
   ) => NotificationsActionType;
   ImageDataUtil: ImageDataUtil;
   setObjectDataAction: (imagesData: ImageData[]) => any;
-  updateFetchingAction: (fetching: string) => any;
+  updateFetchingAction: (fetching: string, progress: number) => any;
 }
 
 const TopNavigationBar: React.FC<IProps> = (props) => {
@@ -53,37 +53,97 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
   };
   console.log("user :", ...props.username, "project :", ...props.project_name);
 
-  // const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = event.target.value.toLowerCase().replace(" ", "-");
-
-  //   props.updateProjectDataAction({
-  //     ...props.projectData,
-  //     name: value,
-  //   });
-  // };
   const navigate = useNavigate();
 
-  const closePopup = () =>
-    // props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
-    navigate("/");
+  const closePopup = () => navigate("/");
+
+  const SaveUsersImages = async () => {
+    const imageForm = new FormData();
+    const imageFiles = props.imageData
+      .filter((fileInfo) => fileInfo.fileData instanceof File)
+      .map((fileInfo) => fileInfo.fileData);
+
+    const chunkSize = 1000;
+
+    // Check if the number of image files is greater than the chunk size
+    if (imageFiles.length > chunkSize) {
+      props.updateFetchingAction("Saving Image(s) - Starting", 0);
+      const totalChunks = Math.ceil(imageFiles.length / chunkSize);
+      let completedChunks = 0;
+
+      // Split the array of image files into chunks
+      const chunks = [];
+      for (let i = 0; i < imageFiles.length; i += chunkSize) {
+        const chunk = imageFiles.slice(i, i + chunkSize);
+        const chunkForm = new FormData();
+
+        // Append the chunk of image files to the new FormData
+        chunk.forEach((file, index) => {
+          console.log("File to save in chunk: ", file.name);
+          chunkForm.append(`image_file`, file);
+        });
+
+        // Append common data to the new FormData
+        chunkForm.append("username", props.username);
+        chunkForm.append("project_name", props.project_name);
+
+        // Add the promise to the chunks array
+        chunks.push(
+          axios
+            .post(`${import.meta.env.VITE_BACKEND_URL}/saveimage/`, chunkForm)
+            .then(() => {
+              completedChunks++;
+              const progressPercent = (completedChunks / totalChunks) * 70;
+              props.updateFetchingAction(
+                `Saving Image(s) - Chunk ${completedChunks}/${totalChunks}`,
+                progressPercent
+              );
+            })
+        );
+      }
+
+      // Execute all promises in parallel
+      await Promise.all(chunks);
+      console.log("All image chunks saved successfully");
+
+      // Continue with label saving logic...
+    } else {
+      // If fewer than Chunksize, make a single request
+      props.updateFetchingAction("Saving Image(s)", 0);
+      imageFiles.forEach((file) => {
+        console.log("File to save: ", file.name);
+        imageForm.append("image_file", file);
+      });
+
+      // Append common data to the FormData
+      imageForm.append("username", props.username);
+      imageForm.append("project_name", props.project_name);
+
+      // Make the request for the single chunk
+      const response = axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/saveimage/`,
+        imageForm
+      );
+      response.then(() => {
+        props.updateFetchingAction("Image(s) Saved", 70);
+        console.log("Image(s) saved with response:", response.data);
+      });
+    }
+  };
 
   const TrainPage = async () => {
+    // Allow button to be clicked only once
     if (isTrainButtonClicked) {
       return;
     }
     setTrainButtonClicked(true);
     props.updateActivePopupTypeAction(PopupWindowType.LOADING);
-    const formData = new FormData();
+
     if (props.modeltype === "IMAGE_RECOGNITION") {
-      props.updateFetchingAction("Preparing Data");
-      const labels = [];
+      // Check if all images are labeled
       for (let i = 0; i < props.imageData.length; i++) {
-        let id = props.imageData[i]["labelNameIds"][0];
-        if (
-          LabelsSelector.getLabelNameById(id) === undefined ||
-          LabelsSelector.getLabelNameById(id) === null
-        ) {
-          props.updateFetchingAction("");
+        if (props.imageData[i]["labelNameIds"].length === 0) {
+          setTrainButtonClicked(false);
           PopupActions.close();
           props.submitNewNotificationAction(
             NotificationUtil.createErrorNotification({
@@ -93,63 +153,70 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
             })
           );
           return;
-        } else {
-          let name = LabelsSelector.getLabelNameById(id)["name"];
+        }
+      }
+      await SaveUsersImages();
+      const labels = [];
+      const chunkSize = 200; // Chunck size for saving image labels : can be configured
+      const totalChunks = Math.ceil(props.imageData.length / chunkSize);
+      let completedChunks = 0;
+
+      // Create an array to store label saving promises
+      const labelRequests = [];
+
+      for (let i = 0; i < props.imageData.length; i += chunkSize) {
+        const chunk = props.imageData.slice(i, i + chunkSize);
+        const formData = new FormData();
+
+        formData.append("username", props.username);
+        formData.append("project_name", props.project_name);
+
+        labels.length = 0; // Clear the labels array
+        chunk.forEach((fileInfo) => {
+          const file = fileInfo.fileData;
+          formData.append("file_name", file.name);
+          const id = fileInfo["labelNameIds"][0];
+          const name =
+            LabelsSelector.getLabelNameById(id) &&
+            LabelsSelector.getLabelNameById(id)["name"];
           labels.push(name);
-        }
-      }
-      props.imageData.forEach((fileInfo, index) => {
-        const file = fileInfo.fileData;
-        if (file instanceof File) {
-          console.log("File(s) to save: ", file.name);
-          formData.append("image_file", file);
-        }
-        formData.append("file_name", file.name);
-      });
-      formData.append("username", props.username);
-      formData.append("project_name", props.project_name);
-      labels.forEach((label, index) => {
-        formData.append("labels", label);
-      });
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
-      console.log("waiting for response");
-      props.updateFetchingAction("Waiting for Response");
-      const response = axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/saveimage/`,
-        formData
-      );
-      response
-        .then((result) => {
-          console.log(
-            "Image(s) and label(s) saved successfully with response: ",
-            result.data
-          );
-          setTrainButtonClicked(false);
-          props.updateFetchingAction("Done");
-          PopupActions.close();
-          navigate("/train");
-        })
-        .catch((error) => {
-          setTrainButtonClicked(false);
-          props.updateFetchingAction("");
-          PopupActions.close();
-          console.error("Error saving image(s) and label(s):", error);
         });
+
+        labels.forEach((label, index) => {
+          formData.append("labels", label);
+        });
+
+        // Add the label saving promise to the array
+        labelRequests.push(
+          axios
+            .post(
+              `${import.meta.env.VITE_BACKEND_URL}/saveimagelabel/`,
+              formData
+            )
+            .then(() => {
+              completedChunks++;
+              props.updateFetchingAction(
+                `Saving Label(s) - Chunk ${completedChunks}/${totalChunks}`,
+                70 + (completedChunks / totalChunks) * 30
+              );
+            })
+        );
+      }
+
+      // Wait for all label saving promises to resolve
+      await Promise.all(labelRequests);
+      console.log("All labels saved successfully");
+      setTrainButtonClicked(false);
+      props.updateFetchingAction("Done", 100);
+      setTimeout(() => {
+        PopupActions.close();
+        navigate("/train");
+      }, 2000);
     } else {
-      // Object Detection
-      props.updateFetchingAction("Loading Image(s) Data");
-      await ImageDataUtil.loadMissingImages(props.imageData);
-      props.updateFetchingAction("Converting to YOLO Format");
-      const yololabels = RectLabelsExporter.YOLOLabelsdata();
-      props.updateFetchingAction("Preparing Data");
-      const labelobject = {};
-      console.log("props.imageData.length", props.imageData.length);
+      // TODO : Object Detection
       for (let i = 0; i < props.imageData.length; i++) {
         // Not all images are labeled
         if (props.imageData[i]["labelRects"].length === 0) {
-          props.updateFetchingAction("");
           PopupActions.close();
           props.submitNewNotificationAction(
             NotificationUtil.createErrorNotification({
@@ -159,53 +226,66 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
             })
           );
           return;
-        } else {
-          labelobject[props.imageData[i].fileData.name] = yololabels[i];
         }
       }
+      await SaveUsersImages();
       const cname = [];
       LabelsSelector.getLabelNames().forEach((name, index) => {
         cname.push(name.name);
       });
-      formData.append("classnames", JSON.stringify(cname));
-      formData.append("labels", JSON.stringify(labelobject));
-      formData.append("username", props.username);
-      formData.append("project_name", props.project_name);
-      props.imageData.forEach((fileInfo, index) => {
-        const file = fileInfo.fileData;
-        if (file instanceof File) {
-          console.log("File(s) to save: ", file.name);
-          formData.append("image_file", file);
-        }
-      });
-      // for (const [key, value] of formData.entries()) {
-      //   console.log(`${key}: ${value}`);
-      // }
+      const chunkSize = 200; // Chunk size for object label saving : can be configured
+      const totalChunks = Math.ceil(props.imageData.length / chunkSize);
+      let completedChunks = 0;
 
-      console.log("waiting for response");
-      props.updateFetchingAction("Waiting for Response");
-      const response = axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/saveobject/`,
-        formData
-      );
-      response
-        .then((result) => {
-          console.log(
-            "Image(s) and label(s) saved successfully with response: ",
-            result.data
-          );
-          setTrainButtonClicked(false);
-          props.updateFetchingAction("Done");
-          PopupActions.close();
-          navigate("/train");
-        })
-        .catch((error) => {
-          setTrainButtonClicked(false);
-          props.updateFetchingAction("");
-          PopupActions.close();
-          console.error("Error saving image(s) and label(s):", error);
-        });
+      // Create an array to store object label saving promises
+      const labelRequests = [];
+
+      for (let i = 0; i < props.imageData.length; i += chunkSize) {
+        const chunk = props.imageData.slice(i, i + chunkSize);
+        console.log("chunk", chunk);
+        const formData = new FormData();
+        await ImageDataUtil.loadMissingImages(chunk);
+        const yololabels = RectLabelsExporter.YOLOLabelsdata(chunk);
+
+        formData.append("classnames", JSON.stringify(cname));
+        const labelobject = {};
+
+        for (let j = 0; j < chunk.length; j++) {
+          labelobject[chunk[j].fileData.name] = yololabels[j];
+        }
+
+        formData.append("labels", JSON.stringify(labelobject));
+        formData.append("username", props.username);
+        formData.append("project_name", props.project_name);
+
+        // Add the object label saving promise to the array
+        labelRequests.push(
+          axios
+            .post(
+              `${import.meta.env.VITE_BACKEND_URL}/saveobjectlabel/`,
+              formData
+            )
+            .then(() => {
+              completedChunks++;
+              props.updateFetchingAction(
+                `Saving Object Label(s) - Chunk ${completedChunks}/${totalChunks}`,
+                70 + (completedChunks / totalChunks) * 30
+              );
+            })
+        );
+      }
+
+      // Wait for all object label saving promises to resolve
+      await Promise.all(labelRequests);
+
+      console.log("All labels saved successfully");
+      setTrainButtonClicked(false);
       props.setObjectDataAction(null);
+      props.updateFetchingAction("Done", 100);
+      setTimeout(() => {
+        PopupActions.close();
+        navigate("/train");
+      }, 2000);
     }
   };
 

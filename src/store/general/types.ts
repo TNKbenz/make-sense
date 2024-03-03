@@ -22,6 +22,7 @@ export type GeneralState = {
   projectData: ProjectData;
   zoom: number;
   fetching: string;
+  progress: number;
 };
 
 interface UpdateProjectData {
@@ -98,6 +99,7 @@ interface UpdateFetching {
   type: typeof Action.UPDATE_FETCHING;
   payload: {
     fetching: string;
+    progress: number;
   };
 }
 

@@ -30,9 +30,9 @@ export class RectLabelsExporter {
     }
   }
 
-  public static YOLOLabelsdata(): string[] {
+  public static YOLOLabelsdata(imageData: ImageData): string[] {
     const Labels = [];
-    LabelsSelector.getImagesData().forEach((imageData: ImageData) => {
+    imageData.forEach((imageData: ImageData) => {
       const fileContent: string =
         RectLabelsExporter.wrapRectLabelsIntoYOLO2(imageData);
       if (fileContent) {

@@ -111,11 +111,15 @@ export function updatePerClassColorationStatus(
   };
 }
 
-export function updateFetching(fetching: string): GeneralActionTypes {
+export function updateFetching(
+  fetching: string,
+  progress: number
+): GeneralActionTypes {
   return {
     type: Action.UPDATE_FETCHING,
     payload: {
       fetching,
+      progress,
     },
   };
 }

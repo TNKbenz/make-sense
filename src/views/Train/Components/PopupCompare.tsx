@@ -3,35 +3,33 @@ import axios from "axios";
 import { connect } from "react-redux";
 import { AppState } from "../../../store";
 import { ImageData } from "../../../store/labels/types";
-import { submitNewNotification } from "../../../store/notifications/actionCreators";
 import { INotification, NotificationsActionType } from "../../../store/notifications/types";
 import { ProjectData } from "src/store/general/types";
-import { updateModelName } from "../../../store/users/actionCreators";
+import { updateCompareModelName } from "../../../store/users/actionCreators";
 
 interface IProps {
   imageData: ImageData[];
-  modelname: string;
+  compare_modelname: string;
   username: string;
   project_name: string;
   submitNewNotificationAction: (notification: INotification) => NotificationsActionType;
-  updateModelNameAction: (modelname: string) => void;
+  updateCompareModelNameAction: (compare_modelname: string) => void;
   projectData: ProjectData;
   activeLabelType: string;
 }
 
 const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({ 
   onClose, 
-  modelname, 
   username, 
   project_name, 
-  updateModelNameAction 
+  updateCompareModelNameAction
 }) => {
   const [listModel, setListModel] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState<any>(null);
 
   useEffect(() => {
     fetchListModel();
-  }, [username, project_name]);
+  }, []);
 
   const fetchListModel = async () => {
     try {
@@ -54,23 +52,10 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
     }
   };
 
-  const handleDeleteListModel = async (model_name: string) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/model/?username=${username}&project_name=${project_name}&model_name=${model_name}`
-      );
-      const updatedList = listModel.filter((Model) => Model.model_name !== model_name);
-      setListModel(updatedList);
-      fetchListModel();
-    } catch (error) {
-      console.error("Error deleting ListModel:", error);
-    }
-  };
-
   const handleOpenClick = () => {
     if (selectedModel) {
       console.log("Selected Model:", selectedModel.model_name);
-      updateModelNameAction(selectedModel.model_name);
+      updateCompareModelNameAction(selectedModel.model_name);
       onClose();
     }
   };
@@ -78,13 +63,14 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
   return (
     <div className="popupCompare">
       <div>
-        <h2 style={{ display: 'flex', justifyContent: 'center' }}>Select Model</h2>
+        <h2 style={{ display: 'flex', justifyContent: 'center' }}>Select Model to Compare</h2>
         <table
           style={{
             width: "100%",
             margin: "auto",
             borderCollapse: "collapse",
             marginTop: "20px",
+            textAlign: "center"
           }}
         >
           <thead>
@@ -120,10 +106,10 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
                     backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
                   }}
                 >
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  <td style={{ border: "1px solid #ddd", padding: "8px"}}>
                     {Model.model_name}
                   </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  <td style={{ border: "1px solid #ddd", padding: "8px"}}>
                     <button
                       className="button-16"
                       role="button"
@@ -133,16 +119,6 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
                       onClick={() => handleSelectListModel(Model.model_name)}
                     >
                       Select
-                    </button>
-                    <button
-                      className="button-16"
-                      role="button"
-                      style={{
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                      }}
-                      onClick={() => handleDeleteListModel(Model.model_name)}
-                    >
-                      Delete
                     </button>
                   </td>
                 </tr>
@@ -154,7 +130,7 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
             )}
           </tbody>
         </table>
-        <div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button className="button-1" onClick={handleOpenClick} disabled={!selectedModel}>
             Open {selectedModel?.model_name} Model
           </button>
@@ -170,10 +146,16 @@ const PopupCompare: React.FC<IProps & { onClose: () => void }> = ({
 const mapStateToProps = (state: AppState) => ({
   imageData: state.labels.imagesData,
   username: state.user.username,
-  modelname: state.user.modelname,
+  compare_modelname: state.user.compare_modelname,
   project_name: state.user.project_name,
   projectData: state.general.projectData,
   activeLabelType: state.labels.activeLabelType,
 });
 
-export default connect(mapStateToProps)(PopupCompare); 
+const mapDispatchToProps = {
+  updateCompareModelNameAction: updateCompareModelName
+};
+
+const ConnectedPopupCompare = connect(mapStateToProps, mapDispatchToProps)(PopupCompare);
+
+export default ConnectedPopupCompare;

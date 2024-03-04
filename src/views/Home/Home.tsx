@@ -4,6 +4,7 @@ import axios from "axios";
 import "./Home.scss";
 import {
   updateModelName,
+  updateCompareModelName,
   updateModelType,
   updateProjectName,
 } from "../../store/users/actionCreators";
@@ -40,6 +41,7 @@ interface IProps {
   updateImageDataAction: (imageData: ImageData[]) => void;
   updateActiveImageIndexAction: (activeImageIndex: number) => any;
   updateModelNameAction: (modelname: string) => void;
+  updateCompareModelNameAction: (compare_modelname: string) => void;
   updateModelTypeAction: (modeltype: string) => void;
   addImageDataAction: (imageData: ImageData[]) => any;
   updateLabelNamesAction: (labels: LabelName[]) => void;
@@ -58,6 +60,7 @@ const Home: React.FC<IProps> = ({
   projectName,
   addImageDataAction,
   updateModelNameAction,
+  updateCompareModelNameAction,
   updateModelTypeAction,
   updateActiveImageIndexAction,
   updateLabelNamesAction,
@@ -378,6 +381,7 @@ const Home: React.FC<IProps> = ({
           setObjectDataAction(null);
           updateModelTypeAction(selectedProject.project_type);
           updateModelNameAction("");
+          updateCompareModelNameAction("");
 
           if (selectedProject.project_type === ProjectType.IMAGE_RECOGNITION) {
             await startEditorWithImageRecognition();
@@ -631,6 +635,7 @@ const mapDispatchToProps = {
   updateActiveImageIndexAction: updateActiveImageIndex,
   addImageDataAction: addImageData,
   updateModelNameAction: updateModelName,
+  updateCompareModelNameAction: updateCompareModelName,
   updateModelTypeAction: updateModelType,
   updateLabelNamesAction: updateLabelNames,
   setObjectDataAction: setObjectData,

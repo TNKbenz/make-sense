@@ -354,9 +354,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                         boundingBoxTextPosition: TextPosition.BottomRight,
                       }}
                     />
-                    {/* <div>
-                      <p> d</p>
-                    </div> */}
+                    <div>
+                      <p> Result [ {ResultsObject[0][index].classes} ]</p>
+                    </div>
                   </div>
                 )}
               </div>

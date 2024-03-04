@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { AppState } from "../../../store";
 import {
   LineChart,
   Line,
@@ -11,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { connect } from "react-redux";
-// import { PopupCompare } from "./PopupCompare";
+import PopupCompare from "./PopupCompare"; 
 
 interface IProps {
   modelname: string;
@@ -33,9 +34,6 @@ const ModelPerformanceChart = ({
   MetaData2,
   isPopupVisible,
   togglePopup,
-  username,
-  project_name,
-  updateModelNameAction,
 }) => {
   console.log("activeLabelType", modeltype);
   return (
@@ -45,7 +43,7 @@ const ModelPerformanceChart = ({
         <h2 style={{ color: "#76D7D5", marginLeft: "20px" }}>Model 1 [ {modelname} ] </h2>
         <h2 style={{ color: "#EF2C12", marginLeft: "20px" }}> VS </h2>
         <h2 style={{ color: "#D476D7", marginLeft: "20px" }}>Model 2 [ {compare_modelname} ]</h2>
-        {/* {isPopupVisible && <PopupCompare onClose={togglePopup}/>} */}
+        {isPopupVisible && <PopupCompare onClose={togglePopup}/>}
         <button
           className="button-14"
           style={{ marginTop: "20px", marginLeft: "20px" }}
@@ -296,6 +294,10 @@ const Tab_Compare: React.FC<IProps> = ({
   const [MetaData, setMetaData] = useState(null);
   const [MetaData2, setMetaData2] = useState(null);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [data2, setData2] = useState([]);
+  const [validationCurveData2, setValidationCurveData2] = useState([]);
+  const [precisionCurveData2, setPrecisionCurveData2] = useState([]);
+  const [RecallCurveData2, setRecallCurveData2] = useState([]);
 
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
@@ -307,15 +309,19 @@ const Tab_Compare: React.FC<IProps> = ({
       project_name: project_name,
       modelname: modelname,
       modeltype: modeltype,
-      compare_modelname: compare_modelname,
+    };
+    const data2 = {
+      username: username,
+      project_name: project_name,
+      modelname: compare_modelname,
+      modeltype: modeltype,
     };
     axios
       .post(dataUrl, data)
       .then((response) => {
-        // Update the component's state with the received data
         const transformedData = response.data.loss.map((loss, index) => ({
           epoch: index + 1,
-          accuracy: response.data.accuracy[index], // converting accuracy to a decimal between 0 and 1
+          accuracy: response.data.accuracy[index],
           cost: loss,
         }));
 
@@ -358,15 +364,56 @@ const Tab_Compare: React.FC<IProps> = ({
       .catch((error) => {
         console.error("Error fetching MetaData:", error);
       });
-      axios
+    axios
       .get(dataUrl3)
       .then((response) => {
         setMetaData2(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching MetaData:", error);
+        console.error("Error fetching MetaData2:", error);
       });
-  }, []);
+    axios
+      .post(dataUrl, data2)
+      .then((response) => {
+        const transformedData = response.data.loss.map((loss, index) => ({
+          epoch: index + 1,
+          accuracy: response.data.accuracy[index],
+          cost: loss,
+        }));
+
+        const transformedPrecisionCurveData = response.data.precision.map(
+          (precision, index) => ({
+            precision,
+            epoch: index + 1,
+          })
+        );
+
+        const transformedRecallCurveData = response.data.recall.map(
+          (recall, index) => ({
+            recall,
+            epoch: index + 1,
+          })
+        );
+
+        setData2(transformedData);
+        setPrecisionCurveData2(transformedPrecisionCurveData);
+        setRecallCurveData2(transformedRecallCurveData);
+        if (modeltype === "IMAGE_RECOGNITION") {
+          const transformedValidationCurveData = response.data.val_loss.map(
+            (loss, index) => ({
+              accuracy: response.data.val_accuracy[index],
+              epoch: index + 1,
+              cost: loss,
+            })
+          );
+          setValidationCurveData2(transformedValidationCurveData);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data2:", error);
+      });
+    
+  }, [compare_modelname]);
 
   return (
     <div className="App">
@@ -387,7 +434,7 @@ const Tab_Compare: React.FC<IProps> = ({
   );
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: AppState) => {
   return {
     username: state.user.username,
     project_name: state.user.project_name,

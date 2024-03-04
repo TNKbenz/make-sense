@@ -13,7 +13,6 @@ import {
 } from "../../../store/notifications/types";
 import { ProjectData } from "src/store/general/types";
 import { updateModelName} from "../../../store/users/actionCreators";
-import { updateCompareModelName } from "../../../store/users/actionCreators";
 import { PieChart, Pie, Tooltip, ResponsiveContainer ,Cell ,Legend} from "recharts";
 
 interface IProps {
@@ -26,22 +25,18 @@ interface IProps {
     notification: INotification,
   ) => NotificationsActionType;
   updateModelNameAction: (modelname: string) => void;
-  updateCompareModelNameAction: (compare_modelname: string) => void;
   projectData: ProjectData;
   activeLabelType: string;
+  notice_update: string;
 }
 
 const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
   onClose,
-  imageData,
-  submitNewNotificationAction,
   modelname,
   username,
   project_name,
   updateModelNameAction,
-  updateCompareModelNameAction,
-  projectData,
-  activeLabelType,
+
 }) => {
   const [newModel, setNewModel] = useState("default");
 
@@ -104,17 +99,12 @@ const PopupCreate: React.FC<IProps & { onClose: () => void }> = ({
 
 const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
   onClose,
-  imageData,
-  submitNewNotificationAction,
-  modelname,
   username,
   project_name,
   updateModelNameAction,
-  updateCompareModelNameAction,
 }) => {
   const [ListModel, setListModel] = useState([]);
   const [selectedModel, setSelectedModel] = useState("");
-  const [selectedCompareModel, setSelectedCompareModel] = useState("");
 
   useEffect(() => {
     fetchListModel();
@@ -145,18 +135,6 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
     }
   };
 
-  const handleSelectCompareListModel = (compare_model_name) => {
-    try {
-      const selected = ListModel.find(
-        (Model) => Model.model_name === compare_model_name,
-      );
-      setSelectedCompareModel(selected);
-      console.log("Selected Compare Model:", compare_model_name);
-    } catch (error) {
-      console.error("Error Selected Compare Model:", error);
-    }
-  };
-
   const handleDeleteListModel = async (model_name) => {
     try {
       await axios.delete(
@@ -175,10 +153,6 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
   };
 
   const handleOpenClick = () => {
-    if (selectedCompareModel) {
-      console.log("Selected Compare Model:", selectedCompareModel.model_name);
-      updateCompareModelNameAction(selectedCompareModel.model_name);
-    }
     if (selectedModel) {
       console.log("Selected Model:", selectedModel.model_name);
       updateModelNameAction(selectedModel.model_name);
@@ -220,16 +194,6 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
               >
                 Action
               </th>
-              <th
-                style={{
-                  width: "20%",
-                  border: "2px solid #ddd",
-                  padding: "8px",
-                  backgroundColor: "#f2f2f2",
-                }}
-              >
-                Compare
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -268,19 +232,6 @@ const PopupSelect: React.FC<IProps & { onClose: () => void }> = ({
                       Delete
                     </button>
                   </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    <button
-                      className="button-16"
-                      role="button"
-                      style={{
-                        backgroundColor:
-                          index % 2 === 0 ? "#ffffff" : "#f9f9f9",
-                      }}
-                      onClick={() => handleSelectCompareListModel(Model.model_name)}
-                    >
-                      Select
-                    </button>
-                  </td>
                 </tr>
               ))
             ) : (
@@ -309,8 +260,8 @@ const Tab_Train: FC<IProps> = ({
   modelname,
   username,
   project_name,
+  notice_update,
   updateModelNameAction,
-  updateCompareModelNameAction,
   activeLabelType,
 }) => {
   const navigate = useNavigate();
@@ -330,6 +281,7 @@ const Tab_Train: FC<IProps> = ({
   const [HaveResult,setHaveResult] = useState<boolean>(false);
   const [Data,setData] = useState(null);
   const [ConfusionMatrix,setConfusionMatrix] = useState(null);
+  const shouldFetchData = notice_update === "train";
 
   const togglePopupCreate = () => {
     setPopupCreate_Visible(!isPopupCreate_Visible);
@@ -486,7 +438,7 @@ const Tab_Train: FC<IProps> = ({
   useEffect(() => {
     handleGetMeta();
     handleGetConfusionMatrix();
-  }, [modelname]);
+  }, [modelname,shouldFetchData]);
 
   const pieChartData = [
     { name: "Training", value: parseInt(DataSplit1) },
@@ -550,7 +502,6 @@ const Tab_Train: FC<IProps> = ({
             project_name={project_name}
             username={username}
             updateModelNameAction={updateModelNameAction}
-            updateCompareModelNameAction={updateCompareModelNameAction}
           />
         )}
         <button
@@ -696,6 +647,7 @@ const mapStateToProps = (state: AppState) => ({
   username: state.user.username,
   modelname: state.user.modelname,
   compare_modelname: state.user.compare_modelname,
+  notice_update: state.user.notice_update,
   project_name: state.user.project_name,
   projectData: state.general.projectData,
   activeLabelType: state.labels.activeLabelType,
@@ -704,7 +656,6 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = {
   submitNewNotificationAction: submitNewNotification,
   updateModelNameAction: updateModelName,
-  updateCompareModelNameAction: updateCompareModelName, 
 };
 
 const connectPopupCreate = connect(

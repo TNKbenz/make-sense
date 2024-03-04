@@ -17,6 +17,7 @@ import {
   NotificationsActionType,
 } from "../../store/notifications/types";
 import { NotificationUtil } from "../../utils/NotificationUtil";
+import { updateNoticeUpdate } from "../../store/users/actionCreators";
 
 type TabsType = {
   label: string;
@@ -53,15 +54,18 @@ interface IProps {
   modeltype: string;
   username: string;
   project_name: string;
+  notice_update: string;
   submitNewNotificationAction: (
     notification: INotification
   ) => NotificationsActionType;
+  updateNoticeUpdateAction: (notice_update: string) => void;
 }
 
 const Train: React.FC<IProps> = (props) => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
-  const WS_URL = `ws://${window.location.hostname}/ws/${props.username}_${props.project_name}`;
+  // const WS_URL = `ws://${window.location.hostname}/ws/${props.username}_${props.project_name}`;
+  const WS_URL = `ws://${window.location.hostname}:8000/ws/${props.username}_${props.project_name}`;
   const { sendJsonMessage, lastMessage, readyState } = useWebSocket(WS_URL, {
     share: false,
     shouldReconnect: () => true,
@@ -84,12 +88,25 @@ const Train: React.FC<IProps> = (props) => {
   useEffect(() => {
     console.log(lastMessage);
     if (lastMessage !== null) {
-      props.submitNewNotificationAction(
-        NotificationUtil.createSuccessNotification({
-          header: "Training success",
-          description: "trainig success",
-        })
-      );
+      const messageData = JSON.parse(lastMessage.data);
+      console.log("lastMessage", messageData.type);
+      if (messageData.type === "train") {
+        props.submitNewNotificationAction(
+          NotificationUtil.createSuccessNotification({
+            header: "Training success",
+            description: "trainig success",
+          })
+        );
+        props.updateNoticeUpdateAction(messageData.type);
+      } else {
+        props.submitNewNotificationAction(
+          NotificationUtil.createSuccessNotification({
+            header: "Training in progress",
+            description: "training in progress",
+          })
+        );
+        props.updateNoticeUpdateAction(messageData.type);
+      }
     }
   }, [lastMessage]);
 
@@ -124,6 +141,7 @@ const Train: React.FC<IProps> = (props) => {
 
 const mapDispatchToProps = {
   submitNewNotificationAction: submitNewNotification,
+  updateNoticeUpdateAction: updateNoticeUpdate,
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -133,6 +151,7 @@ const mapStateToProps = (state: AppState) => ({
   modelname: state.user.modelname,
   modeltype: state.user.modeltype,
   project_name: state.user.project_name,
+  notice_update: state.user.notice_update,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Train);

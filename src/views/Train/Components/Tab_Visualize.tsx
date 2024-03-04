@@ -17,6 +17,7 @@ interface IProps {
   username: string;
   project_name: string;
   modeltype: string;
+  notice_update: string;
 }
 
 const ModelPerformanceChart = ({
@@ -26,13 +27,23 @@ const ModelPerformanceChart = ({
   recallCurveData,
   ConfusionMatrix,
   modeltype,
-
+  notice_update,
+  setRefreshButton 
   }) => {
+  const [RefreshButton, setLocalRefreshButton] = useState(false);
   console.log("activeLabelType",modeltype)
+  console.log("notice",notice_update)
+  useEffect(() => {
+    setLocalRefreshButton(setRefreshButton);
+  }, [RefreshButton, setRefreshButton]);
   return (
     <div className="model-performance-chart">
-      <h2>Model Performance</h2>
-      
+      <div style={{ display: "flex" }}>
+        <h2>Model Performance</h2>
+        <button className="button-14" onClick={() => {setLocalRefreshButton(true)}} style={{  marginLeft: "auto",marginTop: "20px" }}>
+          Refresh
+        </button>
+      </div>
       <div className="accuracy-graph">
       {modeltype === "IMAGE_RECOGNITION" ? (
         <React.Fragment>
@@ -219,18 +230,16 @@ const ModelPerformanceChart = ({
           {ConfusionMatrix && <img src={ConfusionMatrix} alt="Confusion Matrix" style={{ width: "80%", height: "auto" ,}} />}
         </div>
       </div>
-
     </div>
   );
 };
 
-
-// Example data for accuracy and cost over epochs
 const Tab_Visualize: React.FC<IProps> = ({
   modelname,
   username,
   project_name,
   modeltype,
+  notice_update,
 }) => {
   const dataUrl = `${import.meta.env.VITE_BACKEND_URL}/result/`;
   const [data, setData] = useState([]);
@@ -238,6 +247,7 @@ const Tab_Visualize: React.FC<IProps> = ({
   const [precisionCurveData, setPrecisionCurveData] = useState([]);
   const [RecallCurveData, setRecallCurveData] = useState([]);
   const [ConfusionMatrix,setConfusionMatrix] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const data = {
@@ -245,14 +255,14 @@ const Tab_Visualize: React.FC<IProps> = ({
       project_name: project_name,
       modelname: modelname,
       modeltype: modeltype,
+      notice_update:notice_update,
     };
     axios
       .post(dataUrl, data)
       .then((response) => {
-        // Update the component's state with the received data
         const transformedData = response.data.loss.map((loss, index) => ({
           epoch: index + 1,
-          accuracy: response.data.accuracy[index], // converting accuracy to a decimal between 0 and 1
+          accuracy: response.data.accuracy[index], 
           cost: loss,
         }));
 
@@ -291,9 +301,12 @@ const Tab_Visualize: React.FC<IProps> = ({
         }
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);     
+        console.error("Error fetching data:", error);
+      })     
+      .finally(() => {
+        setRefreshing(false);
       });
-  }, []);
+  }, [,notice_update,refreshing]);
 
   return (
     <div className="App">
@@ -304,6 +317,8 @@ const Tab_Visualize: React.FC<IProps> = ({
         recallCurveData={RecallCurveData}
         ConfusionMatrix={ConfusionMatrix}
         modeltype={modeltype}
+        notice_update={notice_update}
+        setRefreshButton={setRefreshing}
       />
     </div>
   );
@@ -315,6 +330,7 @@ const mapStateToProps = (state) => {
     project_name: state.user.project_name,
     modelname: state.user.modelname,
     modeltype: state.user.modeltype,
+    notice_update: state.user.notice_update,
   };
 };
 

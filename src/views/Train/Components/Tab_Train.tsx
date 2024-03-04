@@ -331,10 +331,10 @@ const Tab_Train: FC<IProps> = ({
         updateModelNameAction("default");
       }
 
-      imageData.forEach((fileInfo, index) => {
-        const file = fileInfo.fileData;
-        formData.append("bytefiles", file);
-      });
+      // imageData.forEach((fileInfo, index) => {
+      //   const file = fileInfo.fileData;
+      //   formData.append("bytefiles", file);
+      // });
       if (parseInt(DataSplit1) + parseInt(DataSplit2) + parseInt(DataSplit3) > 100) {
         setDataSplit1("80");
         setDataSplit2("10");
@@ -350,9 +350,9 @@ const Tab_Train: FC<IProps> = ({
       formData.append("test_size", (parseFloat(DataSplit2) / 100).toFixed(2));
       formData.append("validate_size", (parseFloat(DataSplit3) / 100).toFixed(2));
 
-      labels.forEach((label, index) => {
-        formData.append("labels", label);
-      });
+      // labels.forEach((label, index) => {
+      //   formData.append("labels", label);
+      // });
 
       submitNewNotificationAction(
         NotificationUtil.createMessageNotification({

@@ -157,7 +157,7 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
       }
       await SaveUsersImages();
       const labels = [];
-      const chunkSize = 200; // Chunck size for saving image labels : can be configured
+      const chunkSize = 1000; // Chunck size for saving image labels : can be configured
       const totalChunks = Math.ceil(props.imageData.length / chunkSize);
       let completedChunks = 0;
 

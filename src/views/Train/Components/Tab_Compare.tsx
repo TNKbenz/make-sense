@@ -148,26 +148,6 @@ const ModelPerformanceChart = ({
         )}
       </div>
 
-      <div className="cost-graph">
-        <h3>Cost (Loss)</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis
-              dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
-            />
-            <YAxis
-              label={{ value: "Cost", angle: -90, position: "insideLeft" }}
-            />
-            <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="cost1" name="Cost (Model 1)" stroke="#82ca9d" />
-            <Line type="monotone" dataKey="cost2" name="Cost (Model 2)" stroke="#ff7300" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
       {modeltype === "IMAGE_RECOGNITION" && (
         <div className="Validation-Curve-graph">
           <h3>Validation Accuracy</h3>
@@ -192,18 +172,38 @@ const ModelPerformanceChart = ({
                 type="monotone"
                 dataKey="accuracy1"
                 name="validation accuracy (Model1)"
-                stroke="#030C56"
+                stroke="#8884d8"
               />
               <Line
                 type="monotone"
                 dataKey="accuracy2"
                 name="validation accuracy (Model2)"
-                stroke="#BF1E20"
+                stroke="#ff7300"
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
+
+      <div className="cost-graph">
+        <h3>Cost (Loss)</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <XAxis
+              dataKey="epoch"
+              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+            />
+            <YAxis
+              label={{ value: "Cost", angle: -90, position: "insideLeft" }}
+            />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="cost1" name="Cost (Model 1)" stroke="#560305" />
+            <Line type="monotone" dataKey="cost2" name="Cost (Model 2)" stroke="#0CAD21" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
       {modeltype === "IMAGE_RECOGNITION" && (
         <div className="Validation-Curve-graph">

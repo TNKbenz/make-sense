@@ -96,141 +96,142 @@ const ModelPerformanceChart = ({
       )}
     </div>
 
-      <div className="cost-graph">
-        <h3>Cost (Loss)</h3>
+    {modeltype === "IMAGE_RECOGNITION" && (
+      <div className="Validation-Curve-graph">
+        <h3>Validation Accuracy</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis
-              dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
-            />
-            <YAxis
-              label={{ value: "Cost", angle: -90, position: "insideLeft" }}
-            />
-            <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="cost" name="Cost" stroke="#82ca9d" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {modeltype === "IMAGE_RECOGNITION" && (
-        <div className="Validation-Curve-graph">
-          <h3>Validation Accuracy</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={validationCurveData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="epoch"
-                label={{
-                  value: "Epoch",
-                  position: "insideBottom",
-                  offset: 0,
-                }}
-                domain={[1, 'auto']} // กำหนดให้แกน x เริ่มต้นที่ 1
-              />
-              <YAxis
-                label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
-              />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="accuracy"
-                name="validation accuracy"
-                stroke="#030C56"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {modeltype === "IMAGE_RECOGNITION" && (
-        <div className="Validation-Curve-graph">
-          <h3>Validation Loss</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={validationCurveData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="epoch"
-                label={{
-                  value: "Epoch",
-                  position: "insideBottom",
-                  offset: 0,
-                }}
-                domain={[1, 'auto']}
-              />
-              <YAxis
-                label={{ value: "Loss", angle: -90, position: "insideLeft" ,offset: 0}}
-              />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="cost"
-                name="validation loss"
-                stroke="#560305"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-      <div className="Precision-Curve-graph">
-        <h3>Precision</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={precisionCurveData}>
+          <LineChart data={validationCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+              label={{
+                value: "Epoch",
+                position: "insideBottom",
+                offset: 0,
+              }}
+              domain={[1, 'auto']} // กำหนดให้แกน x เริ่มต้นที่ 1
             />
             <YAxis
-              label={{ value: "Precision", angle: -90, position: "insideLeft" }}
+              label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
             />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
-              dataKey="precision"
-              name="Precision"
-              stroke="#2FEEDC"
+              dataKey="accuracy"
+              name="validation accuracy"
+              stroke="#030C56"
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
+    )}
 
-      <div className="Recall-Curve-graph">
-        <h3>Recall</h3>
+    <div className="cost-graph">
+      <h3>Cost (Loss)</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={data}>
+          <XAxis
+            dataKey="epoch"
+            label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+          />
+          <YAxis
+            label={{ value: "Cost", angle: -90, position: "insideLeft" }}
+          />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="cost" name="Cost" stroke="#82ca9d" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+
+    {modeltype === "IMAGE_RECOGNITION" && (
+      <div className="Validation-Curve-graph">
+        <h3>Validation Loss</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={recallCurveData}>
+          <LineChart data={validationCurveData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="epoch"
-              label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+              label={{
+                value: "Epoch",
+                position: "insideBottom",
+                offset: 0,
+              }}
+              domain={[1, 'auto']}
             />
             <YAxis
-              label={{ value: "Recall", angle: -90, position: "insideLeft" }}
+              label={{ value: "Loss", angle: -90, position: "insideLeft" ,offset: 0}}
             />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
-              dataKey="recall"
-              name="Recall"
-              stroke="green"
+              dataKey="cost"
+              name="validation loss"
+              stroke="#560305"
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
+    )}
 
-      <div className="Confusion-Matrix" style={{ marginTop: "15px"}}>
-        <h3>Confusion Matrix</h3>
-        <div className="Confusion-Matrix" style={{ display: "grid", placeItems: "center" }}>
-          {ConfusionMatrix && <img src={ConfusionMatrix} alt="Confusion Matrix" style={{ width: "80%", height: "auto" ,}} />}
-        </div>
+    <div className="Precision-Curve-graph">
+      <h3>Precision</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={precisionCurveData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="epoch"
+            label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+          />
+          <YAxis
+            label={{ value: "Precision", angle: -90, position: "insideLeft" }}
+          />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="precision"
+            name="Precision"
+            stroke="#2FEEDC"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+
+    <div className="Recall-Curve-graph">
+      <h3>Recall</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={recallCurveData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="epoch"
+            label={{ value: "Epoch", position: "insideBottom", offset: 0 }}
+          />
+          <YAxis
+            label={{ value: "Recall", angle: -90, position: "insideLeft" }}
+          />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="recall"
+            name="Recall"
+            stroke="green"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+
+    <div className="Confusion-Matrix" style={{ marginTop: "15px"}}>
+      <h3>Confusion Matrix</h3>
+      <div className="Confusion-Matrix" style={{ display: "grid", placeItems: "center" }}>
+        {ConfusionMatrix && <img src={ConfusionMatrix} alt="Confusion Matrix" style={{ width: "80%", height: "auto" ,}} />}
       </div>
     </div>
+  </div>
   );
 };
 

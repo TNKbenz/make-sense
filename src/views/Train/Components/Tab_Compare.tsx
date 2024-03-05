@@ -120,7 +120,8 @@ const ModelPerformanceChart = ({
                 <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="accuracy" name="Accuracy" stroke="#8884d8" />
+                <Line type="monotone" dataKey="accuracy1" name="Accuracy (Model1)" stroke="#8884d8" />
+                <Line type="monotone" dataKey="accuracy2" name="Accuracy (Model2)" stroke="#ff7300" />
               </LineChart>
             </ResponsiveContainer>
           </React.Fragment>
@@ -139,7 +140,8 @@ const ModelPerformanceChart = ({
                 <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="accuracy" name="Fitness" stroke="#8884d8" />
+                <Line type="monotone" dataKey="accuracy1" name="Fitness (Model1)" stroke="#8884d8" />
+                <Line type="monotone" dataKey="accuracy2" name="Fitness (Model2)" stroke="#ff7300" />
               </LineChart>
             </ResponsiveContainer>
           </React.Fragment>
@@ -160,7 +162,8 @@ const ModelPerformanceChart = ({
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="cost" name="Cost" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="cost1" name="Cost (Model 1)" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="cost2" name="Cost (Model 2)" stroke="#ff7300" />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -187,9 +190,15 @@ const ModelPerformanceChart = ({
               <Legend />
               <Line
                 type="monotone"
-                dataKey="accuracy"
-                name="validation accuracy"
+                dataKey="accuracy1"
+                name="validation accuracy (Model1)"
                 stroke="#030C56"
+              />
+              <Line
+                type="monotone"
+                dataKey="accuracy2"
+                name="validation accuracy (Model2)"
+                stroke="#BF1E20"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -218,9 +227,15 @@ const ModelPerformanceChart = ({
               <Legend />
               <Line
                 type="monotone"
-                dataKey="cost"
-                name="validation loss"
+                dataKey="cost1"
+                name="validation loss (Model1)"
                 stroke="#560305"
+              />
+              <Line
+                type="monotone"
+                dataKey="cost2"
+                name="validation loss (Model2)"
+                stroke="#0CAD21"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -242,9 +257,15 @@ const ModelPerformanceChart = ({
             <Legend />
             <Line
               type="monotone"
-              dataKey="precision"
-              name="Precision"
+              dataKey="precision1"
+              name="Precision (Model1)"
               stroke="#2FEEDC"
+            />
+            <Line
+              type="monotone"
+              dataKey="precision2"
+              name="Precision (Model2)"
+              stroke="#DF16C4"
             />
           </LineChart>
         </ResponsiveContainer>
@@ -266,9 +287,15 @@ const ModelPerformanceChart = ({
             <Legend />
             <Line
               type="monotone"
-              dataKey="recall"
-              name="Recall"
+              dataKey="recall1"
+              name="Recall (Model1)"
               stroke="green"
+            />
+            <Line
+              type="monotone"
+              dataKey="recall2"
+              name="Recall (Model2)"
+              stroke="#864B0B"
             />
           </LineChart>
         </ResponsiveContainer>
@@ -294,10 +321,6 @@ const Tab_Compare: React.FC<IProps> = ({
   const [MetaData, setMetaData] = useState(null);
   const [MetaData2, setMetaData2] = useState(null);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [data2, setData2] = useState([]);
-  const [validationCurveData2, setValidationCurveData2] = useState([]);
-  const [precisionCurveData2, setPrecisionCurveData2] = useState([]);
-  const [RecallCurveData2, setRecallCurveData2] = useState([]);
 
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
@@ -316,103 +339,150 @@ const Tab_Compare: React.FC<IProps> = ({
       modelname: compare_modelname,
       modeltype: modeltype,
     };
-    axios
-      .post(dataUrl, data)
-      .then((response) => {
-        const transformedData = response.data.loss.map((loss, index) => ({
+
+    Promise.all([
+      axios.post(dataUrl, data),
+      axios.post(dataUrl, data2),
+      axios.get(dataUrl2),
+      axios.get(dataUrl3),
+    ]).then(([response1, response2,response3,response4]) => {
+      const transformedData1 = response1.data.loss.map((loss, index) => ({
+        epoch: index + 1,
+        accuracy: response1.data.accuracy[index],
+        cost: loss,
+      }));
+  
+      const transformedPrecisionCurveData1 = response1.data.precision.map(
+        (precision, index) => ({
+          precision,
           epoch: index + 1,
-          accuracy: response.data.accuracy[index],
-          cost: loss,
-        }));
-
-        const transformedPrecisionCurveData = response.data.precision.map(
-          (precision, index) => ({
-            precision,
-            epoch: index + 1,
-          })
-        );
-
-        const transformedRecallCurveData = response.data.recall.map(
-          (recall, index) => ({
-            recall,
-            epoch: index + 1,
-          })
-        );
-
-        setData(transformedData);
-        setPrecisionCurveData(transformedPrecisionCurveData);
-        setRecallCurveData(transformedRecallCurveData);
-        if (modeltype === "IMAGE_RECOGNITION") {
-          const transformedValidationCurveData = response.data.val_loss.map(
-            (loss, index) => ({
-              accuracy: response.data.val_accuracy[index],
-              epoch: index + 1,
-              cost: loss,
-            })
-          );
-          setValidationCurveData(transformedValidationCurveData);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-    axios
-      .get(dataUrl2)
-      .then((response) => {
-        setMetaData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching MetaData:", error);
-      });
-    axios
-      .get(dataUrl3)
-      .then((response) => {
-        setMetaData2(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching MetaData2:", error);
-      });
-    axios
-      .post(dataUrl, data2)
-      .then((response) => {
-        const transformedData = response.data.loss.map((loss, index) => ({
+        })
+      );
+  
+      const transformedRecallCurveData1 = response1.data.recall.map(
+        (recall, index) => ({
+          recall,
           epoch: index + 1,
-          accuracy: response.data.accuracy[index],
-          cost: loss,
-        }));
+        })
+      );
+  
+      const transformedData2 = response2.data.loss.map((loss, index) => ({
+        epoch: index + 1,
+        accuracy: response2.data.accuracy[index],
+        cost: loss,
+      }));
+  
+      const transformedPrecisionCurveData2 = response2.data.precision.map(
+        (precision, index) => ({
+          precision,
+          epoch: index + 1,
+        })
+      );
+  
+      const transformedRecallCurveData2 = response2.data.recall.map(
+        (recall, index) => ({
+          recall,
+          epoch: index + 1,
+        })
+      );
 
-        const transformedPrecisionCurveData = response.data.precision.map(
-          (precision, index) => ({
-            precision,
+      if (modeltype === "IMAGE_RECOGNITION") {
+        const transformedValidationCurveData = response1.data.val_loss.map(
+          (loss, index) => ({
+            accuracy: response1.data.val_accuracy[index],
             epoch: index + 1,
+            cost: loss,
+          })
+        );
+        const transformedValidationCurveData2 = response2.data.val_loss.map(
+          (loss, index) => ({
+            accuracy: response2.data.val_accuracy[index],
+            epoch: index + 1,
+            cost: loss,
           })
         );
 
-        const transformedRecallCurveData = response.data.recall.map(
-          (recall, index) => ({
-            recall,
-            epoch: index + 1,
-          })
-        );
+        const mergedValidationCurveData = [];
+        const numEpochs_ValidationCurve = Math.max(transformedValidationCurveData.length, transformedValidationCurveData2.length);
+        for (let i = 0; i < numEpochs_ValidationCurve; i++) {
+          const epoch = i + 1;
+          const cost1 = transformedValidationCurveData[i] ? transformedValidationCurveData[i].cost : null;
+          const cost2 = transformedValidationCurveData2[i] ? transformedValidationCurveData2[i].cost : null;
+          const accuracy1 = transformedValidationCurveData[i] ? transformedValidationCurveData[i].accuracy : null;
+          const accuracy2 = transformedValidationCurveData2[i] ? transformedValidationCurveData2[i].accuracy : null;
 
-        setData2(transformedData);
-        setPrecisionCurveData2(transformedPrecisionCurveData);
-        setRecallCurveData2(transformedRecallCurveData);
-        if (modeltype === "IMAGE_RECOGNITION") {
-          const transformedValidationCurveData = response.data.val_loss.map(
-            (loss, index) => ({
-              accuracy: response.data.val_accuracy[index],
-              epoch: index + 1,
-              cost: loss,
-            })
-          );
-          setValidationCurveData2(transformedValidationCurveData);
+          mergedValidationCurveData.push({
+            epoch: epoch,
+            cost1: cost1,
+            cost2: cost2,
+            accuracy1: accuracy1,
+            accuracy2: accuracy2,
+          });
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching data2:", error);
-      });
-    
+        
+        setValidationCurveData(mergedValidationCurveData);
+      }
+
+      const metaData1 = response3.data; 
+      const metaData2 = response4.data; 
+
+      setMetaData(metaData1);
+      setMetaData2(metaData2);
+
+      const mergedData = [];
+      const numEpochs = Math.max(transformedData1.length, transformedData2.length);
+      for (let i = 0; i < numEpochs; i++) {
+        const epoch = i + 1;
+        const cost1 = transformedData1[i] ? transformedData1[i].cost : null;
+        const cost2 = transformedData2[i] ? transformedData2[i].cost : null;
+        const accuracy1 = transformedData1[i] ? transformedData1[i].accuracy : null;
+        const accuracy2 = transformedData2[i] ? transformedData2[i].accuracy : null;
+
+        mergedData.push({
+          epoch: epoch,
+          cost1: cost1,
+          cost2: cost2,
+          accuracy1: accuracy1,
+          accuracy2: accuracy2,
+        });
+      }
+
+      const mergedPrecisionCurveData = [];
+      const numEpochs_PrecisionCurveData = Math.max(transformedPrecisionCurveData1.length, transformedPrecisionCurveData2.length);
+      for (let i = 0; i < numEpochs_PrecisionCurveData; i++) {
+        const epoch = i + 1;
+        const precision1 = transformedPrecisionCurveData1[i] ? transformedPrecisionCurveData1[i].precision : null;
+        const precision2 = transformedPrecisionCurveData2[i] ? transformedPrecisionCurveData2[i].precision : null;
+
+        mergedPrecisionCurveData.push({
+          epoch: epoch,
+          precision1: precision1,
+          precision2: precision2,
+        });
+      }
+
+      const mergedRecallCurveData = [];
+      const numEpochs_RecallCurveData = Math.max(transformedRecallCurveData1.length, transformedRecallCurveData2.length);
+      for (let i = 0; i < numEpochs_RecallCurveData; i++) {
+        const epoch = i + 1;
+        const recall1 = transformedRecallCurveData1[i] ? transformedRecallCurveData1[i].recall : null;
+        const recall2 = transformedRecallCurveData2[i] ? transformedRecallCurveData2[i].recall : null;
+
+        mergedRecallCurveData.push({
+          epoch: epoch,
+          recall1: recall1,
+          recall2: recall2,
+        });
+      }
+ 
+      setData(mergedData);
+      setPrecisionCurveData(mergedPrecisionCurveData);
+      setRecallCurveData(mergedRecallCurveData);
+      
+    }).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
   }, [compare_modelname]);
 
   return (

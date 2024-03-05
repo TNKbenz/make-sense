@@ -235,6 +235,13 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
                         <p><strong>Filename:</strong> {entry.filename}</p>
                         <p><strong>Actual Label:</strong> {entry.actual_label}</p>
                         <p><strong>True Label:</strong> {entry.true_label}</p>
+                        {entry.true_label === entry.actual_label ? (
+                            <p><strong>Label Verify:</strong>Correct</p>
+                          ) : (
+                            <p><strong>Label Verify:</strong> Missed</p>
+                          )}
+                        {/* <p><strong>X:</strong> {entry.x.toFixed(2)}</p>
+                        <p><strong>Y:</strong> {entry.y.toFixed(2)}</p> */}
                         {entry.filename && <img src={entry.filename} alt="Preview" style={{ width: 'auto', height: 'auto' }} />}
                       </div>
                     );

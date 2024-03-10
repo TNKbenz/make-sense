@@ -145,29 +145,37 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
   const formatDataForScatterPlot = (data) => {
     console.log("data",data)
     if (data && data.xycoord) {
-      const uniqueLabels = [...new Set(data.actual_labels)]; // หาค่า unique ของ actual_labels
+      const uniqueLabels = [...new Set(data.true_labels)]; 
       const uniqueTrueLabels = [...new Set(data.true_labels)]; 
-      const colors = ['blue', 'red', 'green', 'orange', 'yellow']; // สีที่ใช้แสดงข้อมูล
+      const colors = ['blue', 'red', 'green', 'orange', 'yellow']; 
       const shapes = ['star',"triangle","circle","diamond","cross"]
-      const labelColors = {}; // object เก็บคู่ของ actual_label กับสีที่ต้องการแสดง
+      const labelColors = {}; 
       const trueLabelShape = {};
 
       uniqueLabels.forEach((label, index) => {
-        labelColors[label] = colors[index % colors.length]; // กำหนดสีตามลำดับของ actual_labels
+        labelColors[label] = colors[index % colors.length]; 
       });
 
       uniqueTrueLabels.forEach((label, index) => {
         trueLabelShape[label] = shapes[index % shapes.length]; 
       });
-          
+
+      const uniqueData = [...new Set(data.true_labels)];
+      const customPayload = uniqueData.map((item, index) => ({
+        value: item,
+        type: 'circle',
+        color: colors[index % colors.length]
+      }));
+       
       return setCluster(data.xycoord.map((coord, index) => ({
         x: coord[0],
         y: coord[1],
         filename: data.filename[index],
         actual_label: data.actual_labels[index],
         true_label: data.true_labels[index],
-        fill: labelColors[data.actual_labels[index]], // กำหนดสีตาม actual_labels
+        fill: labelColors[data.true_labels[index]], 
         shape: trueLabelShape[data.true_labels[index]], 
+        legend: customPayload
       })));
     } else {
       return [];
@@ -224,7 +232,7 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
               <CartesianGrid />
               <XAxis type="number" dataKey="x" name="x" />
               <YAxis type="number" dataKey="y" name="y" />
-              <ZAxis type="number" dataKey="actual_label" name="actual_label" />
+              <ZAxis type="number" dataKey="true_label" name="true_label" />
               <Tooltip 
                 cursor={{ strokeDasharray: '3 3' }} 
                 content={({ payload }) => {
@@ -233,13 +241,7 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
                     return (
                       <div className="custom-tooltip">
                         <p><strong>Filename:</strong> {entry.filename}</p>
-                        <p><strong>Actual Label:</strong> {entry.actual_label}</p>
                         <p><strong>True Label:</strong> {entry.true_label}</p>
-                        {entry.true_label === entry.actual_label ? (
-                            <p><strong>Label Verify:</strong>Correct</p>
-                          ) : (
-                            <p><strong>Label Verify:</strong> Missed</p>
-                          )}
                         {/* <p><strong>X:</strong> {entry.x.toFixed(2)}</p>
                         <p><strong>Y:</strong> {entry.y.toFixed(2)}</p> */}
                         {entry.filename && <img src={entry.filename} alt="Preview" style={{ width: 'auto', height: 'auto' }} />}
@@ -252,7 +254,14 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
               />
               {
                 Cluster && Cluster.map((entry, index) => (
-                  <Scatter name={entry.true_label} data={[entry]} key={`scatter-${index}`} shape={entry.shape} fill={entry.fill}/>
+                  <Scatter name={entry.true_label} data={[entry]} key={`scatter-${index}`} fill={entry.fill}/>
+                  
+                ))
+              }
+              {
+                Cluster && Cluster.map((entry, index) => (
+                  <Legend payload={entry.legend}/>
+                  
                 ))
               }
             </ScatterChart>

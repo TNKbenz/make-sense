@@ -2,7 +2,7 @@ import React, { useCallback, useState , useEffect} from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import "./Predict.css";
-import { PieChart, Pie, Tooltip, ResponsiveContainer ,Cell ,Legend} from "recharts";
+import { PieChart, Pie, Tooltip, ResponsiveContainer ,Cell ,Legend,BarChart,XAxis,YAxis,Bar} from "recharts";
 import { AppState } from "src/store";
 import { connect } from "react-redux";
 import ObjectDetectionVisualizer from "object-detection-visualizer";
@@ -40,7 +40,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFilesUrls, setSelectedFilesUrls] = useState<string[]>([]);
-  const [predictions, setPredictions] = useState<Predictions[]>([]);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [Results, setResults] = useState([]);
   const [modifiedResults, setmodifiedResults] = useState([]);
@@ -49,7 +48,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setResultsObject([]);
-    // setClassObject([]);
     setResults([]);
     setmaxValues([]);
     if (acceptedFiles.length > 0) {
@@ -121,12 +119,13 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           return {
             name: item.predicted_labels[0],
             value: item.probabilities[0],
+            class: Object.keys(item.prob_with_classname[0]),
+            class_value: item.prob_with_classname[0],
           };
         });
 
         const modifiedData = convertedData.map(entry => ({
           ...entry,
-          name: [entry.name.toString(), 'not ' + entry.name.toString()]
         }));
 
         const maxValues = convertedData.reduce((acc, obj) => {
@@ -135,23 +134,22 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
           return acc;
         }, []);
 
-        const ChartData = modifiedData.map(item => [
-          {
-            name: item.name[0],
-            value: item.value[0]
-          },
-          {
-            name: item.name[1],
-            value: item.value[1]
-          }
-        ]);
+        const ChartData = modifiedData.map(item => {
+          const data = item.class
+            .filter(className => item.class_value[className] !== undefined)
+            .map(className => ({
+              name: className,
+              value: item.class_value[className]
+            }));
+        
+          return data;
+        });
+
         setResults(convertedData);
         setmodifiedResults(ChartData);
         setmaxValues(maxValues)
-        console.log("predictionsResults",ChartData)
       } 
       else {
-        console.log("predictionsResults" ,predictionsResults )
         setResultsObject(predictionsResults)
       }
     } catch (error) {
@@ -251,9 +249,12 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
 
   return (
     <div>
-      <div {...getRootProps()} className="image-dropzone">
-        <input {...getInputProps()} />
-        <p className="Predict-image-dropzone">Upload Image</p>
+      <div {...getRootProps()} className="image-preview-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <input {...getInputProps()} />
+          <img draggable={false} alt={"upload"} src={"ico/box-opened.png"} />
+          <p className="extraBold">Click here to select your image(s)</p>
+        </div>
       </div>
       {(selectedFilesUrls.length > 0 && activeLabelType === "IMAGE RECOGNITION") && (
         <div className="row">
@@ -286,27 +287,29 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                         {((maxValues[index]) * 100).toFixed(2) + "%"}
                       </h2>
                       <div className="Chart">
-                        <ResponsiveContainer width="100%" height={200}>
-                          <PieChart width={200} height={200}>
-                            <Pie
-                              dataKey="value"
-                              isAnimationActive={false}
-                              data={modifiedResults[index]}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={0}
-                              outerRadius={100}
-                              fill={colors[index]}
-                              label={(entry) => entry.name[0] + ` ${(entry.value * 100).toFixed(3)}%`}
-                            > 
-                              {modifiedResults[index].map((entry, idx) => (
-                                <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
-                              ))}    
-                            </Pie>
-                            <Tooltip formatter={(value) => value.toFixed(4)} />
-                            <Legend align="right" verticalAlign="middle" layout="vertical" />
-                          </PieChart>
-                        </ResponsiveContainer>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={modifiedResults[index]}>
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip formatter={(value) => value.toFixed(4)} />
+                          <Bar dataKey="value" label={{ position: 'top', formatter: (value) => value.toFixed(2) }}>
+                            {modifiedResults[index].map((entry, idx) => (
+                              <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
+                            ))}
+                          </Bar>
+                          <Legend
+                            align="right"
+                            verticalAlign="middle"
+                            layout="vertical"
+                            payload={modifiedResults[index].map((entry, index) => ({
+                              value: entry.name,
+                              type: 'square',
+                              color: colors[index % colors.length]
+                            }))}
+                            formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
                       </div>
                     </div>
                   )}

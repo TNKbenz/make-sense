@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MainView.scss';
 import { TextButton } from '../Common/TextButton/TextButton';
 import classNames from 'classnames';
@@ -9,10 +9,22 @@ import { EditorFeatureData, IEditorFeature } from '../../data/info/EditorFeature
 import { styled, Tooltip, tooltipClasses, TooltipProps } from '@mui/material';
 import Fade from '@mui/material/Fade';
 import ImagesDropZone from './ImagesDropZone/ImagesDropZone';
+import {  useSelector } from "react-redux";
+import { AppState } from "../../store";
+import { useNavigate } from "react-router-dom";
+
 
 const MainView: React.FC = () => {
     const [projectInProgress, setProjectInProgress] = useState(false);
     const [projectCanceled, setProjectCanceled] = useState(false);
+    const user = useSelector((state: AppState) => state.user.username);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+          navigate("/login");
+        }
+      }, [user]);
 
     const startProject = () => {
         setProjectInProgress(true);
@@ -136,5 +148,7 @@ const MainView: React.FC = () => {
         </div>
     );
 };
+
+
 
 export default MainView;

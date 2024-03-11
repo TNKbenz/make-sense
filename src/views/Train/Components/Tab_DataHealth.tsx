@@ -26,7 +26,7 @@ interface SizeImage {
 
 const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_update ,username ,project_name ,modelname }) => {
   const data = []
-  if (activeLabelType === "IMAGE_RECOGNITION") {
+  if (activeLabelType === "IMAGE RECOGNITION") {
     const labels = [];
     imageData.forEach(item => {
         item.labelNameIds.forEach(id => {
@@ -250,7 +250,7 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
               <Bar dataKey="value" fill="#8884d8" />
             </BarChart>
           </div>
-          {activeLabelType === "IMAGE_RECOGNITION" && (
+          {(activeLabelType === "IMAGE RECOGNITION") && (
             <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
               <h3>Cluster Images</h3>
               <ScatterChart
@@ -301,7 +301,7 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
               </ScatterChart>
             </div>
           )}
-          {activeLabelType === "IMAGE_RECOGNITION" && (
+          {(activeLabelType === "IMAGE RECOGNITION") && (
             <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
               <h3>Unique Images</h3>
               <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", alignItems: "center" }}>

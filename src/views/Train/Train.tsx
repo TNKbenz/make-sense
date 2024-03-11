@@ -72,6 +72,12 @@ const Train: React.FC<IProps> = (props) => {
   });
   console.log("websocket url:", WS_URL);
 
+  useEffect(() => {
+    if (!props.username) {
+      navigate("/login");
+    }
+  }, [props.username]);
+
   // Run when the connection state (readyState) changes
   useEffect(() => {
     console.log("Connection state changed");

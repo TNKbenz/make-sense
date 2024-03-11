@@ -188,12 +188,18 @@ const Predict: React.FC<PredictProps> = ({
   const togglePopupSelect = () => {
     setPopupSelect_Visible(!isPopupSelect_Visible);
   };
-
+  
   const handleSelectModelClick = () => {
     togglePopupSelect();
     // navigate('/home');
     // window.location.reload();
   };
+
+  useEffect(() => {
+    if (!username) {
+      navigate("/login");
+    }
+  }, [username]);
 
   const handleUpload = (imageUrl: string) => {
     console.log("อัพโหลดไฟล์สำเร็จ รูปภาพอยู่ที่:", imageUrl);

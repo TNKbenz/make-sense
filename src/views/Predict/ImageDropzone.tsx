@@ -45,6 +45,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   const [modifiedResults, setmodifiedResults] = useState([]);
   const [maxValues, setmaxValues] = useState([]);
   const [ResultsObject, setResultsObject] = useState([]);
+  const [CountResultsObject, setCountResultsObject] = useState([]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setResultsObject([]);
@@ -150,6 +151,19 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         setmaxValues(maxValues)
       } 
       else {
+        const classCounts = {};
+        predictionsResults[0].forEach(item => {
+            item.classes.forEach(classValue => {
+                if (classCounts[classValue] === undefined) {
+                    classCounts[classValue] = 1;
+                } else {
+                    classCounts[classValue]++;
+                }
+            });
+        });
+        const countText = Object.entries(classCounts).map(([cls, count]) => `${cls} : ${count}`).join(', ');
+        console.log("classCounts",countText)
+        setCountResultsObject(countText)
         setResultsObject(predictionsResults)
       }
     } catch (error) {
@@ -358,7 +372,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                       }}
                     />
                     <div>
-                      <p> Result [ {ResultsObject[0][index].classes} ]</p>
+                      <p> Result [ {CountResultsObject} ]</p>
                     </div>
                   </div>
                 )}

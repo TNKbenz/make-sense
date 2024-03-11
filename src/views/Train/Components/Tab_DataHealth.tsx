@@ -147,7 +147,13 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
     if (data && data.xycoord) {
       const uniqueLabels = [...new Set(data.true_labels)]; 
       const uniqueTrueLabels = [...new Set(data.true_labels)]; 
-      const colors = ['blue', 'red', 'green', 'orange', 'yellow']; 
+      const colors = [
+        "#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#4B0082", "#800080",
+        "#FF4500", "#FF6347", "#FFD700", "#32CD32", "#00FFFF", "#4169E1", "#9932CC",
+        "#FF69B4", "#FF7F50", "#FFA07A", "#ADFF2F", "#00FF7F", "#20B2AA", "#9370DB",
+        "#FF8C00", "#FF1493", "#00BFFF", "#228B22", "#8A2BE2", "#8B0000", "#8FBC8F",
+        "#FFC0CB", "#800000"
+    ];
       const shapes = ['star',"triangle","circle","diamond","cross"]
       const labelColors = {}; 
       const trueLabelShape = {};

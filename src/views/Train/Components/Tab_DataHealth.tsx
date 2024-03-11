@@ -25,33 +25,60 @@ interface SizeImage {
 }
 
 const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_update ,username ,project_name ,modelname }) => {
-  const labels = [];
-  imageData.forEach(item => {
-    item.labelNameIds.forEach(id => {
-      const name = LabelsSelector.getLabelNameById(id)?.name;
-      if (name) {
-        labels.push(name);
-      }
+  const data = []
+  if (activeLabelType === "IMAGE_RECOGNITION") {
+    const labels = [];
+    imageData.forEach(item => {
+        item.labelNameIds.forEach(id => {
+            const name = LabelsSelector.getLabelNameById(id)?.name;
+            if (name) {
+                labels.push(name);
+            }
+        });
     });
-  });
 
-  const data = [];
-  const counts = new Map();
-  labels.forEach(item => {
-    if (counts.has(item)) {
-      counts.set(item, counts.get(item) + 1);
-    } else {
-      counts.set(item, 1);
-    }
+    const counts = new Map();
+    labels.forEach(item => {
+        if (counts.has(item)) {
+            counts.set(item, counts.get(item) + 1);
+        } else {
+            counts.set(item, 1);
+        }
+    });
+
+    counts.forEach((value, name) => {
+        data.push({ name, value });
+    });
+  } else {
+    const labels = [];
+    imageData.forEach(item => {
+      item.labelRects.forEach(id => {
+          const name = LabelsSelector.getLabelNameById(id.labelId).name;
+          if (name) {
+              labels.push(name);
+          }
+      });
   });
-  counts.forEach((value, name) => {
-    data.push({name,value});
-  });
+  
+    const counts = new Map();
+    labels.forEach(item => {
+        if (counts.has(item)) {
+            counts.set(item, counts.get(item) + 1);
+        } else {
+            counts.set(item, 1);
+        }
+    });
+
+    counts.forEach((value, name) => {
+        data.push({ name, value });
+    });
+  }
 
   const imageCount = imageData.length;
   const annotationCount = data.reduce((total, item) => total + item.value, 0);
-  const annotationsPerImage = (annotationCount / imageCount).toFixed(2);;
+  const annotationsPerImage = (annotationCount / imageCount).toFixed(2); // ต้องการให้ค่าเป็นทศนิยม 2 ตำแหน่ง
   const classCount = data.length;
+
 
   const data_SizeImage = [];
   for (let i = 0; i < imageData.length; i++) {
@@ -223,61 +250,65 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
               <Bar dataKey="value" fill="#8884d8" />
             </BarChart>
           </div>
-          <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
-            <h3>Cluster Images</h3>
-            <ScatterChart
-              width={800}
-              height={400}
-              margin={{
-                top: 20,
-                right: 20,
-                bottom: 20,
-                left: 20,
-              }}
-            >
-              <CartesianGrid />
-              <XAxis type="number" dataKey="x" name="x" />
-              <YAxis type="number" dataKey="y" name="y" />
-              <ZAxis type="number" dataKey="true_label" name="true_label" />
-              <Tooltip 
-                cursor={{ strokeDasharray: '3 3' }} 
-                content={({ payload }) => {
-                  if(payload && payload[0]){
-                    const entry = payload[0].payload;
-                    return (
-                      <div className="custom-tooltip">
-                        <p><strong>Filename:</strong> {entry.filename}</p>
-                        <p><strong>True Label:</strong> {entry.true_label}</p>
-                        {/* <p><strong>X:</strong> {entry.x.toFixed(2)}</p>
-                        <p><strong>Y:</strong> {entry.y.toFixed(2)}</p> */}
-                        {entry.filename && <img src={entry.filename} alt="Preview" style={{ width: 'auto', height: 'auto' }} />}
-                      </div>
-                    );
-                  }else{
-                    return null;
-                  }
+          {activeLabelType === "IMAGE_RECOGNITION" && (
+            <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
+              <h3>Cluster Images</h3>
+              <ScatterChart
+                width={800}
+                height={400}
+                margin={{
+                  top: 20,
+                  right: 20,
+                  bottom: 20,
+                  left: 20,
                 }}
-              />
-              {
-                Cluster && Cluster.map((entry, index) => (
-                  <Scatter name={entry.true_label} data={[entry]} key={`scatter-${index}`} fill={entry.fill}/>
-                  
-                ))
-              }
-              {
-                Cluster && Cluster.map((entry, index) => (
-                  <Legend payload={entry.legend}/>
-                  
-                ))
-              }
-            </ScatterChart>
-          </div>
-          <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
-            <h3>Unique Images</h3>
-            <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              {Unique && <img src={Unique} alt="Unique Image" style={{ width: "100%", height: "auto" }} />}
+              >
+                <CartesianGrid />
+                <XAxis type="number" dataKey="x" name="x" />
+                <YAxis type="number" dataKey="y" name="y" />
+                <ZAxis type="number" dataKey="true_label" name="true_label" />
+                <Tooltip 
+                  cursor={{ strokeDasharray: '3 3' }} 
+                  content={({ payload }) => {
+                    if(payload && payload[0]){
+                      const entry = payload[0].payload;
+                      return (
+                        <div className="custom-tooltip">
+                          <p><strong>Filename:</strong> {entry.filename}</p>
+                          <p><strong>True Label:</strong> {entry.true_label}</p>
+                          {/* <p><strong>X:</strong> {entry.x.toFixed(2)}</p>
+                          <p><strong>Y:</strong> {entry.y.toFixed(2)}</p> */}
+                          {entry.filename && <img src={entry.filename} alt="Preview" style={{ width: 'auto', height: 'auto' }} />}
+                        </div>
+                      );
+                    }else{
+                      return null;
+                    }
+                  }}
+                />
+                {
+                  Cluster && Cluster.map((entry, index) => (
+                    <Scatter name={entry.true_label} data={[entry]} key={`scatter-${index}`} fill={entry.fill}/>
+                    
+                  ))
+                }
+                {
+                  Cluster && Cluster.map((entry, index) => (
+                    <Legend payload={entry.legend}/>
+                    
+                  ))
+                }
+              </ScatterChart>
             </div>
-          </div>
+          )}
+          {activeLabelType === "IMAGE_RECOGNITION" && (
+            <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
+              <h3>Unique Images</h3>
+              <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                {Unique && <img src={Unique} alt="Unique Image" style={{ width: "100%", height: "auto" }} />}
+              </div>
+            </div>
+          )}
           {/* <div className="Parameter" style={{overflow : "auto" , marginBottom: '10px'}}> */}
             {/* <h3>Dimension Insights</h3>
             <h4>Size Distribution</h4>

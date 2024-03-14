@@ -116,9 +116,10 @@ const ModelPerformanceChart = ({
                 />
                 <YAxis
                   label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
+                  domain={[0, 100]}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
+                <Tooltip formatter={(value) => value.toFixed(2)}/>
                 <Legend />
                 <Line type="monotone" dataKey="accuracy1" name="Accuracy (Model1)" stroke="#8884d8" />
                 <Line type="monotone" dataKey="accuracy2" name="Accuracy (Model2)" stroke="#ff7300" />
@@ -138,7 +139,7 @@ const ModelPerformanceChart = ({
                   label={{ value: "Fitness", angle: -90, position: "insideLeft" }}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
+                <Tooltip formatter={(value) => value.toFixed(2)}/>
                 <Legend />
                 <Line type="monotone" dataKey="accuracy1" name="Fitness (Model1)" stroke="#8884d8" />
                 <Line type="monotone" dataKey="accuracy2" name="Fitness (Model2)" stroke="#ff7300" />
@@ -165,8 +166,9 @@ const ModelPerformanceChart = ({
               />
               <YAxis
                 label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
+                domain={[0, 100]}
               />
-              <Tooltip />
+              <Tooltip formatter={(value) => value.toFixed(2)}/>
               <Legend />
               <Line
                 type="monotone"
@@ -197,7 +199,7 @@ const ModelPerformanceChart = ({
               label={{ value: "Cost", angle: -90, position: "insideLeft" }}
             />
             <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip />
+            <Tooltip formatter={(value) => value.toFixed(2)}/>
             <Legend />
             <Line type="monotone" dataKey="cost1" name="Cost (Model 1)" stroke="#560305" />
             <Line type="monotone" dataKey="cost2" name="Cost (Model 2)" stroke="#0CAD21" />
@@ -223,7 +225,7 @@ const ModelPerformanceChart = ({
               <YAxis
                 label={{ value: "Loss", angle: -90, position: "insideLeft", offset: 0 }}
               />
-              <Tooltip />
+              <Tooltip formatter={(value) => value.toFixed(2)}/>
               <Legend />
               <Line
                 type="monotone"
@@ -252,8 +254,9 @@ const ModelPerformanceChart = ({
             />
             <YAxis
               label={{ value: "Precision", angle: -90, position: "insideLeft" }}
+              domain={[0, 1]}
             />
-            <Tooltip />
+            <Tooltip formatter={(value) => value.toFixed(2)}/>
             <Legend />
             <Line
               type="monotone"
@@ -282,8 +285,9 @@ const ModelPerformanceChart = ({
             />
             <YAxis
               label={{ value: "Recall", angle: -90, position: "insideLeft" }}
+              domain={[0, 1]}
             />
-            <Tooltip />
+            <Tooltip formatter={(value) => value.toFixed(2)}/>
             <Legend />
             <Line
               type="monotone"

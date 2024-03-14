@@ -242,12 +242,12 @@ const DataHealth: React.FC<IProps> = ({ imageData ,activeLabelType ,notice_updat
           </div>
           <div className="Parameter" style={{ overflow: "auto", marginBottom: '10px' }}>
             <h3>Class Balance</h3>
-            <BarChart width={800} height={150} data={data} layout="vertical">
+            <BarChart width={800} height={Math.max(150, data.length * 30)} data={data.sort((a, b) => b.value - a.value)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis dataKey="name" type="category" interval={0} />
+              <YAxis dataKey="name" type="category" interval={0} tick={{ fontSize: 12, width: 80}}/>
               <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Bar dataKey="value" fill="#8884d8" color="#82ca9d"/>
             </BarChart>
           </div>
           {(activeLabelType === "IMAGE RECOGNITION") && (

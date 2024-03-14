@@ -28,7 +28,13 @@ type PredictionsResult = {
   probabilities: number[][];
 };
 
-const colors = ["#ADD8E6","#ffb6c1","#ff7f0e", "#d1300e","#8884d8","#82ca9d","#ffc658"];
+const colors = ["#ADD8E6","#ffb6c1","#ff7f0e", "#d1300e","#8884d8","#82ca9d","#ffc658",
+  "#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#4B0082", "#800080",
+  "#FF4500", "#FF6347", "#FFD700", "#32CD32", "#00FFFF", "#4169E1", "#9932CC",
+  "#FF69B4", "#FF7F50", "#FFA07A", "#ADFF2F", "#00FF7F", "#20B2AA", "#9370DB",
+  "#FF8C00", "#FF1493", "#00BFFF", "#228B22", "#8A2BE2", "#8B0000", "#8FBC8F",
+  "#FFC0CB", "#800000"
+];
 
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   onUploadSuccess,
@@ -302,20 +308,20 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({
                       </h2>
                       <div className="Chart">
                       <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={modifiedResults[index]}>
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip formatter={(value) => value.toFixed(4)} />
-                          <Bar dataKey="value" label={{ position: 'top', formatter: (value) => value.toFixed(2) }}>
-                            {modifiedResults[index].map((entry, idx) => (
+                        <BarChart data={modifiedResults[index].sort((a, b) => b.value - a.value).slice(0, 5)} layout="vertical" >
+                          <YAxis dataKey="name" type="category" tick={{ fontSize: 12, width: 80}}/>
+                          <XAxis type="number" scale="auto" domain={[0, 1]} />
+                          <Tooltip formatter={(value) => value.toFixed(2)} />
+                          <Bar dataKey="value" label={{ position: 'right', formatter: (value) => value.toFixed(2) }}>
+                            {modifiedResults[index].slice(0, 5).map((entry, idx) => (
                               <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
                             ))}
                           </Bar>
                           <Legend
-                            align="right"
-                            verticalAlign="middle"
-                            layout="vertical"
-                            payload={modifiedResults[index].map((entry, index) => ({
+                            align="center"
+                            verticalAlign="bottom"
+                            layout="horizontal"
+                            payload={modifiedResults[index].slice(0, 5).map((entry, index) => ({
                               value: entry.name,
                               type: 'square',
                               color: colors[index % colors.length]

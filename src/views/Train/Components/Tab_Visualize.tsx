@@ -64,8 +64,14 @@ const ModelPerformanceChart = ({
               <Line
                 type="monotone"
                 dataKey="accuracy"
-                name="Accuracy"
+                name="Training Accuracy"
                 stroke="#8884d8"
+              />
+              <Line
+                type="monotone"
+                dataKey="val_accuracy"
+                name="Validation Accuracy"
+                stroke="#ff7300"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -97,38 +103,6 @@ const ModelPerformanceChart = ({
       )}
     </div>
 
-    {modeltype === "IMAGE_RECOGNITION" && (
-      <div className="Validation-Curve-graph">
-        <h3>Validation Accuracy</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={validationCurveData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="epoch"
-              label={{
-                value: "Epoch",
-                position: "insideBottom",
-                offset: 0,
-              }}
-              domain={[1, 'auto']} // กำหนดให้แกน x เริ่มต้นที่ 1
-            />
-            <YAxis
-              label={{ value: "Accuracy", angle: -90, position: "insideLeft" }}
-              domain={[0, 100]}
-            />
-            <Tooltip formatter={(value) => value.toFixed(2)}/>
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="accuracy"
-              name="validation accuracy"
-              stroke="#030C56"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    )}
-
     <div className="cost-graph">
       <h3>Cost (Loss)</h3>
       <ResponsiveContainer width="100%" height={300}>
@@ -143,41 +117,11 @@ const ModelPerformanceChart = ({
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip formatter={(value) => value.toFixed(2)}/>
           <Legend />
-          <Line type="monotone" dataKey="cost" name="Cost" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="cost" name="Training Cost" stroke="#0CAD21" />
+          <Line type="monotone" dataKey="val_cost" name="Validation Cost" stroke="#560305" />
         </LineChart>
       </ResponsiveContainer>
     </div>
-
-    {modeltype === "IMAGE_RECOGNITION" && (
-      <div className="Validation-Curve-graph">
-        <h3>Validation Loss</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={validationCurveData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="epoch"
-              label={{
-                value: "Epoch",
-                position: "insideBottom",
-                offset: 0,
-              }}
-              domain={[1, 'auto']}
-            />
-            <YAxis
-              label={{ value: "Loss", angle: -90, position: "insideLeft" ,offset: 0}}
-            />
-            <Tooltip formatter={(value) => value.toFixed(2)}/>
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="cost"
-              name="validation loss"
-              stroke="#560305"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    )}
 
     <div className="Precision-Curve-graph">
       <h3>Precision</h3>
@@ -265,12 +209,23 @@ const Tab_Visualize: React.FC<IProps> = ({
     axios
       .post(dataUrl, data)
       .then((response) => {
-        const transformedData = response.data.loss.map((loss, index) => ({
-          epoch: index + 1,
-          accuracy: response.data.accuracy[index], 
-          cost: loss,
-        }));
-
+        if (modeltype === "IMAGE_RECOGNITION") {
+          const transformedData = response.data.loss.map((loss, index) => ({
+            epoch: index + 1,
+            accuracy: response.data.accuracy[index], 
+            cost: loss,
+            val_accuracy: response.data.val_accuracy[index],
+            val_cost: response.data.val_loss[index],
+          }));
+          setData(transformedData);
+        } else {
+          const transformedData = response.data.loss.map((loss, index) => ({
+            epoch: index + 1,
+            accuracy: response.data.accuracy[index], 
+            cost: loss,
+          }));
+          setData(transformedData);
+        }
         const transformedPrecisionCurveData = response.data.precision.map(
           (precision, index) => ({
             precision,
@@ -291,7 +246,6 @@ const Tab_Visualize: React.FC<IProps> = ({
           console.error("Error:", error);
         }
 
-        setData(transformedData);
         setPrecisionCurveData(transformedPrecisionCurveData);
         setRecallCurveData(transformedRecallCurveData);
         if (modeltype === "IMAGE_RECOGNITION") {

@@ -26,7 +26,7 @@
     "lodash": "^4.17.21",
     "mobile-detect": "^1.4.5",
     "moment": "^2.29.4",
-    "mongoose": "^8.0.3",
+    "mongoose": "^8.8.4",
     "object-detection-visualizer": "^1.2.0",
     "react": "18.2.0",
     "react-bbox-annotator": "^0.3.0",
